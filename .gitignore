@@ -1,0 +1,11 @@
+.openclaw/
+.openclaw-home/
+.DS_Store
+
+workspace/.scratch/
+workspace/tmp/
+
+memory/inbox/*.md
+!memory/inbox/.gitkeep
+
+*.log

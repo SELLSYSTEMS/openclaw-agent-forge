@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export OPENCLAW_HOME="/home/OpenClaw/.openclaw-home"
+export PATH="/home/OpenClaw/.openclaw/bin:${PATH}"
+
+exec /home/OpenClaw/.openclaw/bin/openclaw "$@"
