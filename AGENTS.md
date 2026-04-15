@@ -6,6 +6,11 @@ These instructions are for future AI agents working in `/home/OpenClaw`.
 
 Keep this repository as the reproducible source of truth for installing and operating a local isolated OpenClaw setup.
 
+Canonical repository identity:
+
+- Name: `openclaw-agent-forge`
+- Meaning: Codex-built bootstrap and operations repo for a live OpenClaw AI server with multi-agent workflows
+
 ## Non-Negotiable Rules
 
 1. Do not commit `.openclaw/` or `.openclaw-home/`.
@@ -18,9 +23,10 @@ Keep this repository as the reproducible source of truth for installing and oper
 ## Required Flow
 
 1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), and [docs/lessons-learned.md](docs/lessons-learned.md).
-2. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
-3. Validate the setup with `scripts/validate-local-setup.sh`.
-4. If you change the operating model, update the docs in the same commit.
+2. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
+3. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
+4. Validate the setup with `scripts/validate-local-setup.sh`.
+5. If you change the operating model, update the docs in the same commit.
 
 ## Pitfalls Already Seen
 

@@ -1,4 +1,6 @@
-# OpenClaw Local Bootstrap
+# OpenClaw Agent Forge
+
+Codex-built bootstrap for a live OpenClaw AI server and multi-agent operating environment.
 
 This repository captures a reproducible local OpenClaw installation pattern, the operating notes behind it, and the guardrails for future AI agents.
 
@@ -8,6 +10,8 @@ This repository captures a reproducible local OpenClaw installation pattern, the
 - a bootstrap path for a fresh machine
 - local memory structure and durable notes
 - lessons learned from the first installation pass
+
+Suggested GitHub repository name: `openclaw-agent-forge`
 
 It does not track the installed runtime or mutable state directories.
 
@@ -45,6 +49,18 @@ It does not track the installed runtime or mutable state directories.
 ```bash
 /home/OpenClaw/bin/openclaw-local
 ```
+
+## Positioning
+
+This repo is not the OpenClaw product source tree.
+
+It is the operator repo around OpenClaw:
+
+- bootstrap scripts
+- isolated runtime layout
+- memory conventions
+- multi-agent workspace defaults
+- installation lessons so the next AI agent does not repeat setup mistakes
 
 ## Memory Strategy
 
