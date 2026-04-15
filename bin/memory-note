@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+base="/home/OpenClaw/memory"
+timestamp="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+slug="${1:-note}"
+
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+file="${base}/inbox/${timestamp}-${slug}.md"
+
+{
+  printf -- "# %s\n\n" "${slug}"
+  printf -- "- captured_at: %s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf -- "- source: local-cli\n\n"
+  if [[ $# -gt 0 ]]; then
+    printf -- "%s\n" "$*"
+  else
+    printf -- "Add details here.\n"
+  fi
+} > "${file}"
+
+printf -- "%s\n" "${file}"
