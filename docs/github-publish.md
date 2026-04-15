@@ -20,6 +20,12 @@ git remote add origin https://github.com/ryuriymega/openclaw-agent-forge.git
 git push -u origin main
 ```
 
+Automated publish path:
+
+```bash
+GITHUB_TOKEN=... /home/OpenClaw/scripts/publish-github.sh ryuriymega openclaw-agent-forge public
+```
+
 ## Why This Name
 
 - `OpenClaw` keeps the product identity explicit
@@ -32,3 +38,13 @@ git push -u origin main
 - `.openclaw-home/`
 - transient inbox captures unless curated
 - machine-local scratch files
+
+## Current Known Blocker
+
+If plain `git push` fails with:
+
+```text
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+the shell is not authenticated to GitHub. Use `scripts/publish-github.sh` with `GITHUB_TOKEN` or `GH_TOKEN`.
