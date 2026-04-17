@@ -8,6 +8,7 @@ This repository captures a reproducible local OpenClaw installation pattern, the
 
 - local launchers and helper scripts
 - a bootstrap path for a fresh machine
+- seeded first-run workspace knowledge so OpenClaw does not start as a blank slate
 - local memory structure and durable notes
 - a Codex CLI-backed default model path without `OPENAI_API_KEY`
 - systemd and tmux helpers for keeping the local gateway alive
@@ -34,6 +35,7 @@ It must also stay free of secrets because the repository is public.
 - [docs/prompt-patterns.md](docs/prompt-patterns.md) - starter prompts for future agents on this host
 - [docs/telegram-test-plan.md](docs/telegram-test-plan.md) - Telegram prerequisites and approval flow
 - [workspace/MEMORY.md](workspace/MEMORY.md) - seeded public-safe memory for future installs and agents
+- [workspace/BOOTSTRAP.md](workspace/BOOTSTRAP.md) - first-run behavior that assumes seeded context already exists
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
 - [scripts/agent-landscape.sh](scripts/agent-landscape.sh) - safe status snapshot of shared agents and services
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap

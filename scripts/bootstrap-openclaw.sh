@@ -9,6 +9,15 @@ MEMORY_DIR="${ROOT}/memory"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 BASELINE_MODEL="gpt-5.4"
 BASELINE_REASONING="xhigh"
+REQUIRED_WORKSPACE_CONTEXT=(
+  "${ROOT}/workspace/AGENTS.md"
+  "${ROOT}/workspace/MEMORY.md"
+  "${ROOT}/workspace/TOOLS.md"
+  "${ROOT}/workspace/WEBTERMINAL.md"
+  "${ROOT}/workspace/SOUL.md"
+  "${ROOT}/workspace/IDENTITY.md"
+  "${ROOT}/workspace/USER.md"
+)
 
 extract_toml_string() {
   local key="$1"
@@ -56,6 +65,14 @@ resolve_shared_reasoning() {
 }
 
 mkdir -p "${OPENCLAW_HOME_DIR}" "${WORKSPACE_DIR}" "${MEMORY_DIR}/inbox" "${MEMORY_DIR}/projects" "${MEMORY_DIR}/references" "${ROOT}/bin"
+
+for required_file in "${REQUIRED_WORKSPACE_CONTEXT[@]}"; do
+  if [[ ! -f "${required_file}" ]]; then
+    echo "Missing required seeded workspace context file: ${required_file}" >&2
+    echo "Restore the tracked workspace context before bootstrap continues." >&2
+    exit 1
+  fi
+done
 
 if [[ ! -x "${PREFIX}/bin/openclaw" ]]; then
   curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --prefix "${PREFIX}" --no-onboard

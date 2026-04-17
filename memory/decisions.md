@@ -64,6 +64,11 @@
 - Decision: keep a tracked, public-safe `workspace/MEMORY.md` with the core operating facts for this server class
 - Why: future installs and future agents should start with the right context immediately, without needing to reconstruct it from chat history or re-read the whole repo first
 
+### Seed host knowledge before first external conversation
+
+- Decision: keep the tracked workspace startup files as the source of first-run host knowledge and require them before the first user chat or Telegram connection
+- Why: OpenClaw should begin with the machine context already loaded and ask only for missing personalization instead of learning the server basics from the first DM
+
 ### Document the shared Codex CLI TUI explicitly
 
 - Decision: keep a dedicated `docs/codex-cli-tui.md` runbook for the OpenAI Codex CLI TUI used by the other terminal agents

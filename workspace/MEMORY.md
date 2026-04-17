@@ -4,6 +4,8 @@ This is the seeded long-term memory for the OpenClaw workspace.
 
 It is intentionally public-safe and high signal, so a future install or future agent starts with the right operating assumptions from the beginning.
 
+This file is meant to be understood before the first external user conversation and before connecting Telegram or other channels.
+
 ## Core Operating Facts
 
 - OpenClaw owns `/home/OpenClaw`
@@ -13,6 +15,7 @@ It is intentionally public-safe and high signal, so a future install or future a
 - OpenClaw should prefer `xhigh` reasoning through the shared Codex user config
 - If the shared Codex user model becomes numerically newer than 5.4, OpenClaw should follow it after validation
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
+- The initial user should not have to reteach the host basics that are already seeded here
 
 ## Shared Host Facts
 

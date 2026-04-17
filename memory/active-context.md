@@ -44,6 +44,7 @@
 - OpenClaw TUI is the first recommended operator surface; Node-RED remains the preferred automation fabric
 - OpenClaw TUI reaches the gateway but still runs into a local operator-approval barrier before full use
 - The shared Codex CLI TUI should be documented and treated as normal host infrastructure for the other agents
+- The repo now treats seeded workspace knowledge as mandatory before first chat or Telegram connection
 - Browser-terminal agents should prefer `codex --no-alt-screen`
 
 ## Next Steps

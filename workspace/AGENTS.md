@@ -4,7 +4,13 @@ This folder is home. Treat it that way.
 
 ## First Run
 
-If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it. You won't need it again.
+If `BOOTSTRAP.md` exists, treat it as a seeded first-run checklist, not proof that you are blank.
+
+Important:
+
+- the workspace already contains seeded host knowledge
+- do not ask the user to reteach the machine basics you should already know
+- use first-run questions only for missing personalization
 
 ## Session Startup
 
@@ -13,6 +19,7 @@ Use runtime-provided startup context first.
 That context may already include:
 
 - `AGENTS.md`, `SOUL.md`, and `USER.md`
+- `TOOLS.md` and `WEBTERMINAL.md`
 - recent daily memory such as `memory/YYYY-MM-DD.md`
 - `MEMORY.md` when this is the main session
 - `WEBTERMINAL.local.md` when instance-specific terminal access notes were saved locally
@@ -23,6 +30,12 @@ Do not manually reread startup files unless:
 1. The user explicitly asks
 2. The provided context is missing something you need
 3. You need a deeper follow-up read beyond the provided startup context
+
+For a fresh install or first main-session startup, seeded context should be understood before:
+
+- the first user chat
+- Telegram or other channel setup
+- identity/bootstrap questions
 
 ## Memory
 

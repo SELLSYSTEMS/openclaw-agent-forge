@@ -9,6 +9,15 @@ EXPECTED_GATEWAY_BIND="loopback"
 BASELINE_MODEL="gpt-5.4"
 EXPECTED_REASONING="xhigh"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
+REQUIRED_WORKSPACE_CONTEXT=(
+  "${ROOT}/workspace/AGENTS.md"
+  "${ROOT}/workspace/MEMORY.md"
+  "${ROOT}/workspace/TOOLS.md"
+  "${ROOT}/workspace/WEBTERMINAL.md"
+  "${ROOT}/workspace/SOUL.md"
+  "${ROOT}/workspace/IDENTITY.md"
+  "${ROOT}/workspace/USER.md"
+)
 
 extract_toml_string() {
   local key="$1"
@@ -52,6 +61,13 @@ EXPECTED_MODEL="$(resolve_expected_model)"
 
 "${LAUNCHER}" --version
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
+
+for required_file in "${REQUIRED_WORKSPACE_CONTEXT[@]}"; do
+  if [[ ! -f "${required_file}" ]]; then
+    echo "Missing required seeded workspace context file: ${required_file}" >&2
+    exit 1
+  fi
+done
 
 actual_workspace="$(
   env OPENCLAW_HOME="${ROOT}/.openclaw-home" \

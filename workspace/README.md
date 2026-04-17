@@ -5,6 +5,7 @@ This is the default agent workspace configured for the local OpenClaw runtime.
 Use this directory for project work that should stay isolated from other agents.
 
 Future agents should read `MEMORY.md` first before changing workspace prompts or local overrides.
+On a fresh install, that seeded context should be absorbed before the first user chat and before any Telegram connection.
 
 The Markdown files in this directory are starter prompts and continuity templates for a personal OpenClaw workspace:
 

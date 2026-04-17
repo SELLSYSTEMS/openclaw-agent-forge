@@ -64,6 +64,28 @@ Keep private data out of that tracked seed:
 - secrets belong in `.openclaw-home/secrets/`
 - owner-specific IDs belong in local runtime state, not public Git
 
+## Seeded Knowledge Before First Chat
+
+A fresh OpenClaw install from this repo should **not** behave like a blank slate.
+
+Before the first user message or Telegram connection, the workspace should already contain and preserve these tracked context files:
+
+- `/home/OpenClaw/workspace/AGENTS.md`
+- `/home/OpenClaw/workspace/MEMORY.md`
+- `/home/OpenClaw/workspace/TOOLS.md`
+- `/home/OpenClaw/workspace/WEBTERMINAL.md`
+- `/home/OpenClaw/workspace/SOUL.md`
+- `/home/OpenClaw/workspace/IDENTITY.md`
+- `/home/OpenClaw/workspace/USER.md`
+
+Behavior rule:
+
+- use those files to preload host knowledge and operating assumptions
+- ask only for missing personalization
+- do not make the first Telegram DM responsible for teaching the machine basics
+
+Validation should happen before starting the gateway or adding channels.
+
 ## Codex CLI TUI On This Server
 
 No separate server-side TUI package is required for Codex.

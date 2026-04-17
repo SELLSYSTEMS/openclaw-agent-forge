@@ -20,6 +20,7 @@
 - `ripgrep` is enough for the current scale.
 - Obsidian is acceptable as a user interface over the same folder.
 - A vector database should be added only after keyword retrieval becomes insufficient.
+- A fresh OpenClaw install needs tracked seeded context before first user contact; otherwise it falls back to generic blank-slate bootstrap behavior.
 
 ## Model And Auth
 
@@ -44,6 +45,7 @@
 - Do not commit the installed runtime tree.
 - Do not assume helper scripts work without a smoke-test.
 - Do not store durable decisions only in chat history; promote them into tracked files.
+- Do not let the first Telegram DM become the place where OpenClaw learns the host basics; seed those in tracked workspace files before channels are connected.
 - Do not make a GitHub repo depend on local state that cannot be rebuilt from scripts.
 - Do not write multiple `openclaw config set` updates in parallel against the same config file; one write can clobber the other.
 - Do not place bot tokens or other secrets into tracked docs, scripts, or memory files when the GitHub repo is public.

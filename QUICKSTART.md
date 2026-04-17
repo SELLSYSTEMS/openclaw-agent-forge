@@ -27,6 +27,8 @@ codex login status
 /home/OpenClaw/scripts/validate-local-setup.sh
 ```
 
+This validation also confirms the seeded workspace context files exist before first chat or channel setup.
+
 ## 3. Run
 
 ```bash
@@ -78,3 +80,8 @@ git remote add origin https://github.com/SELLSYSTEMS/openclaw-agent-forge.git
 ## 7. Telegram Test Prep
 
 Read [docs/telegram-test-plan.md](docs/telegram-test-plan.md) before wiring a test bot.
+
+Important rule:
+
+- keep the seeded workspace context intact before Telegram is connected
+- the bot should already know the host basics before the first DM
