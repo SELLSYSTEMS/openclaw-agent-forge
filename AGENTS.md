@@ -22,6 +22,8 @@ Canonical repository identity:
 6. Use Markdown files first. Do not introduce a vector database unless keyword search has clearly stopped being enough.
 7. Keep the primary model on `codex-cli/gpt-5.4` unless the user explicitly asks for a different provider.
 8. Do not introduce `OPENAI_API_KEY` as the default auth path when Codex CLI reuse is available.
+9. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
+10. Keep machine-local secrets under ignored paths such as `/home/OpenClaw/.openclaw-home/secrets/`.
 
 ## Required Flow
 
@@ -39,4 +41,5 @@ Canonical repository identity:
 - Helper scripts should be smoke-tested after creation. One early `printf` bug created a partial note file.
 - OpenClaw config writes should be applied sequentially, not in parallel, or later writes can clobber earlier ones.
 - A healthy gateway probe does not guarantee full operator scope; `pairing required` on admin-style RPCs is a separate gateway authorization issue.
+- Telegram channel tokens should be loaded from a local `tokenFile` under `.openclaw-home/secrets`, never from tracked docs or scripts.
 - If shell commands fail with `bwrap: Failed to make / slave: Permission denied`, rerun the required command with escalation instead of debugging the project itself.

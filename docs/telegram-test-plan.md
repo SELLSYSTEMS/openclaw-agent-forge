@@ -8,6 +8,7 @@ This is the shortest safe path to wire a test Telegram bot into the local OpenCl
 - primary model is `codex-cli/gpt-5.4`
 - gateway target is local loopback
 - Codex CLI auth is the intended path, not `OPENAI_API_KEY`
+- Telegram bot credentials should live only in `/home/OpenClaw/.openclaw-home/secrets/`
 
 ## What Is Needed From The User
 
@@ -37,16 +38,23 @@ This is the shortest safe path to wire a test Telegram bot into the local OpenCl
 /home/OpenClaw/bin/openclaw-local channels add --channel telegram --name test-telegram --token-file /path/to/bot.token
 ```
 
+Recommended local path:
+
+```bash
+/home/OpenClaw/.openclaw-home/secrets/<bot-name>.token
+```
+
 3. DM the bot from the target Telegram account.
+4. After the gateway is already running, send a fresh `/start` or plain-text message so polling definitely sees a live inbound event.
 
-4. Inspect logs or updates to capture the numeric Telegram user ID if durable allowlisting is needed.
+5. Inspect logs or updates to capture the numeric Telegram user ID if durable allowlisting is needed.
 
-5. Keep one of these policies:
+6. Keep one of these policies:
 
 - `dmPolicy: pairing` for the fastest DM smoke test
 - `dmPolicy: allowlist` plus `allowFrom: ["<numeric-user-id>"]` for a durable owner-only bot
 
-6. For groups, allow the group separately and keep sender authorization explicit:
+7. For groups, allow the group separately and keep sender authorization explicit:
 
 - add the negative Telegram group ID under `channels.telegram.groups`
 - keep your numeric user ID in `allowFrom` or `groupAllowFrom`
@@ -57,3 +65,4 @@ This is the shortest safe path to wire a test Telegram bot into the local OpenCl
 - For groups, sender authorization still comes from explicit config allowlists.
 - If the same owner should work in both DM and groups, store the numeric Telegram user ID in `channels.telegram.allowFrom`.
 - Group replies require mention by default unless group config relaxes it.
+- Never store the Telegram bot token in tracked repo files. Keep only the secret file path and safe operational notes in Git.

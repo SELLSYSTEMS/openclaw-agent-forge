@@ -32,6 +32,7 @@
 - `openclaw-local health` and `openclaw-local gateway probe` are the fastest live checks.
 - In this environment, running the gateway in tmux was more reliable than backgrounding it with `nohup`.
 - Some higher-scope gateway RPCs can still trigger a local `pairing required` repair request even when health and probe are healthy. Treat that as a gateway authorization layer issue, not a model/auth failure.
+- Telegram channel probe can be healthy before any inbound DM arrives. Check `lastInboundAt` or send a fresh message after startup.
 
 ## Tooling Mistakes To Avoid
 
@@ -40,4 +41,5 @@
 - Do not store durable decisions only in chat history; promote them into tracked files.
 - Do not make a GitHub repo depend on local state that cannot be rebuilt from scripts.
 - Do not write multiple `openclaw config set` updates in parallel against the same config file; one write can clobber the other.
+- Do not place bot tokens or other secrets into tracked docs, scripts, or memory files when the GitHub repo is public.
 - If the shell sandbox throws `bwrap: Failed to make / slave: Permission denied`, treat it as an execution environment issue and rerun with escalation.

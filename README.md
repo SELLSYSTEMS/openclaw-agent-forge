@@ -19,6 +19,7 @@ Published repository:
 - `https://github.com/SELLSYSTEMS/openclaw-agent-forge`
 
 It does not track the installed runtime or mutable state directories.
+It must also stay free of secrets because the repository is public.
 
 ## Repository Layout
 
