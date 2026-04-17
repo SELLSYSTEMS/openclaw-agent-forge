@@ -83,6 +83,19 @@ else
 fi
 echo
 
+echo "[openclaw-systemd]"
+if systemctl is-enabled openclaw-gateway.service >/dev/null 2>&1; then
+  echo "enabled: $(systemctl is-enabled openclaw-gateway.service)"
+else
+  echo "enabled: not-installed-or-disabled"
+fi
+if systemctl is-active openclaw-gateway.service >/dev/null 2>&1; then
+  echo "active: $(systemctl is-active openclaw-gateway.service)"
+else
+  echo "active: inactive-or-missing"
+fi
+echo
+
 echo "[processes]"
 ps -ef | rg -i 'node-red|openclaw|/usr/bin/codex|codex/codex|tmux' || true
 echo

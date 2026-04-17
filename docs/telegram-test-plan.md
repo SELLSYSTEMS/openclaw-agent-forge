@@ -28,8 +28,15 @@ This is the shortest safe path to wire a test Telegram bot into the local OpenCl
 1. Start the local gateway:
 
 ```bash
-/home/OpenClaw/scripts/start-gateway-tmux.sh
+/home/OpenClaw/scripts/install-gateway-systemd.sh
+/home/OpenClaw/scripts/gateway-systemd-status.sh
 /home/OpenClaw/bin/openclaw-local gateway probe
+```
+
+If systemd is unavailable, use the tmux fallback instead:
+
+```bash
+/home/OpenClaw/scripts/start-gateway-tmux.sh
 ```
 
 2. Add the Telegram channel account:

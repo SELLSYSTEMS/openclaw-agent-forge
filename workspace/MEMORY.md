@@ -48,6 +48,7 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 - Treat OpenClaw as the main orchestrator for `/home/OpenClaw`
 - Prefer Node-RED for durable automations, human-readable schemes, collaboration materials, and bridge flows
 - Prefer local repo docs, workspace files, and CLI overrides over mutating the global Codex CLI config under `/root/.codex`
+- Prefer the repo-managed systemd gateway service for reboot persistence; treat tmux as a fallback only
 - Keep public GitHub docs safe for humans and future agents; keep secrets and instance-private identifiers only in ignored local files
 
 ## Discovery First

@@ -1,0 +1,19 @@
+[Unit]
+Description=OpenClaw Gateway (OpenClaw local isolated runtime)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/OpenClaw
+Environment=HOME=/root
+ExecStart=/home/OpenClaw/bin/openclaw-local gateway run --verbose
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+TimeoutStartSec=30
+SuccessExitStatus=0 143
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

@@ -34,6 +34,8 @@
 ## Current Live State
 
 - The local gateway is running on loopback and passes `gateway probe`
+- The preferred reboot-persistent gateway path on this host class is the repo-managed systemd service, not tmux
+- The repo-managed `openclaw-gateway.service` is installed, enabled, and currently active on this server
 - Telegram bot connectivity is configured locally via `channels.telegram.tokenFile`
 - Telegram channel probe is healthy
 - Telegram owner access is now persisted in local runtime config via `allowFrom` plus `dmPolicy=allowlist`

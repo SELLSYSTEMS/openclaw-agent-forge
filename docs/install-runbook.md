@@ -123,7 +123,20 @@ Preferred local launcher:
 /home/OpenClaw/bin/openclaw-local
 ```
 
-If systemd user services are not available, keep the gateway alive with tmux:
+For an always-on shared Linux server, prefer the repo-managed systemd service:
+
+```bash
+/home/OpenClaw/scripts/install-gateway-systemd.sh
+/home/OpenClaw/scripts/gateway-systemd-status.sh
+```
+
+Why this repo uses a system service:
+
+- OpenClaw's built-in `gateway install` path expects a systemd user service on Linux
+- this host class may not have working systemd user services for the shared terminal environment
+- a system service under `/etc/systemd/system/openclaw-gateway.service` survives server reboot cleanly
+
+If systemd is unavailable, keep the gateway alive with tmux:
 
 ```bash
 /home/OpenClaw/scripts/start-gateway-tmux.sh

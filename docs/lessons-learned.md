@@ -34,6 +34,7 @@
 
 - `openclaw-local health` and `openclaw-local gateway probe` are the fastest live checks.
 - In this environment, running the gateway in tmux was more reliable than backgrounding it with `nohup`.
+- OpenClaw's built-in Linux gateway install path expects systemd user services; on this host class, a repo-managed system service is the better reboot-persistent path.
 - Some higher-scope gateway RPCs can still trigger a local `pairing required` repair request even when health and probe are healthy. Treat that as a gateway authorization layer issue, not a model/auth failure.
 - Telegram channel probe can be healthy before any inbound DM arrives. Check `lastInboundAt` or send a fresh message after startup.
 - Telegram can initially reply with `access not configured` while in pairing mode. After the first owner DM, approve pairing, then move to local `allowFrom` plus `dmPolicy=allowlist` for a more durable owner-only setup.

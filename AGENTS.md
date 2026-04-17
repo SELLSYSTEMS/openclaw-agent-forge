@@ -48,6 +48,7 @@ Canonical repository identity:
 - `/root/.node-red` is a shared host service for automations and diagrams. Treat it as installed/available shared infrastructure, even when flows are still close to empty. Keep passwords, credential material, and user-specific data out of the public repo.
 - Browser webterminal access is part of the operating model on this host class, but the exact terminal URL is instance-specific and should stay in local-only notes, not public Git.
 - The Codex TUI is already built into `codex`; do not invent a separate server-side TUI install step for it. In browser terminals, prefer `codex --no-alt-screen`.
+- The built-in `openclaw gateway install` path expects systemd user services on Linux. On this host class, prefer the repo-managed system service under `systemd/openclaw-gateway.service` for reboot persistence.
 - If shell commands fail with `bwrap: Failed to make / slave: Permission denied`, rerun the required command with escalation instead of debugging the project itself.
 
 ## Shared Host Rules
@@ -56,4 +57,5 @@ Canonical repository identity:
 - Prefer local repo config, workspace files, CLI overrides, and agent docs over mutating global Codex CLI config.
 - Treat OpenClaw as the orchestrator for this repo's workflows.
 - Prefer Node-RED when you need durable automations, bridges, or human-readable flow diagrams.
+- On always-on servers, prefer the repo-managed systemd gateway service over tmux.
 - Use `scripts/agent-landscape.sh` before assuming which agents or services are active on the host.

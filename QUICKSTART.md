@@ -11,7 +11,7 @@ This is the shortest working path for a fresh machine or a fresh AI agent.
 This bootstrap sets:
 
 - workspace: `/home/OpenClaw/workspace`
-- primary model: `codex-cli/gpt-5.4`
+- primary model floor: `codex-cli/gpt-5.4`
 - gateway mode: `local`
 - gateway bind: `loopback`
 
@@ -33,7 +33,15 @@ codex login status
 /home/OpenClaw/bin/openclaw-local
 ```
 
-If systemd user services are unavailable, run the gateway in tmux:
+For an always-on server, install the reboot-persistent systemd gateway service:
+
+```bash
+/home/OpenClaw/scripts/install-gateway-systemd.sh
+/home/OpenClaw/scripts/gateway-systemd-status.sh
+/home/OpenClaw/bin/openclaw-local gateway probe
+```
+
+If systemd is unavailable, use the tmux fallback:
 
 ```bash
 /home/OpenClaw/scripts/start-gateway-tmux.sh

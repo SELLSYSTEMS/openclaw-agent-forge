@@ -10,7 +10,7 @@ This repository captures a reproducible local OpenClaw installation pattern, the
 - a bootstrap path for a fresh machine
 - local memory structure and durable notes
 - a Codex CLI-backed default model path without `OPENAI_API_KEY`
-- tmux helpers for keeping the local gateway alive
+- systemd and tmux helpers for keeping the local gateway alive
 - Telegram test-channel preparation notes
 - lessons learned from the first installation pass
 
@@ -37,8 +37,11 @@ It must also stay free of secrets because the repository is public.
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
 - [scripts/agent-landscape.sh](scripts/agent-landscape.sh) - safe status snapshot of shared agents and services
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap
+- [scripts/install-gateway-systemd.sh](scripts/install-gateway-systemd.sh) - install the boot-persistent systemd gateway service
+- [scripts/gateway-systemd-status.sh](scripts/gateway-systemd-status.sh) - inspect the systemd-managed gateway
 - [scripts/validate-local-setup.sh](scripts/validate-local-setup.sh) - smoke-test and validation
-- [scripts/start-gateway-tmux.sh](scripts/start-gateway-tmux.sh) - keep the gateway alive without systemd
+- [scripts/start-gateway-tmux.sh](scripts/start-gateway-tmux.sh) - fallback gateway runtime when systemd is unavailable
+- [systemd/openclaw-gateway.service](systemd/openclaw-gateway.service) - tracked system service for reboot persistence
 - [.github/workflows/smoke-check.yml](.github/workflows/smoke-check.yml) - repo sanity checks on GitHub Actions
 - [memory/](memory/) - local Markdown memory vault
 
@@ -73,7 +76,8 @@ This setup uses `codex-cli/gpt-5.4` as the current minimum baseline, with `xhigh
 
 - OpenClaw delegates agent turns to the installed `codex` CLI.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
-- The gateway is configured for `local` mode on loopback and can be kept alive with tmux when systemd user services are unavailable.
+- The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
+- The tmux launcher remains a fallback when systemd is unavailable.
 - If the shared Codex user default later moves to a numerically newer GPT model than 5.4, OpenClaw should be updated to follow that newer model after a local validation pass.
 
 ## Positioning
