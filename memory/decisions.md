@@ -33,3 +33,8 @@
 
 - Decision: document the secret file path pattern and channel setup flow, but never the token itself
 - Why: future agents need the procedure and the exact local path model, not the credential
+
+### Persist Telegram owner access only in local runtime config
+
+- Decision: after the first successful owner DM, keep the owner's Telegram user ID only in local OpenClaw config and switch DM access to allowlist mode
+- Why: this avoids repeated pairing prompts while keeping owner-specific identifiers out of the public repo

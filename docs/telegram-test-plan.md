@@ -54,6 +54,13 @@ Recommended local path:
 - `dmPolicy: pairing` for the fastest DM smoke test
 - `dmPolicy: allowlist` plus `allowFrom: ["<numeric-user-id>"]` for a durable owner-only bot
 
+Recommended steady state after the first successful owner DM:
+
+- approve the initial pairing if the bot started in pairing mode
+- capture the owner's numeric Telegram user ID
+- move the bot to `dmPolicy: allowlist`
+- keep the numeric owner ID only in local runtime config, not in tracked repo files
+
 7. For groups, allow the group separately and keep sender authorization explicit:
 
 - add the negative Telegram group ID under `channels.telegram.groups`
@@ -66,3 +73,4 @@ Recommended local path:
 - If the same owner should work in both DM and groups, store the numeric Telegram user ID in `channels.telegram.allowFrom`.
 - Group replies require mention by default unless group config relaxes it.
 - Never store the Telegram bot token in tracked repo files. Keep only the secret file path and safe operational notes in Git.
+- Never store the owner's numeric Telegram user ID in tracked docs when the repo is public. Keep it only in local runtime config.

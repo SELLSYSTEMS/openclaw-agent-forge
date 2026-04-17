@@ -20,9 +20,10 @@
 
 - The local gateway is running on loopback and passes `gateway probe`
 - Telegram bot connectivity is configured locally via `channels.telegram.tokenFile`
-- Telegram channel probe is healthy, but there has not yet been a confirmed inbound DM after the live channel came up
+- Telegram channel probe is healthy
+- Telegram owner access is now persisted in local runtime config via `allowFrom` plus `dmPolicy=allowlist`
 
 ## Next Steps
 
-- Wait for a fresh Telegram DM after channel startup, then confirm pairing or allowlist
+- Wait for a fresh Telegram DM after the allowlist restart, then confirm end-to-end chat handling
 - Keep repo docs aligned with the public-safe operating model
