@@ -58,3 +58,18 @@
 
 - Decision: treat `/opt/claude-vnc-terminal/data/terminal-state.json` as the primary discovery file for current webterminal tabs when it exists
 - Why: this gives future agents and OpenClaw a direct server-side view of tab names, working directories, and providers without relying on the browser UI
+
+### Seed important OpenClaw memory directly in the workspace
+
+- Decision: keep a tracked, public-safe `workspace/MEMORY.md` with the core operating facts for this server class
+- Why: future installs and future agents should start with the right context immediately, without needing to reconstruct it from chat history or re-read the whole repo first
+
+### Document the shared Codex CLI TUI explicitly
+
+- Decision: keep a dedicated `docs/codex-cli-tui.md` runbook for the OpenAI Codex CLI TUI used by the other terminal agents
+- Why: OpenClaw should understand that the neighboring agents are running the Codex TUI, how it is enabled, and which host-level defaults already apply
+
+### Treat Codex TUI enablement as a CLI install and login concern
+
+- Decision: document that enabling the Codex TUI for all server-side terminal agents means keeping `codex` installed on `PATH` plus a valid `~/.codex` login for the session user, not installing a second TUI package
+- Why: this prevents future agents from wasting time looking for a non-existent separate TUI component and keeps the shared-host setup simple

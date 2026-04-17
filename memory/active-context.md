@@ -11,6 +11,8 @@
 - Known current agent roots currently include `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
 - Webterminal implementation exists under `/opt/claude-vnc-terminal`
 - Webterminal tab state is readable from `/opt/claude-vnc-terminal/data/terminal-state.json`
+- The shared OpenAI Codex CLI TUI is the default interactive mode of `codex`
+- The Codex TUI does not need a separate install beyond the `codex` CLI itself plus login state for the session user
 
 ## Current Defaults
 
@@ -35,6 +37,9 @@
 - Telegram DM replies are now working end to end
 - Shared host context is now documented in `docs/shared-host-context.md`
 - OpenClaw TUI is the first recommended operator surface; Node-RED remains the preferred automation fabric
+- OpenClaw TUI reaches the gateway but still runs into a local operator-approval barrier before full use
+- The shared Codex CLI TUI should be documented and treated as normal host infrastructure for the other agents
+- Browser-terminal agents should prefer `codex --no-alt-screen`
 
 ## Next Steps
 

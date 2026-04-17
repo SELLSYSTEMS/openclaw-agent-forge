@@ -27,12 +27,13 @@ Canonical repository identity:
 
 ## Required Flow
 
-1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), and [docs/lessons-learned.md](docs/lessons-learned.md).
+1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), [docs/lessons-learned.md](docs/lessons-learned.md), and [docs/codex-cli-tui.md](docs/codex-cli-tui.md).
 2. Read [docs/shared-host-context.md](docs/shared-host-context.md), [docs/agent-topology.md](docs/agent-topology.md), and [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) before changing operating assumptions about the host.
-3. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
-4. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
-5. Validate the setup with `scripts/validate-local-setup.sh`.
-6. If you change the operating model, update the docs in the same commit.
+3. Read [workspace/README.md](workspace/README.md) and [workspace/MEMORY.md](workspace/MEMORY.md) before changing workspace defaults or identity prompts.
+4. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
+5. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
+6. Validate the setup with `scripts/validate-local-setup.sh`.
+7. If you change the operating model, update the docs in the same commit.
 
 ## Pitfalls Already Seen
 
@@ -46,6 +47,7 @@ Canonical repository identity:
 - `/root/.codex` is a shared host-level Codex CLI home. Read it first, but do not rewrite global config casually from this repo.
 - `/root/.node-red` is a shared host service for automations and diagrams. Treat it as installed/available shared infrastructure, even when flows are still close to empty. Keep passwords, credential material, and user-specific data out of the public repo.
 - Browser webterminal access is part of the operating model on this host class, but the exact terminal URL is instance-specific and should stay in local-only notes, not public Git.
+- The Codex TUI is already built into `codex`; do not invent a separate server-side TUI install step for it. In browser terminals, prefer `codex --no-alt-screen`.
 - If shell commands fail with `bwrap: Failed to make / slave: Permission denied`, rerun the required command with escalation instead of debugging the project itself.
 
 ## Shared Host Rules

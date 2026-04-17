@@ -21,6 +21,7 @@ jobs:
           test -f LICENSE
           test -f docs/shared-host-context.md
           test -f docs/agent-topology.md
+          test -f docs/codex-cli-tui.md
           test -f docs/orchestrator-roadmap.md
           test -f docs/prompt-patterns.md
           test -f docs/telegram-test-plan.md
@@ -32,6 +33,7 @@ jobs:
           test -f workspace/BOOTSTRAP.md
           test -f workspace/HEARTBEAT.md
           test -f workspace/IDENTITY.md
+          test -f workspace/MEMORY.md
           test -f workspace/SOUL.md
           test -f workspace/TOOLS.md
           test -f workspace/USER.md

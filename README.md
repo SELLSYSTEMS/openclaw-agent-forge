@@ -29,9 +29,11 @@ It must also stay free of secrets because the repository is public.
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
 - [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
 - [docs/agent-topology.md](docs/agent-topology.md) - known agent folders, roles, and rediscovery rules
+- [docs/codex-cli-tui.md](docs/codex-cli-tui.md) - how the shared OpenAI Codex CLI TUI works on this host
 - [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) - recommended direction for orchestration, TUI, and cross-agent visibility
 - [docs/prompt-patterns.md](docs/prompt-patterns.md) - starter prompts for future agents on this host
 - [docs/telegram-test-plan.md](docs/telegram-test-plan.md) - Telegram prerequisites and approval flow
+- [workspace/MEMORY.md](workspace/MEMORY.md) - seeded public-safe memory for future installs and agents
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
 - [scripts/agent-landscape.sh](scripts/agent-landscape.sh) - safe status snapshot of shared agents and services
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap

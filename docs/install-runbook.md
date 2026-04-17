@@ -48,6 +48,52 @@ This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 This keeps auth ownership with Codex CLI instead of storing OpenAI API credentials inside the OpenClaw repo or config flow.
 
+## Seeded Workspace Memory
+
+This repository ships a tracked, public-safe workspace memory seed:
+
+- `/home/OpenClaw/workspace/MEMORY.md`
+
+Future agents should read `workspace/README.md` and `workspace/MEMORY.md` before changing workspace prompts, identity files, or local overrides.
+
+Keep private data out of that tracked seed:
+
+- instance-private URLs belong in `workspace/*.local.md`
+- secrets belong in `.openclaw-home/secrets/`
+- owner-specific IDs belong in local runtime state, not public Git
+
+## Codex CLI TUI On This Server
+
+No separate server-side TUI package is required for Codex.
+
+What the server actually needs is:
+
+- a working `codex` binary on `PATH`
+- a successful `codex login` under the Unix account that will run the agent sessions
+- a readable `~/.codex` home for that same account
+- a terminal surface that can render interactive TUIs
+
+On browser terminals or strict multiplexers, prefer:
+
+```bash
+codex --no-alt-screen
+```
+
+If you need to start Codex in a specific project root, use:
+
+```bash
+codex -C /home/admin
+codex -C /home/langchain
+codex -C /home/udacity
+codex -C /home/OpenClaw
+```
+
+For OpenClaw's own TUI, the prerequisites are different:
+
+- OpenClaw must already be installed locally
+- the local gateway must be reachable
+- operator pairing or approval may still be required even when the TUI itself launches
+
 ## Validation
 
 Run:

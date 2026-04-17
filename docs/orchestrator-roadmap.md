@@ -28,6 +28,8 @@ From local inspection:
 From official docs:
 
 - OpenClaw ships an official terminal UI: `openclaw tui`
+- OpenAI Codex CLI uses its interactive TUI by default when run as `codex`
+- the Codex TUI ships inside the `codex` CLI itself; there is no separate TUI package to install
 - one Gateway can host multiple agents; separate VPSes are usually unnecessary
 - there is no built-in bot-to-bot bridge, but a CLI bridge pattern is supported
 - Node-RED projects are Git-backed when enabled in `settings.js`
@@ -56,6 +58,23 @@ Why:
 - it already understands agents and sessions
 - it shows history and streaming tool output
 - it avoids inventing a parallel control plane too early
+
+Current caveat from local testing:
+
+- the TUI starts and reaches the gateway
+- on this host it can still hit a local `pairing required` or operator-approval blocker before becoming fully usable
+- that blocker belongs to gateway authorization, not to the TUI design itself
+
+### 2a. Understand The Shared Codex CLI TUI Too
+
+The other long-running terminal agents on this host use the OpenAI Codex CLI TUI.
+
+Important rule:
+
+- OpenClaw should understand that `codex` without a subcommand starts the interactive Codex TUI
+- enabling that TUI on a server means installing `codex` itself and keeping a valid `~/.codex` login for the session user
+- in browser terminals, `codex --no-alt-screen` is the safer default because it preserves scrollback
+- shared Codex TUI behavior belongs in `docs/codex-cli-tui.md`
 
 ### 3. Use Node-RED For Durable Automations And Bridges
 

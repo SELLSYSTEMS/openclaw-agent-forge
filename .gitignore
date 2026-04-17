@@ -4,6 +4,7 @@
 
 workspace/.scratch/
 workspace/tmp/
+workspace/.openclaw/
 workspace/memory/
 workspace/*.local.md
 
