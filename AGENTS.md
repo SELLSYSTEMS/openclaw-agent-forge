@@ -28,7 +28,7 @@ Canonical repository identity:
 ## Required Flow
 
 1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), and [docs/lessons-learned.md](docs/lessons-learned.md).
-2. Read [docs/shared-host-context.md](docs/shared-host-context.md) and [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) before changing operating assumptions about the host.
+2. Read [docs/shared-host-context.md](docs/shared-host-context.md), [docs/agent-topology.md](docs/agent-topology.md), and [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) before changing operating assumptions about the host.
 3. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
 4. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
 5. Validate the setup with `scripts/validate-local-setup.sh`.
@@ -44,7 +44,8 @@ Canonical repository identity:
 - A healthy gateway probe does not guarantee full operator scope; `pairing required` on admin-style RPCs is a separate gateway authorization issue.
 - Telegram channel tokens should be loaded from a local `tokenFile` under `.openclaw-home/secrets`, never from tracked docs or scripts.
 - `/root/.codex` is a shared host-level Codex CLI home. Read it first, but do not rewrite global config casually from this repo.
-- `/root/.node-red` is a shared host service for automations and diagrams. Keep passwords, credential material, and user-specific data out of the public repo.
+- `/root/.node-red` is a shared host service for automations and diagrams. Treat it as installed/available shared infrastructure, even when flows are still close to empty. Keep passwords, credential material, and user-specific data out of the public repo.
+- Browser webterminal access is part of the operating model on this host class, but the exact terminal URL is instance-specific and should stay in local-only notes, not public Git.
 - If shell commands fail with `bwrap: Failed to make / slave: Permission denied`, rerun the required command with escalation instead of debugging the project itself.
 
 ## Shared Host Rules

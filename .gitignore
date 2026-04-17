@@ -4,6 +4,7 @@
 
 workspace/.scratch/
 workspace/tmp/
+workspace/memory/
 workspace/*.local.md
 
 memory/inbox/*.md

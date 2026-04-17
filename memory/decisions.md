@@ -48,3 +48,8 @@
 
 - Decision: let future agents read shared Codex CLI context from `/root/.codex`, but avoid mutating global config unless the user explicitly asks
 - Why: several Codex agents already run on the host, and repo-local changes should not accidentally break the global setup
+
+### Treat Node-RED as shared-by-default server infrastructure
+
+- Decision: document Node-RED as installed and available to all agents on this server class, even if its flows are initially empty
+- Why: future agents should assume it exists as a shared automation resource instead of rediscovering or reinstalling it

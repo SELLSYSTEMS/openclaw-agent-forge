@@ -42,6 +42,26 @@ if [[ -d /root/.node-red ]]; then
   echo
 fi
 
+echo "[known-workspaces]"
+for entry in \
+  "/home/admin:Default AI" \
+  "/home/langchain:learnLangChain" \
+  "/home/udacity:learnUdacity" \
+  "/home/OpenClaw:OpenClaw"
+do
+  path="${entry%%:*}"
+  label="${entry#*:}"
+  if [[ -d "${path}" ]]; then
+    echo "${path} -> ${label}"
+  else
+    echo "${path} -> ${label} (missing)"
+  fi
+done
+if [[ -f /home/OpenClaw/workspace/WEBTERMINAL.local.md ]]; then
+  echo "webterminal note: /home/OpenClaw/workspace/WEBTERMINAL.local.md"
+fi
+echo
+
 echo "[openclaw]"
 if [[ -x /home/OpenClaw/bin/openclaw-local ]]; then
   echo "repo: /home/OpenClaw"

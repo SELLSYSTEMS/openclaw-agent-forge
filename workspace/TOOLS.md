@@ -29,6 +29,7 @@ This file is the safe machine-context cheat sheet for this workspace.
   - `adminAuth` is configured
   - `editorTheme.projects` is configured
 - Treat Node-RED as the preferred place for durable automations, service bridges, and human-readable flow diagrams.
+- On this host class, assume Node-RED is already installed and shared across agents even if its default flows are empty.
 - Never copy Node-RED passwords, hashes, or credential material into tracked repo files.
 
 ### OpenClaw
@@ -46,6 +47,12 @@ This file is the safe machine-context cheat sheet for this workspace.
 - tmux sessions: `tmux ls`
 - OpenClaw health: `/home/OpenClaw/bin/openclaw-local health`
 - OpenClaw gateway probe: `/home/OpenClaw/bin/openclaw-local gateway probe`
+- Known current agent roots:
+  - `/home/admin` → Default AI
+  - `/home/langchain` → learnLangChain
+  - `/home/udacity` → learnUdacity
+  - `/home/OpenClaw` → OpenClaw
+- If present, read `WEBTERMINAL.local.md` for the current instance's browser-terminal entrypoint.
 
 ## Collaboration Rules
 

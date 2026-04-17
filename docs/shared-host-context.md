@@ -84,6 +84,11 @@ Local inspection on this host shows:
 - `adminAuth` is configured
 - `editorTheme.projects` is configured
 
+Operational assumption for this server class:
+
+- Node-RED should be treated as installed and shared by default
+- future agents should assume it exists even when the initial flows are mostly empty
+
 Operational rule:
 
 - treat Node-RED as the preferred automation fabric when a workflow needs repeatability, fan-out, or a human-readable flow diagram
@@ -92,6 +97,13 @@ Operational rule:
 ### Other Active Agents
 
 This host can have multiple long-running terminal agents at once.
+
+Known current roots:
+
+- `/home/admin` → Default AI
+- `/home/langchain` → learnLangChain
+- `/home/udacity` → learnUdacity
+- `/home/OpenClaw` → OpenClaw
 
 Practical discovery commands:
 
@@ -110,6 +122,8 @@ Keep local-only material out of Git:
 - `memory/references/local-only/`
 
 If a future agent needs sensitive machine-specific facts, store them there and reference only the path conventions in the public docs.
+
+Instance-specific browser-terminal URLs belong there too. The public repo should document the rule, not the live URL.
 
 ## Orchestrator Stance
 

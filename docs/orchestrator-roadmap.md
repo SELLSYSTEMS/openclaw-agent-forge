@@ -20,6 +20,8 @@ From local inspection:
 - OpenClaw has its own isolated runtime under `/home/OpenClaw/.openclaw-home`
 - Node-RED is already installed and running locally
 - the global Codex CLI home lives under `/root/.codex`
+- known current agent roots are `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
+- browser access commonly happens through an instance-specific webterminal URL
 
 From official docs:
 
@@ -64,6 +66,8 @@ When a workflow needs:
 - integration glue between systems
 
 prefer Node-RED over hidden ad hoc scripts.
+
+On this host class, agents should assume Node-RED already exists as a shared service instead of treating it as a per-project install step.
 
 ### 4. Treat Shared Codex State As Read-First Context
 
@@ -110,6 +114,7 @@ Use:
 - `scripts/agent-landscape.sh`
 - `tmux ls`
 - `ps -ef | rg -i 'codex|openclaw|node-red|tmux'`
+- `workspace/WEBTERMINAL.local.md` when present
 
 This gives a fast answer to “what is running now?”
 

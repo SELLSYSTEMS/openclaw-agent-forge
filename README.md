@@ -28,6 +28,7 @@ It must also stay free of secrets because the repository is public.
 - [docs/install-runbook.md](docs/install-runbook.md) - step-by-step installation model
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
 - [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
+- [docs/agent-topology.md](docs/agent-topology.md) - known agent folders, roles, and rediscovery rules
 - [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) - recommended direction for orchestration, TUI, and cross-agent visibility
 - [docs/prompt-patterns.md](docs/prompt-patterns.md) - starter prompts for future agents on this host
 - [docs/telegram-test-plan.md](docs/telegram-test-plan.md) - Telegram prerequisites and approval flow
@@ -91,7 +92,7 @@ This machine has more than one active AI system.
 
 - OpenClaw owns `/home/OpenClaw`
 - the host also has a shared Codex CLI home under `/root/.codex`
-- Node-RED runs locally under `/root/.node-red`
+- Node-RED runs locally under `/root/.node-red` and should be treated as shared host infrastructure available to all agents
 - multiple terminal-driven Codex agents may already be active at the same time
 
 The repo documents those relationships in a public-safe way. It should capture paths, rules, and operating patterns, but never passwords, tokens, or owner-specific identifiers.

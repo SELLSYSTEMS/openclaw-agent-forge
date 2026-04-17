@@ -1,6 +1,6 @@
 # USER.md - About Your Human
 
-_Learn about the person you're helping. Update this as you go._
+_Public-safe template. Put private or instance-specific overrides in `USER.local.md`._
 
 - **Name:**
 - **What to call them:**

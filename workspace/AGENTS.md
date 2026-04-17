@@ -15,6 +15,8 @@ That context may already include:
 - `AGENTS.md`, `SOUL.md`, and `USER.md`
 - recent daily memory such as `memory/YYYY-MM-DD.md`
 - `MEMORY.md` when this is the main session
+- `WEBTERMINAL.local.md` when instance-specific terminal access notes were saved locally
+- `IDENTITY.local.md` and `USER.local.md` when local private overrides were saved for this instance
 
 Do not manually reread startup files unless:
 
@@ -130,12 +132,19 @@ This workspace does not live alone on the machine.
 - Shared Node-RED state lives under `/root/.node-red`
 - Other Codex agents can already be active in parallel terminal sessions
 - OpenClaw should act as the main orchestrator for this workspace
+- Known current agent roots are:
+  - `/home/admin` → Default AI
+  - `/home/langchain` → learnLangChain
+  - `/home/udacity` → learnUdacity
+  - `/home/OpenClaw` → OpenClaw
+- Access often happens through a browser webterminal; exact URLs vary per instance and belong in local-only notes
 
 Rules:
 
 - Read shared host context first; do not casually rewrite it
+- If `IDENTITY.local.md` or `USER.local.md` exists, treat it as the private local override over the public-safe template files
 - Prefer local workspace files, local repo docs, and repo-local config over mutating `/root/.codex`
-- Prefer Node-RED when you need durable automations, bridges, or diagrams
+- Prefer Node-RED when you need durable automations, bridges, or diagrams; assume it is installed and shared
 - Keep public repo docs safe for humans and future agents; keep passwords, tokens, and owner-specific IDs in ignored local files only
 
 **🎭 Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and "storytime" moments! Way more engaging than walls of text. Surprise people with funny voices.
