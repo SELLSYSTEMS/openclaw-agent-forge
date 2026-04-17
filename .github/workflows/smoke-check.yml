@@ -1,0 +1,50 @@
+name: smoke-check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  repo-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required files
+        run: |
+          test -f README.md
+          test -f AGENTS.md
+          test -f QUICKSTART.md
+          test -f LICENSE
+          test -f docs/telegram-test-plan.md
+          test -f scripts/bootstrap-openclaw.sh
+          test -f scripts/validate-local-setup.sh
+          test -f bin/openclaw-local
+          test -f workspace/AGENTS.md
+          test -f workspace/BOOTSTRAP.md
+          test -f workspace/HEARTBEAT.md
+          test -f workspace/IDENTITY.md
+          test -f workspace/SOUL.md
+          test -f workspace/TOOLS.md
+          test -f workspace/USER.md
+
+      - name: Validate shell syntax
+        run: |
+          bash -n bin/openclaw-local
+          bash -n bin/memory-find
+          bash -n bin/memory-note
+          bash -n scripts/bootstrap-openclaw.sh
+          bash -n scripts/gateway-tmux-status.sh
+          bash -n scripts/publish-github.sh
+          bash -n scripts/start-gateway-tmux.sh
+          bash -n scripts/stop-gateway-tmux.sh
+          bash -n scripts/validate-local-setup.sh
+
+      - name: Validate docs links target files
+        run: |
+          test -d docs
+          test -d memory
+          test -d workspace

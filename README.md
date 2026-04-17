@@ -9,6 +9,9 @@ This repository captures a reproducible local OpenClaw installation pattern, the
 - local launchers and helper scripts
 - a bootstrap path for a fresh machine
 - local memory structure and durable notes
+- a Codex CLI-backed default model path without `OPENAI_API_KEY`
+- tmux helpers for keeping the local gateway alive
+- Telegram test-channel preparation notes
 - lessons learned from the first installation pass
 
 Published repository:
@@ -20,11 +23,15 @@ It does not track the installed runtime or mutable state directories.
 ## Repository Layout
 
 - [AGENTS.md](AGENTS.md) - instructions for future AI agents
+- [QUICKSTART.md](QUICKSTART.md) - shortest path for a fresh operator or AI agent
 - [docs/install-runbook.md](docs/install-runbook.md) - step-by-step installation model
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
+- [docs/telegram-test-plan.md](docs/telegram-test-plan.md) - Telegram prerequisites and approval flow
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap
 - [scripts/validate-local-setup.sh](scripts/validate-local-setup.sh) - smoke-test and validation
+- [scripts/start-gateway-tmux.sh](scripts/start-gateway-tmux.sh) - keep the gateway alive without systemd
+- [.github/workflows/smoke-check.yml](.github/workflows/smoke-check.yml) - repo sanity checks on GitHub Actions
 - [memory/](memory/) - local Markdown memory vault
 
 ## Local Layout After Bootstrap
@@ -51,6 +58,14 @@ It does not track the installed runtime or mutable state directories.
 ```bash
 /home/OpenClaw/bin/openclaw-local
 ```
+
+## Model Path
+
+This setup is pinned to `codex-cli/gpt-5.4`.
+
+- OpenClaw delegates agent turns to the installed `codex` CLI.
+- Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
+- The gateway is configured for `local` mode on loopback and can be kept alive with tmux when systemd user services are unavailable.
 
 ## Positioning
 

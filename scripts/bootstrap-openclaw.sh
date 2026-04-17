@@ -14,7 +14,20 @@ if [[ ! -x "${PREFIX}/bin/openclaw" ]]; then
 fi
 
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.workspace "${WORKSPACE_DIR}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" models set codex-cli/gpt-5.4
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set gateway.mode local
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set gateway.bind loopback
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config validate
+
+if command -v codex >/dev/null 2>&1; then
+  if ! codex login status >/dev/null 2>&1; then
+    echo "Codex CLI is installed but not authenticated yet."
+    echo "Run: codex login"
+  fi
+else
+  echo "Codex CLI is not installed or not on PATH."
+  echo "Install/login Codex CLI before using codex-cli/gpt-5.4 turns."
+fi
 
 echo "Bootstrap complete."
 echo "Run: ${ROOT}/bin/openclaw-local"
