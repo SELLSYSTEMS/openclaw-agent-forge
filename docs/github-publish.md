@@ -4,6 +4,10 @@ Recommended repository name:
 
 - `openclaw-agent-forge`
 
+Canonical owner:
+
+- `SELLSYSTEMS`
+
 Recommended description:
 
 - `Codex-built bootstrap for a live OpenClaw AI server and multi-agent workspace.`
@@ -16,14 +20,14 @@ Recommended visibility:
 Recommended remote:
 
 ```bash
-git remote add origin https://github.com/ryuriymega/openclaw-agent-forge.git
+git remote add origin https://github.com/SELLSYSTEMS/openclaw-agent-forge.git
 git push -u origin main
 ```
 
 Automated publish path:
 
 ```bash
-GITHUB_TOKEN=... /home/OpenClaw/scripts/publish-github.sh ryuriymega openclaw-agent-forge public
+GITHUB_TOKEN=... /home/OpenClaw/scripts/publish-github.sh SELLSYSTEMS openclaw-agent-forge public
 ```
 
 ## Why This Name
@@ -39,12 +43,7 @@ GITHUB_TOKEN=... /home/OpenClaw/scripts/publish-github.sh ryuriymega openclaw-ag
 - transient inbox captures unless curated
 - machine-local scratch files
 
-## Current Known Blocker
+## Notes
 
-If plain `git push` fails with:
-
-```text
-fatal: could not read Username for 'https://github.com': No such device or address
-```
-
-the shell is not authenticated to GitHub. Use `scripts/publish-github.sh` with `GITHUB_TOKEN` or `GH_TOKEN`.
+- This repository is already published at `https://github.com/SELLSYSTEMS/openclaw-agent-forge`.
+- If `git push` fails, inspect `gh auth status -t` and verify the token or browser auth actually grants write access for the target organization repository.

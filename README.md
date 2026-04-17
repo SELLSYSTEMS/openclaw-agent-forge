@@ -11,7 +11,9 @@ This repository captures a reproducible local OpenClaw installation pattern, the
 - local memory structure and durable notes
 - lessons learned from the first installation pass
 
-Suggested GitHub repository name: `openclaw-agent-forge`
+Published repository:
+
+- `https://github.com/SELLSYSTEMS/openclaw-agent-forge`
 
 It does not track the installed runtime or mutable state directories.
 
@@ -61,6 +63,12 @@ It is the operator repo around OpenClaw:
 - memory conventions
 - multi-agent workspace defaults
 - installation lessons so the next AI agent does not repeat setup mistakes
+
+## Canonical Remote
+
+```bash
+git remote add origin https://github.com/SELLSYSTEMS/openclaw-agent-forge.git
+```
 
 ## Memory Strategy
 

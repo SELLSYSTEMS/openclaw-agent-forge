@@ -10,6 +10,7 @@ Canonical repository identity:
 
 - Name: `openclaw-agent-forge`
 - Meaning: Codex-built bootstrap and operations repo for a live OpenClaw AI server with multi-agent workflows
+- GitHub: `https://github.com/SELLSYSTEMS/openclaw-agent-forge`
 
 ## Non-Negotiable Rules
 

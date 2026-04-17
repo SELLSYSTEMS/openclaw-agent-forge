@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OWNER="${1:-${GITHUB_OWNER:-ryuriymega}}"
+OWNER="${1:-${GITHUB_OWNER:-SELLSYSTEMS}}"
 REPO_NAME="${2:-openclaw-agent-forge}"
 VISIBILITY="${3:-public}"
 DESCRIPTION="Codex-built bootstrap for a live OpenClaw AI server and multi-agent workspace."
