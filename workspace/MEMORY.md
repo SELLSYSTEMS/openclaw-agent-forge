@@ -9,7 +9,9 @@ It is intentionally public-safe and high signal, so a future install or future a
 - OpenClaw owns `/home/OpenClaw`
 - OpenClaw runtime home is `/home/OpenClaw/.openclaw-home`
 - OpenClaw default workspace is `/home/OpenClaw/workspace`
-- OpenClaw default model path is `codex-cli/gpt-5.4`
+- OpenClaw current model floor is `codex-cli/gpt-5.4`
+- OpenClaw should prefer `xhigh` reasoning through the shared Codex user config
+- If the shared Codex user model becomes numerically newer than 5.4, OpenClaw should follow it after validation
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
 
 ## Shared Host Facts
@@ -21,6 +23,7 @@ It is intentionally public-safe and high signal, so a future install or future a
 - The OpenAI Codex CLI TUI is the default interactive Codex mode; `codex` starts it
 - The Codex TUI ships with the `codex` CLI; there is no separate server-side TUI package to install
 - The real prerequisite is a working `codex` binary on `PATH` plus valid `~/.codex` login state for the Unix account running the session
+- On this host class, webterminal tabs share the same Unix user and the same `~/.codex` state
 - In browser terminals, prefer `codex --no-alt-screen`
 
 ## Known Current Agent Roots

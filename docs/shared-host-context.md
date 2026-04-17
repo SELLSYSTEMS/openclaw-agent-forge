@@ -43,7 +43,8 @@ OpenClaw-owned paths:
 
 OpenClaw defaults in this repo:
 
-- primary model: `codex-cli/gpt-5.4`
+- primary model floor: `codex-cli/gpt-5.4`
+- preferred reasoning floor: `xhigh`
 - gateway mode: `local`
 - gateway bind: `loopback`
 - Telegram is configured via a local `tokenFile`, not tracked secrets
@@ -66,6 +67,8 @@ Operational rule:
 - read shared Codex context when it helps
 - do not mutate global Codex config casually from this repo
 - prefer local repo docs, local workspace files, or CLI overrides when you need repo-specific behavior
+- on this host class, webterminal tabs share the same Unix user and therefore the same `~/.codex` login state
+- do not treat Codex authentication as a per-tab setup step
 
 ### Shared Node-RED Service
 

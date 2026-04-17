@@ -49,12 +49,13 @@ Official install paths from the OpenAI docs and official GitHub repo:
 - `npm install -g @openai/codex`
 - the official binary releases from `openai/codex`
 
-On this host class, the practical extra rule is:
+On this host class, the practical extra rules are:
 
+- all webterminal tabs share the same Unix user and the same `~/.codex` login state
+- do not treat Codex login as a per-tab setup step
 - in browser terminals, prefer `codex --no-alt-screen`
 
-If all terminal tabs share the same Unix user, one shared `~/.codex` login is enough for all of them.
-If future agents run under different Unix users, each user needs its own Codex login state.
+If a future host ever runs agents under different Unix users, each user needs its own Codex login state.
 
 ## Authentication
 
@@ -133,7 +134,8 @@ Operational rule:
 ## Relationship To OpenClaw
 
 - Codex CLI TUI is the main interactive surface for the other terminal agents
-- OpenClaw uses `codex-cli/gpt-5.4` as its default model path
+- OpenClaw uses `codex-cli/gpt-5.4` as its current minimum model floor
+- OpenClaw should follow the shared Codex user model once it becomes numerically newer than 5.4 and is validated locally
 - OpenClaw should understand Codex CLI TUI behavior, but keep its own repo-local orchestration rules under `/home/OpenClaw`
 
 ## Official References

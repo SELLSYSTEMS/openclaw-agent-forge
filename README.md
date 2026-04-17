@@ -69,11 +69,12 @@ It must also stay free of secrets because the repository is public.
 
 ## Model Path
 
-This setup is pinned to `codex-cli/gpt-5.4`.
+This setup uses `codex-cli/gpt-5.4` as the current minimum baseline, with `xhigh` reasoning inherited from the shared Codex user config.
 
 - OpenClaw delegates agent turns to the installed `codex` CLI.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
 - The gateway is configured for `local` mode on loopback and can be kept alive with tmux when systemd user services are unavailable.
+- If the shared Codex user default later moves to a numerically newer GPT model than 5.4, OpenClaw should be updated to follow that newer model after a local validation pass.
 
 ## Positioning
 

@@ -9,7 +9,8 @@ This runbook describes the local isolated OpenClaw installation pattern used in 
 - launcher: `/home/OpenClaw/bin/openclaw-local`
 - workspace: `/home/OpenClaw/workspace`
 - memory vault: `/home/OpenClaw/memory`
-- primary model: `codex-cli/gpt-5.4`
+- primary model floor: `codex-cli/gpt-5.4`
+- preferred reasoning floor: `xhigh`
 - gateway: `local` mode on loopback
 
 ## Why This Layout
@@ -33,7 +34,7 @@ What it does:
 2. Creates `/home/OpenClaw/.openclaw-home`.
 3. Configures OpenClaw with `OPENCLAW_HOME=/home/OpenClaw/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `/home/OpenClaw/workspace`.
-5. Sets the primary model to `codex-cli/gpt-5.4`.
+5. Sets the primary model to `codex-cli/gpt-5.4`, or to the shared Codex user model if it is numerically newer than 5.4.
 6. Sets `gateway.mode=local`.
 7. Sets `gateway.bind=loopback`.
 8. Validates the resulting config.
@@ -43,8 +44,9 @@ What it does:
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 - install and log in to the `codex` CLI
-- keep the OpenClaw model ref at `codex-cli/gpt-5.4`
+- keep the OpenClaw model ref at `codex-cli/gpt-5.4` or a newer shared Codex user model when one exists
 - let OpenClaw delegate turn execution to the installed Codex CLI
+- keep shared Codex reasoning at `xhigh`
 
 This keeps auth ownership with Codex CLI instead of storing OpenAI API credentials inside the OpenClaw repo or config flow.
 
@@ -69,7 +71,7 @@ No separate server-side TUI package is required for Codex.
 What the server actually needs is:
 
 - a working `codex` binary on `PATH`
-- a successful `codex login` under the Unix account that will run the agent sessions
+- a successful one-time `codex login` under the Unix account that will run the agent sessions
 - a readable `~/.codex` home for that same account
 - a terminal surface that can render interactive TUIs
 
@@ -107,10 +109,11 @@ Expected outcomes:
 - `openclaw-local --version` prints a version
 - `openclaw config validate` reports a valid config
 - the configured workspace resolves to `/home/OpenClaw/workspace`
-- the configured primary model resolves to `codex-cli/gpt-5.4`
+- the configured primary model resolves to `codex-cli/gpt-5.4` or a newer shared Codex user model
 - the configured gateway mode resolves to `local`
 - the configured gateway bind resolves to `loopback`
 - `codex login status` succeeds
+- the shared Codex reasoning default resolves to `xhigh`
 
 ## Keeping The Gateway Alive
 

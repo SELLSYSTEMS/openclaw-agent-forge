@@ -21,8 +21,8 @@
 
 ### Use Codex CLI as the default OpenClaw model path
 
-- Decision: keep `agents.defaults.model.primary=codex-cli/gpt-5.4`
-- Why: this reuses the installed Codex CLI login and avoids making `OPENAI_API_KEY` the default auth path
+- Decision: keep `agents.defaults.model.primary` on `codex-cli/gpt-5.4` as the current minimum floor, inherit `xhigh` reasoning from the shared Codex user config, and move to a newer shared GPT model once it is numerically newer than 5.4 and validated locally
+- Why: this reuses the installed Codex CLI login, avoids making `OPENAI_API_KEY` the default auth path, and keeps OpenClaw aligned with the newest stable shared-user Codex model instead of freezing forever on 5.4
 
 ### Keep repo knowledge public-safe and secrets local-only
 
@@ -73,3 +73,8 @@
 
 - Decision: document that enabling the Codex TUI for all server-side terminal agents means keeping `codex` installed on `PATH` plus a valid `~/.codex` login for the session user, not installing a second TUI package
 - Why: this prevents future agents from wasting time looking for a non-existent separate TUI component and keeps the shared-host setup simple
+
+### Treat Codex login as shared user state on this host class
+
+- Decision: document that the browser-terminal tabs on this host class share the same Unix user and therefore the same `~/.codex` login state
+- Why: future agents should not repeat pointless per-tab login instructions when the login already exists for the shared session user

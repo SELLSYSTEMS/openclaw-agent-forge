@@ -4,9 +4,51 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LAUNCHER="${ROOT}/bin/openclaw-local"
 EXPECTED_WORKSPACE="${ROOT}/workspace"
-EXPECTED_MODEL="codex-cli/gpt-5.4"
 EXPECTED_GATEWAY_MODE="local"
 EXPECTED_GATEWAY_BIND="loopback"
+BASELINE_MODEL="gpt-5.4"
+EXPECTED_REASONING="xhigh"
+SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
+
+extract_toml_string() {
+  local key="$1"
+  local file="$2"
+  awk -F'"' -v key="${key}" '$0 ~ "^[[:space:]]*" key " = \"" { print $2; exit }' "${file}"
+}
+
+model_is_newer_than_baseline() {
+  local model="$1"
+  if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
+    local major="${BASH_REMATCH[1]}"
+    local minor="${BASH_REMATCH[3]:-0}"
+    (( major > 5 || (major == 5 && minor > 4) ))
+    return
+  fi
+  return 1
+}
+
+resolve_expected_model() {
+  local shared_model=""
+  if [[ -f "${SHARED_CODEX_CONFIG}" ]]; then
+    shared_model="$(extract_toml_string model "${SHARED_CODEX_CONFIG}" || true)"
+  fi
+
+  if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}"; then
+    printf 'codex-cli/%s\n' "${shared_model}"
+    return
+  fi
+
+  printf 'codex-cli/%s\n' "${BASELINE_MODEL}"
+}
+
+resolve_shared_reasoning() {
+  if [[ ! -f "${SHARED_CODEX_CONFIG}" ]]; then
+    return 1
+  fi
+  extract_toml_string model_reasoning_effort "${SHARED_CODEX_CONFIG}"
+}
+
+EXPECTED_MODEL="$(resolve_expected_model)"
 
 "${LAUNCHER}" --version
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
@@ -52,5 +94,11 @@ if [[ "${actual_gateway_bind}" != "${EXPECTED_GATEWAY_BIND}" ]]; then
 fi
 
 codex login status >/dev/null
+
+actual_reasoning="$(resolve_shared_reasoning || true)"
+if [[ "${actual_reasoning}" != "${EXPECTED_REASONING}" ]]; then
+  echo "Shared Codex reasoning mismatch: expected ${EXPECTED_REASONING}, got ${actual_reasoning:-<unset>}" >&2
+  exit 1
+fi
 
 echo "Local setup validated."

@@ -23,8 +23,11 @@
 
 ## Model And Auth
 
-- `codex-cli/gpt-5.4` is the intended default model path for this repo.
+- `codex-cli/gpt-5.4` is the current minimum model floor for this repo, not a forever pin.
+- Shared Codex reasoning should stay on `xhigh`.
+- If the shared Codex user default moves to a numerically newer GPT model than 5.4, OpenClaw should follow it after validation.
 - This setup should prefer Codex CLI login reuse over `OPENAI_API_KEY`.
+- On this host class, all webterminal tabs share the same Unix user, so Codex login is a shared user-level state rather than a per-tab concern.
 - A successful `codex login status` plus a successful `codex exec ...` smoke test proves the auth path is usable.
 
 ## Gateway Operations

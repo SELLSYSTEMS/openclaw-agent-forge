@@ -13,6 +13,7 @@
 - Webterminal tab state is readable from `/opt/claude-vnc-terminal/data/terminal-state.json`
 - The shared OpenAI Codex CLI TUI is the default interactive mode of `codex`
 - The Codex TUI does not need a separate install beyond the `codex` CLI itself plus login state for the session user
+- Webterminal tabs on this host class share the same Unix user and the same `~/.codex` login state
 
 ## Current Defaults
 
@@ -20,7 +21,9 @@
 - Keep agent notes in Markdown
 - Promote durable facts into `decisions.md` or `references/`
 - Keep ad hoc captures in `inbox/`
-- Keep the primary model on `codex-cli/gpt-5.4`
+- Keep the primary model floor on `codex-cli/gpt-5.4`
+- Prefer `xhigh` reasoning through the shared Codex user config
+- If the shared Codex user model becomes numerically newer than 5.4, OpenClaw should follow it after validation
 - Keep secrets only in ignored local paths, not tracked repo files
 - Treat OpenClaw as the main orchestrator for this repo
 - Prefer Node-RED for durable automations and cross-system flows when possible
