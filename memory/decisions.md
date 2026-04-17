@@ -53,3 +53,8 @@
 
 - Decision: document Node-RED as installed and available to all agents on this server class, even if its flows are initially empty
 - Why: future agents should assume it exists as a shared automation resource instead of rediscovering or reinstalling it
+
+### Detect webterminal tabs from server-side state, not only from browser assumptions
+
+- Decision: treat `/opt/claude-vnc-terminal/data/terminal-state.json` as the primary discovery file for current webterminal tabs when it exists
+- Why: this gives future agents and OpenClaw a direct server-side view of tab names, working directories, and providers without relying on the browser UI

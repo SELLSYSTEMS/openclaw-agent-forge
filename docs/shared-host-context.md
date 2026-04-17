@@ -98,6 +98,18 @@ Operational rule:
 
 This host can have multiple long-running terminal agents at once.
 
+There is also a concrete webterminal implementation on this host:
+
+- implementation root: `/opt/claude-vnc-terminal`
+- tab/session state file: `/opt/claude-vnc-terminal/data/terminal-state.json`
+
+That file stores tab metadata such as:
+
+- tab name
+- working directory
+- provider
+- created/updated timestamps
+
 Known current roots:
 
 - `/home/admin` → Default AI
@@ -111,6 +123,12 @@ Practical discovery commands:
 /home/OpenClaw/scripts/agent-landscape.sh
 ps -ef | rg -i 'codex|openclaw|node-red|tmux'
 tmux ls
+```
+
+Practical direct inspection for webterminal tabs:
+
+```bash
+cat /opt/claude-vnc-terminal/data/terminal-state.json
 ```
 
 ## 4. Local-Only Secrets And IDs

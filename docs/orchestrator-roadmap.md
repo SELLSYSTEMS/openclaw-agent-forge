@@ -22,6 +22,8 @@ From local inspection:
 - the global Codex CLI home lives under `/root/.codex`
 - known current agent roots are `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
 - browser access commonly happens through an instance-specific webterminal URL
+- the current webterminal implementation lives under `/opt/claude-vnc-terminal`
+- server-side tab state is persisted in `/opt/claude-vnc-terminal/data/terminal-state.json`
 
 From official docs:
 
@@ -115,6 +117,7 @@ Use:
 - `tmux ls`
 - `ps -ef | rg -i 'codex|openclaw|node-red|tmux'`
 - `workspace/WEBTERMINAL.local.md` when present
+- `/opt/claude-vnc-terminal/data/terminal-state.json` when present
 
 This gives a fast answer to “what is running now?”
 

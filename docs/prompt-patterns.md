@@ -17,7 +17,8 @@ Read README.md, docs/install-runbook.md, docs/shared-host-context.md, docs/orche
 1. what OpenClaw owns locally,
 2. which shared host services already exist,
 3. which configs are repo-local versus global,
-4. what must stay out of Git because the repo is public.
+4. what must stay out of Git because the repo is public,
+5. whether `/opt/claude-vnc-terminal/data/terminal-state.json` reveals additional live tabs or roots.
 Do not modify global config unless the user explicitly asks.
 ```
 

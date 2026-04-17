@@ -41,6 +41,25 @@ Recommended local-only file:
 
 Use that file for the current instance's browser-terminal URL and any safe local notes about how to access it.
 
+The server-side implementation currently lives here:
+
+- `/opt/claude-vnc-terminal`
+
+The server-side tab/session registry currently lives here:
+
+- `/opt/claude-vnc-terminal/data/terminal-state.json`
+
+That state file is the fastest way to detect which tabs currently exist and which working directory each tab points at.
+
+Example fields:
+
+- `name`
+- `cwd`
+- `provider`
+- `createdAt`
+- `updatedAt`
+- `lastActiveAt`
+
 ## Boundary Rules
 
 - OpenClaw should treat itself as the main orchestrator for `/home/OpenClaw`

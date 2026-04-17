@@ -9,6 +9,8 @@
 - Shared Codex CLI host state exists under `/root/.codex`
 - Shared Node-RED host state exists under `/root/.node-red`
 - Known current agent roots currently include `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
+- Webterminal implementation exists under `/opt/claude-vnc-terminal`
+- Webterminal tab state is readable from `/opt/claude-vnc-terminal/data/terminal-state.json`
 
 ## Current Defaults
 
@@ -22,6 +24,7 @@
 - Prefer Node-RED for durable automations and cross-system flows when possible
 - Prefer local repo config over mutating the global Codex CLI config in `/root/.codex`
 - Treat webterminal access as a normal discovery surface on this host class, but keep exact instance URLs in local-only files
+- Use the server-side terminal-state file, when present, as the fastest way to detect live webterminal tabs and their working directories
 
 ## Current Live State
 

@@ -42,6 +42,17 @@ if [[ -d /root/.node-red ]]; then
   echo
 fi
 
+if [[ -f /opt/claude-vnc-terminal/data/terminal-state.json ]]; then
+  echo "[webterminal-tabs]"
+  echo "implementation: /opt/claude-vnc-terminal"
+  echo "state file: /opt/claude-vnc-terminal/data/terminal-state.json"
+  jq -r '
+    .terminals[]?
+    | "- " + (.name // "unnamed") + " | cwd=" + (.cwd // "?") + " | provider=" + (.provider // "?")
+  ' /opt/claude-vnc-terminal/data/terminal-state.json 2>/dev/null || echo "failed to parse terminal-state.json"
+  echo
+fi
+
 echo "[known-workspaces]"
 for entry in \
   "/home/admin:Default AI" \
