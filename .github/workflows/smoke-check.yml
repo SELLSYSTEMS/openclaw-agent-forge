@@ -19,7 +19,11 @@ jobs:
           test -f AGENTS.md
           test -f QUICKSTART.md
           test -f LICENSE
+          test -f docs/shared-host-context.md
+          test -f docs/orchestrator-roadmap.md
+          test -f docs/prompt-patterns.md
           test -f docs/telegram-test-plan.md
+          test -f scripts/agent-landscape.sh
           test -f scripts/bootstrap-openclaw.sh
           test -f scripts/validate-local-setup.sh
           test -f bin/openclaw-local
@@ -36,6 +40,7 @@ jobs:
           bash -n bin/openclaw-local
           bash -n bin/memory-find
           bash -n bin/memory-note
+          bash -n scripts/agent-landscape.sh
           bash -n scripts/bootstrap-openclaw.sh
           bash -n scripts/gateway-tmux-status.sh
           bash -n scripts/publish-github.sh

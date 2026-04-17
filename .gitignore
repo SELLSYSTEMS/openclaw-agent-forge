@@ -4,8 +4,10 @@
 
 workspace/.scratch/
 workspace/tmp/
+workspace/*.local.md
 
 memory/inbox/*.md
 !memory/inbox/.gitkeep
+memory/references/local-only/
 
 *.log

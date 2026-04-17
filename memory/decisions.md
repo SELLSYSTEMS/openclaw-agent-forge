@@ -38,3 +38,13 @@
 
 - Decision: after the first successful owner DM, keep the owner's Telegram user ID only in local OpenClaw config and switch DM access to allowlist mode
 - Why: this avoids repeated pairing prompts while keeping owner-specific identifiers out of the public repo
+
+### Treat OpenClaw as the orchestrator and Node-RED as the preferred automation fabric
+
+- Decision: use OpenClaw as the coordination layer for this repo, and prefer Node-RED when building durable automations, bridges, or human-readable schemes
+- Why: OpenClaw owns the agent workflows here, while Node-RED is already present on the host and is a better fit for repeatable automation and visual flow management
+
+### Treat `/root/.codex` as shared host context, not repo-owned state
+
+- Decision: let future agents read shared Codex CLI context from `/root/.codex`, but avoid mutating global config unless the user explicitly asks
+- Why: several Codex agents already run on the host, and repo-local changes should not accidentally break the global setup

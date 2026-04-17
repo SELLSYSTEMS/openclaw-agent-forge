@@ -122,6 +122,22 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.
 
+## Shared Host Context
+
+This workspace does not live alone on the machine.
+
+- Shared Codex CLI state lives under `/root/.codex`
+- Shared Node-RED state lives under `/root/.node-red`
+- Other Codex agents can already be active in parallel terminal sessions
+- OpenClaw should act as the main orchestrator for this workspace
+
+Rules:
+
+- Read shared host context first; do not casually rewrite it
+- Prefer local workspace files, local repo docs, and repo-local config over mutating `/root/.codex`
+- Prefer Node-RED when you need durable automations, bridges, or diagrams
+- Keep public repo docs safe for humans and future agents; keep passwords, tokens, and owner-specific IDs in ignored local files only
+
 **🎭 Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and "storytime" moments! Way more engaging than walls of text. Surprise people with funny voices.
 
 **📝 Platform Formatting:**

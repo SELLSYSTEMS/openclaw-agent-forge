@@ -28,10 +28,11 @@ Canonical repository identity:
 ## Required Flow
 
 1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), and [docs/lessons-learned.md](docs/lessons-learned.md).
-2. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
-3. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
-4. Validate the setup with `scripts/validate-local-setup.sh`.
-5. If you change the operating model, update the docs in the same commit.
+2. Read [docs/shared-host-context.md](docs/shared-host-context.md) and [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) before changing operating assumptions about the host.
+3. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
+4. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
+5. Validate the setup with `scripts/validate-local-setup.sh`.
+6. If you change the operating model, update the docs in the same commit.
 
 ## Pitfalls Already Seen
 
@@ -42,4 +43,14 @@ Canonical repository identity:
 - OpenClaw config writes should be applied sequentially, not in parallel, or later writes can clobber earlier ones.
 - A healthy gateway probe does not guarantee full operator scope; `pairing required` on admin-style RPCs is a separate gateway authorization issue.
 - Telegram channel tokens should be loaded from a local `tokenFile` under `.openclaw-home/secrets`, never from tracked docs or scripts.
+- `/root/.codex` is a shared host-level Codex CLI home. Read it first, but do not rewrite global config casually from this repo.
+- `/root/.node-red` is a shared host service for automations and diagrams. Keep passwords, credential material, and user-specific data out of the public repo.
 - If shell commands fail with `bwrap: Failed to make / slave: Permission denied`, rerun the required command with escalation instead of debugging the project itself.
+
+## Shared Host Rules
+
+- Treat `/root/.codex` and `/root/.node-red` as shared infrastructure, not as OpenClaw-owned state.
+- Prefer local repo config, workspace files, CLI overrides, and agent docs over mutating global Codex CLI config.
+- Treat OpenClaw as the orchestrator for this repo's workflows.
+- Prefer Node-RED when you need durable automations, bridges, or human-readable flow diagrams.
+- Use `scripts/agent-landscape.sh` before assuming which agents or services are active on the host.

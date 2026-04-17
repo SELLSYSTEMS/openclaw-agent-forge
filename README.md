@@ -27,8 +27,12 @@ It must also stay free of secrets because the repository is public.
 - [QUICKSTART.md](QUICKSTART.md) - shortest path for a fresh operator or AI agent
 - [docs/install-runbook.md](docs/install-runbook.md) - step-by-step installation model
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
+- [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
+- [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) - recommended direction for orchestration, TUI, and cross-agent visibility
+- [docs/prompt-patterns.md](docs/prompt-patterns.md) - starter prompts for future agents on this host
 - [docs/telegram-test-plan.md](docs/telegram-test-plan.md) - Telegram prerequisites and approval flow
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
+- [scripts/agent-landscape.sh](scripts/agent-landscape.sh) - safe status snapshot of shared agents and services
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap
 - [scripts/validate-local-setup.sh](scripts/validate-local-setup.sh) - smoke-test and validation
 - [scripts/start-gateway-tmux.sh](scripts/start-gateway-tmux.sh) - keep the gateway alive without systemd
@@ -79,6 +83,18 @@ It is the operator repo around OpenClaw:
 - memory conventions
 - multi-agent workspace defaults
 - installation lessons so the next AI agent does not repeat setup mistakes
+- shared-host context so OpenClaw can coexist with other long-running agents and Node-RED automations
+
+## Shared Host Context
+
+This machine has more than one active AI system.
+
+- OpenClaw owns `/home/OpenClaw`
+- the host also has a shared Codex CLI home under `/root/.codex`
+- Node-RED runs locally under `/root/.node-red`
+- multiple terminal-driven Codex agents may already be active at the same time
+
+The repo documents those relationships in a public-safe way. It should capture paths, rules, and operating patterns, but never passwords, tokens, or owner-specific identifiers.
 
 ## Canonical Remote
 
