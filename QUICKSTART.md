@@ -2,6 +2,19 @@
 
 This is the shortest working path for a fresh machine or a fresh AI agent.
 
+## 0. Detect Canonical Owner Root First
+
+Before bootstrap:
+
+- detect `whoami`
+- detect `pwd`
+- detect `$HOME`
+- detect whether a valid OpenClaw repo/install already exists in this owner context
+- choose one canonical repo/install root
+- do not create duplicate roots such as `/home/OpenClaw` and `/home/openclaw`
+
+Reference paths below reflect this tracked host. On another host, use the same repo-local pattern under that host's canonical owner root.
+
 ## 1. Bootstrap
 
 ```bash
@@ -11,7 +24,7 @@ This is the shortest working path for a fresh machine or a fresh AI agent.
 This bootstrap sets:
 
 - workspace: `/home/OpenClaw/workspace`
-- primary model floor: `codex-cli/gpt-5.4`
+- primary model floor: `codex-cli/gpt-5.5`
 - gateway mode: `local`
 - gateway bind: `loopback`
 
@@ -55,7 +68,7 @@ Minimal live checks:
 
 ```bash
 /home/OpenClaw/bin/openclaw-local health
-codex exec --model gpt-5.4 --skip-git-repo-check --sandbox workspace-write --color never --json "reply with exactly: codex-ok"
+codex exec --model gpt-5.5 --skip-git-repo-check --sandbox workspace-write --color never --json "reply with exactly: codex-ok"
 ```
 
 ## 4. Memory
@@ -85,3 +98,5 @@ Important rule:
 
 - keep the seeded workspace context intact before Telegram is connected
 - the bot should already know the host basics before the first DM
+- if the install prompt includes `TELEGRAM_BOT_TOKEN` and `TELEGRAM_USER_ID`, Telegram pairing is part of the same install pass
+- if token validation or pairing fails, stop immediately and report the exact cause

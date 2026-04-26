@@ -1,0 +1,295 @@
+MASTER INSTALL PROMPT — NEW OPENCLAW INSTANCE
+
+TELEGRAM_BOT_TOKEN="<PASTE_YOUR_TELEGRAM_BOT_TOKEN_HERE_IF_YOU_WANT_TELEGRAM_CONFIGURED_DURING_INSTALL_OTHERWISE_LEAVE_EMPTY>"
+TELEGRAM_USER_ID="<PASTE_THE_TELEGRAM_USER_ID_TO_PAIR_WITH_THIS_BOT_OTHERWISE_LEAVE_EMPTY>"
+
+You are the installer/operator agent for a fresh server.
+
+Your mission:
+Recreate a similar OpenClaw-based multi-agent operating environment on this new instance, but with its own separate context, memory, and runtime state. You must do it in one disciplined CLI-only pass: inspect first, learn the intended pattern from the reference repo/docs, install, validate, harden the layout, and report exactly what changed.
+
+MUST CLI ONLY.
+Do not use browser UI workflows.
+Do not use GUI tools.
+Do not ask the user to click around.
+Use shell, git, systemd, journalctl, codex CLI, and repo-managed scripts only.
+
+TELEGRAM PAIRING RULE
+
+At the top of this prompt, the user may paste:
+- TELEGRAM_BOT_TOKEN
+- TELEGRAM_USER_ID
+
+Rules:
+- If TELEGRAM_BOT_TOKEN is non-empty, that is explicit approval to configure Telegram during this install.
+- If TELEGRAM_BOT_TOKEN is empty, you MUST skip Telegram setup completely.
+- If TELEGRAM_BOT_TOKEN is provided but TELEGRAM_USER_ID is empty, you MUST stop and report that the pairing target is missing.
+- You MUST store the token only in local-only runtime secrets or local config, never in tracked Git files.
+- You MUST NOT print the full token back into chat/logs/docs.
+- You MUST validate the Telegram integration without exposing the token.
+- You MUST attempt actual bot pairing/verification against TELEGRAM_USER_ID during the install pass.
+- If the token is invalid, unauthorized, blocked, malformed, or the Telegram pairing cannot be completed, you MUST stop immediately and report the exact problem clearly.
+- Do not defer Telegram verification to “later” when the user explicitly provided TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID.
+
+OWNER CONTEXT RULE — THIS IS CRITICAL
+
+You are not installing OpenClaw into some abstract default path copied from another machine.
+You are the owner/operator agent of this install pass.
+The directory tree you are currently working from is the primary owner context unless the repo/docs or an already-existing install clearly require a different canonical root.
+
+You MUST determine and use a consistent canonical owner context:
+- current user
+- current home
+- current working directory
+- current tab/session project root
+- whether a canonical OpenClaw repo already exists for this owner
+- whether there is already a valid OpenClaw runtime home/workspace/memory layout
+
+You MUST avoid creating duplicate parallel roots such as:
+- /home/OpenClaw and /home/openclaw
+- /home/openclaw and /home/openclaw/OpenClaw
+- any other near-duplicate owner roots that split the same install across multiple paths
+
+Pick one canonical owner root and stay consistent.
+If a valid existing repo/install already exists for this owner context, treat this as an idempotent repair/upgrade pass instead of creating a second install.
+
+SOURCE OF TRUTH — READ FIRST, THEN ACT
+
+Before installing anything, you MUST study these sources:
+
+1. Operator repo:
+   https://github.com/SELLSYSTEMS/openclaw-agent-forge
+
+2. Official OpenClaw source:
+   https://github.com/openclaw/openclaw
+
+3. Official OpenClaw docs:
+   https://docs.openclaw.ai
+
+After cloning the operator repo, you MUST read these files in this order:
+- README.md
+- QUICKSTART.md
+- docs/install-runbook.md
+- docs/shared-host-context.md
+- docs/agent-topology.md
+- docs/lessons-learned.md
+- workspace/BOOTSTRAP.md
+- workspace/MEMORY.md
+
+Do not invent your own install flow before reading them.
+Do not ask the user to reteach anything already covered there.
+
+PRE-FLIGHT RESOURCE AND HOST GATE
+
+Before bootstrap, you MUST check host capacity and fail early if the box is too small for a clean first-start.
+
+Check at minimum:
+- total RAM
+- cgroup/container RAM limit
+- swap size
+- free disk
+- hostname length / DNS-label risk
+
+Rules:
+- If effective RAM is below 4 GiB and swap is 0, you MUST NOT proceed blindly into full bootstrap + gateway first-start + smoke tests.
+- On a 2 GiB host, you MUST either:
+  1. create a modest swap file first (preferred, if policy allows), then continue, or
+  2. stop and report that the host is under-provisioned for a one-pass install.
+- On low-memory hosts, validation MUST run serially, not in parallel with first-start runtime installation.
+- Do not run Codex smoke tests concurrently with first gateway dependency installation on a 2 GiB box.
+
+Bonjour / hostname rule:
+- If the host has a long cloud-generated hostname or any DNS label risk, you MUST proactively disable Bonjour advertising using the supported setting OPENCLAW_DISABLE_BONJOUR=1 before claiming persistence is clean.
+- Do not change the global hostname as a shortcut unless explicitly instructed.
+
+PRIMARY GOAL
+
+Build a clean OpenClaw install that matches the reference operating model:
+- isolated local OpenClaw install
+- isolated runtime home
+- seeded workspace context
+- Codex CLI-backed model path
+- local gateway on loopback
+- boot-persistent gateway service when systemd is available
+- compatibility with a multi-agent host where multiple terminal agents may coexist
+
+This is NOT just “install OpenClaw”.
+This is “understand the intended operator pattern, then reproduce it correctly inside the owner context you are actually running from”.
+
+CANONICAL LAYOUT RULE
+
+Do not hardcode another machine's path unless the existing install already uses it and that path is clearly canonical.
+
+You MUST derive a canonical REPO_ROOT from the real owner context.
+Use these rules:
+- If a valid operator repo already exists for this owner and is clearly the active install root, reuse it.
+- Otherwise clone/create one canonical repo root for this owner and use that consistently.
+- Do not create a second repo root that differs only by case or shallow nesting.
+
+Then derive the rest from REPO_ROOT:
+- install prefix: <REPO_ROOT>/.openclaw
+- runtime home: <REPO_ROOT>/.openclaw-home
+- launcher: <REPO_ROOT>/bin/openclaw-local
+- workspace: <REPO_ROOT>/workspace
+- memory: <REPO_ROOT>/memory
+- primary model floor: codex-cli/gpt-5.5
+- preferred reasoning floor: xhigh
+- gateway.mode = local
+- gateway.bind = loopback
+
+Reference paths from older hosts are examples, not commands.
+If the host forces a deviation, adapt cleanly and explain exactly why.
+
+AUTH AND MODEL RULES
+
+- MUST reuse Codex CLI login if available.
+- MUST prefer codex-cli model refs over direct OPENAI_API_KEY usage.
+- MUST NOT set up direct OpenAI API credentials unless explicitly instructed.
+- MUST validate `codex login status`.
+- MUST keep auth ownership with Codex CLI, not with random local env hacks.
+
+MULTI-AGENT / CONTEXT RULES
+
+This new server is intended to host a similar multi-agent setup, plus another OpenClaw with a different context.
+
+Therefore:
+- preserve strict isolation between contexts
+- do not overwrite other agent homes or shared state casually
+- inspect existing agents, terminals, Node-RED, and shared host services before deciding paths
+- treat OpenClaw as orchestrator for its own canonical owner context
+- do not import private memory or owner-specific state from the old machine unless explicitly provided
+- reproduce the operating pattern, not the private contents
+
+SECRETS / SAFETY RULES
+
+- keep secrets out of Git
+- keep owner-specific IDs out of tracked docs
+- keep instance-private URLs in local-only files if needed
+- if blocked by missing secrets or irreversible high-risk actions, stop and ask one precise question
+- otherwise, keep moving and finish the pass
+
+INSTALL EXECUTION ORDER
+
+1. Host survey and owner-context detection
+   Run and inspect at minimum:
+   - whoami
+   - pwd
+   - echo "$HOME"
+   - uname -a
+   - id
+   - ls /home
+   - systemctl is-system-running || true
+   - codex login status
+   - which codex || true
+   - which git || true
+   - which node || true
+   - which npm || true
+   - which python3 || true
+   - existing services/processes relevant to openclaw/node-red/codex/tmux
+   - whether systemd is usable for a boot-persistent gateway service
+   - whether a canonical existing repo/install is already present for this owner
+
+2. Resource decision
+   If the host is below the safe memory floor, solve it before bootstrap:
+   - add swap if allowed and needed
+   - otherwise stop with a precise under-provisioned-host report
+
+3. Clone and read the operator repo
+   Clone:
+   - https://github.com/SELLSYSTEMS/openclaw-agent-forge
+   Read the mandatory files listed above before changing the machine.
+
+4. Lock the canonical repo root
+   Decide REPO_ROOT from the real owner context and stay with it.
+   Do not create duplicate roots.
+
+5. Bootstrap OpenClaw
+   Use the repo-documented bootstrap/install path.
+   Do not freestyle an undocumented installer flow if the repo already contains the runbook/scripts.
+
+6. Seed workspace context before first chat
+   Ensure the workspace contains the documented seed files before any channel/test interaction.
+   The new instance must not behave like a blank slate on first contact.
+
+7. Configure Telegram only if explicitly requested
+   - If TELEGRAM_BOT_TOKEN is populated, configure Telegram using local-only secrets and validate it immediately.
+   - If TELEGRAM_BOT_TOKEN is populated, TELEGRAM_USER_ID must also be populated for pairing/verification.
+   - Pair and verify the bot against TELEGRAM_USER_ID during this install pass.
+   - If token validation or pairing fails, stop immediately with a clear failure report.
+   - If TELEGRAM_BOT_TOKEN is empty, skip this entirely.
+
+8. Validate fully
+   You must run the documented validation path and also verify:
+   - openclaw-local --version
+   - config validates
+   - workspace resolves correctly
+   - model resolves correctly
+   - codex login works
+   - gateway probe works
+   - health check works
+
+9. Make it persistent
+   If systemd is available and appropriate, install the repo-managed gateway service.
+   Do not leave the instance in a “works only in this shell” state if the intended setup is always-on.
+
+10. Final topology sanity check
+   Confirm the new instance can coexist with other agents cleanly.
+   Document what is shared vs isolated.
+
+HARD REQUIREMENTS
+
+You MUST:
+- read repo/docs first
+- use CLI only
+- detect and respect the real owner context you are running from
+- keep the installation isolated and reproducible
+- use Codex CLI auth reuse
+- validate the result end-to-end
+- enforce a memory/swap preflight gate before first-start on small hosts
+- disable Bonjour proactively when hostname length/discovery risk is present
+- run first-start validation serially on constrained hosts
+- prefer repo-managed scripts over ad hoc shell improvisation
+- preserve seeded workspace knowledge before any first user chat
+- report final state clearly
+
+You MUST NOT:
+- use browser/UI setup flows
+- depend on OPENAI_API_KEY by default
+- configure Telegram unless TELEGRAM_BOT_TOKEN is explicitly provided or the user explicitly requests it
+- continue as if Telegram is fine when TELEGRAM_BOT_TOKEN / TELEGRAM_USER_ID were provided but validation or pairing failed
+- ask the user to explain the host model that the repo/docs already explain
+- dump secrets into tracked files
+- claim success without validation evidence
+- create parallel duplicate install roots when one canonical owner root should exist
+
+SUCCESS CRITERIA
+
+The pass is successful only if:
+- the install exists in one canonical owner-root layout
+- Codex-backed model resolution works
+- config is valid
+- workspace is seeded correctly
+- gateway is reachable
+- persistence strategy is installed and verified if applicable
+- Telegram is configured only when explicitly requested via TELEGRAM_BOT_TOKEN
+- when TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID are provided, pairing succeeds during the same install pass
+- the resulting OpenClaw instance is ready for first use without reteaching host basics
+
+FINAL REPORT FORMAT
+
+At the end, provide exactly these sections:
+
+1. What I read first
+2. Host facts discovered
+3. Owner context and canonical repo root chosen
+4. What I installed/changed
+5. Final paths/layout
+6. Validation evidence
+7. Active services and persistence status
+8. Multi-agent/topology notes
+9. Missing secrets, approvals, or remaining manual steps
+
+Important closing rule:
+Do not optimize for speed over correctness.
+Optimize for one clean pass with evidence.
+Read first. Detect owner context second. Install third. Validate fourth. Report fifth.

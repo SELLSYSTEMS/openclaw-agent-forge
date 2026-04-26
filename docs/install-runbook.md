@@ -2,6 +2,19 @@
 
 This runbook describes the local isolated OpenClaw installation pattern used in this repository.
 
+## Canonical Owner Root First
+
+This repo tracks one concrete host layout, but future installer agents must not blindly hardcode that path on every new machine.
+
+Rules:
+
+- detect the real owner context from `whoami`, `pwd`, `$HOME`, and the current project/session root
+- if a valid existing install already exists there, treat the work as an idempotent repair/upgrade pass
+- choose one canonical repo/install root and keep everything under it
+- do not create duplicate near-identical roots such as `/home/OpenClaw` and `/home/openclaw`
+
+For this tracked host, the canonical root is `/home/OpenClaw`.
+
 ## Target Layout
 
 - install prefix: `/home/OpenClaw/.openclaw`
@@ -9,7 +22,7 @@ This runbook describes the local isolated OpenClaw installation pattern used in 
 - launcher: `/home/OpenClaw/bin/openclaw-local`
 - workspace: `/home/OpenClaw/workspace`
 - memory vault: `/home/OpenClaw/memory`
-- primary model floor: `codex-cli/gpt-5.4`
+- primary model floor: `codex-cli/gpt-5.5`
 - preferred reasoning floor: `xhigh`
 - gateway: `local` mode on loopback
 
@@ -34,7 +47,7 @@ What it does:
 2. Creates `/home/OpenClaw/.openclaw-home`.
 3. Configures OpenClaw with `OPENCLAW_HOME=/home/OpenClaw/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `/home/OpenClaw/workspace`.
-5. Sets the primary model to `codex-cli/gpt-5.4`, or to the shared Codex user model if it is numerically newer than 5.4.
+5. Sets the primary model to `codex-cli/gpt-5.5`, or to the shared Codex user model if it is numerically newer than 5.5.
 6. Sets `gateway.mode=local`.
 7. Sets `gateway.bind=loopback`.
 8. Validates the resulting config.
@@ -44,7 +57,7 @@ What it does:
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 - install and log in to the `codex` CLI
-- keep the OpenClaw model ref at `codex-cli/gpt-5.4` or a newer shared Codex user model when one exists
+- keep the OpenClaw model ref at `codex-cli/gpt-5.5` or a newer shared Codex user model when one exists
 - let OpenClaw delegate turn execution to the installed Codex CLI
 - keep shared Codex reasoning at `xhigh`
 
@@ -85,6 +98,23 @@ Behavior rule:
 - do not make the first Telegram DM responsible for teaching the machine basics
 
 Validation should happen before starting the gateway or adding channels.
+
+## Telegram Pairing During Install
+
+If the install prompt includes:
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_USER_ID`
+
+then Telegram setup is explicitly in scope for that install pass.
+
+Rules:
+
+- keep the token in local-only secrets or local config
+- never commit the token or the owner-specific user ID to Git
+- validate the bot token during the install pass
+- attempt pairing/verification against `TELEGRAM_USER_ID` during the same pass
+- if token validation fails or pairing cannot be completed, stop immediately and report the exact issue
 
 ## Codex CLI TUI On This Server
 
@@ -131,7 +161,7 @@ Expected outcomes:
 - `openclaw-local --version` prints a version
 - `openclaw config validate` reports a valid config
 - the configured workspace resolves to `/home/OpenClaw/workspace`
-- the configured primary model resolves to `codex-cli/gpt-5.4` or a newer shared Codex user model
+- the configured primary model resolves to `codex-cli/gpt-5.5` or a newer shared Codex user model
 - the configured gateway mode resolves to `local`
 - the configured gateway bind resolves to `loopback`
 - `codex login status` succeeds

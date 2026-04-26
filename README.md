@@ -54,6 +54,17 @@ It must also stay free of secrets because the repository is public.
 - `workspace/` - default agent workspace
 - `memory/` - local Markdown memory vault
 
+## Canonical Owner Root Rule
+
+This repo documents one installation pattern, but the installer agent must still detect the real owner context it is running from.
+
+- do not blindly clone or install into a second path just because another host used `/home/OpenClaw`
+- detect the real owner root from `whoami`, `pwd`, `$HOME`, and the current project/session context
+- choose one canonical repo/install root and stay consistent
+- do not create duplicate parallel roots such as `/home/OpenClaw` vs `/home/openclaw`
+
+Reference paths in this repo are examples from the current tracked host, not universal commands for every other machine.
+
 ## Bootstrap
 
 ```bash
@@ -95,11 +106,25 @@ It is the operator repo around OpenClaw:
 - installation lessons so the next AI agent does not repeat setup mistakes
 - shared-host context so OpenClaw can coexist with other long-running agents and Node-RED automations
 
+## Telegram Pairing Input
+
+The installer prompt may begin with:
+
+- `TELEGRAM_BOT_TOKEN="..."`
+- `TELEGRAM_USER_ID="..."`
+
+Rules:
+
+- if both are provided, Telegram setup and pairing are explicitly in scope for that install pass
+- the token must stay in local-only runtime secrets or local config
+- do not commit Telegram secrets or owner-specific IDs into Git
+- if token validation or pairing fails, stop immediately and report the exact problem instead of pretending the install is complete
+
 ## Shared Host Context
 
 This machine has more than one active AI system.
 
-- OpenClaw owns `/home/OpenClaw`
+- OpenClaw owns the canonical repo-local root for that host; on this tracked machine the canonical root is `/home/OpenClaw`
 - the host also has a shared Codex CLI home under `/root/.codex`
 - Node-RED runs locally under `/root/.node-red` and should be treated as shared host infrastructure available to all agents
 - multiple terminal-driven Codex agents may already be active at the same time

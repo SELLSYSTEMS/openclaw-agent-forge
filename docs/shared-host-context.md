@@ -4,7 +4,7 @@ This document describes the safe, durable context that future agents should know
 
 ## Purpose
 
-OpenClaw lives in `/home/OpenClaw`, but it is not the only AI system on the host.
+OpenClaw lives in a canonical repo-local owner root, but it is not the only AI system on the host.
 
 Future agents need to understand four different context layers:
 
@@ -33,7 +33,7 @@ The public repo is not a place for:
 
 ## 2. Repo-Local OpenClaw Context
 
-OpenClaw-owned paths:
+For this tracked host, OpenClaw-owned paths are:
 
 - install prefix: `/home/OpenClaw/.openclaw`
 - runtime home: `/home/OpenClaw/.openclaw-home`
@@ -43,11 +43,18 @@ OpenClaw-owned paths:
 
 OpenClaw defaults in this repo:
 
-- primary model floor: `codex-cli/gpt-5.4`
+- primary model floor: `codex-cli/gpt-5.5`
 - preferred reasoning floor: `xhigh`
 - gateway mode: `local`
 - gateway bind: `loopback`
 - Telegram is configured via a local `tokenFile`, not tracked secrets
+
+Owner-root rule for future installs:
+
+- reference paths from this repo are examples from this host
+- future installer agents must detect the real owner root they are running from
+- do not create duplicate roots with different case or shallow nesting
+- keep one canonical repo/install root per OpenClaw context
 
 ## 3. Shared Host Services
 
