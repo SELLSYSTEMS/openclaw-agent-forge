@@ -48,6 +48,7 @@ OpenClaw defaults in this repo:
 - gateway mode: `local`
 - gateway bind: `loopback`
 - Telegram is configured via a local `tokenFile`, not tracked secrets
+- in the Telegram-paired installer flow, `TELEGRAM_BOT_TOKEN` and `TELEGRAM_USER_ID` are mandatory inputs before install continues
 
 Owner-root rule for future installs:
 

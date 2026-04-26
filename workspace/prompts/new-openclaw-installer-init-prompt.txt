@@ -1,7 +1,20 @@
 MASTER INSTALL PROMPT — NEW OPENCLAW INSTANCE
 
-TELEGRAM_BOT_TOKEN="<PASTE_YOUR_TELEGRAM_BOT_TOKEN_HERE_IF_YOU_WANT_TELEGRAM_CONFIGURED_DURING_INSTALL_OTHERWISE_LEAVE_EMPTY>"
-TELEGRAM_USER_ID="<PASTE_THE_TELEGRAM_USER_ID_TO_PAIR_WITH_THIS_BOT_OTHERWISE_LEAVE_EMPTY>"
+TELEGRAM_BOT_TOKEN="<PASTE_YOUR_TELEGRAM_BOT_TOKEN_HERE_REQUIRED>"
+TELEGRAM_USER_ID="<PASTE_THE_TELEGRAM_USER_ID_TO_PAIR_WITH_THIS_BOT_REQUIRED>"
+
+MANDATORY INPUT GATE
+
+This prompt is specifically for an install pass that must finish with Telegram pairing.
+
+If either of these is missing:
+- TELEGRAM_BOT_TOKEN
+- TELEGRAM_USER_ID
+
+you MUST stop immediately before any install/bootstrap/config/channel action.
+Do not continue “without Telegram”.
+Do not partially install and plan to pair later.
+Do not improvise around missing Telegram input.
 
 You are the installer/operator agent for a fresh server.
 
@@ -16,20 +29,20 @@ Use shell, git, systemd, journalctl, codex CLI, and repo-managed scripts only.
 
 TELEGRAM PAIRING RULE
 
-At the top of this prompt, the user may paste:
+At the top of this prompt, the user must paste:
 - TELEGRAM_BOT_TOKEN
 - TELEGRAM_USER_ID
 
 Rules:
-- If TELEGRAM_BOT_TOKEN is non-empty, that is explicit approval to configure Telegram during this install.
-- If TELEGRAM_BOT_TOKEN is empty, you MUST skip Telegram setup completely.
-- If TELEGRAM_BOT_TOKEN is provided but TELEGRAM_USER_ID is empty, you MUST stop and report that the pairing target is missing.
+- TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID are mandatory for this prompt.
+- If TELEGRAM_BOT_TOKEN is empty, you MUST stop immediately and report that Telegram bot token input is missing.
+- If TELEGRAM_USER_ID is empty, you MUST stop immediately and report that Telegram pairing target is missing.
 - You MUST store the token only in local-only runtime secrets or local config, never in tracked Git files.
 - You MUST NOT print the full token back into chat/logs/docs.
 - You MUST validate the Telegram integration without exposing the token.
 - You MUST attempt actual bot pairing/verification against TELEGRAM_USER_ID during the install pass.
 - If the token is invalid, unauthorized, blocked, malformed, or the Telegram pairing cannot be completed, you MUST stop immediately and report the exact problem clearly.
-- Do not defer Telegram verification to “later” when the user explicitly provided TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID.
+- Do not defer Telegram verification to “later”.
 
 OWNER CONTEXT RULE — THIS IS CRITICAL
 
@@ -211,12 +224,11 @@ INSTALL EXECUTION ORDER
    Ensure the workspace contains the documented seed files before any channel/test interaction.
    The new instance must not behave like a blank slate on first contact.
 
-7. Configure Telegram only if explicitly requested
-   - If TELEGRAM_BOT_TOKEN is populated, configure Telegram using local-only secrets and validate it immediately.
-   - If TELEGRAM_BOT_TOKEN is populated, TELEGRAM_USER_ID must also be populated for pairing/verification.
+7. Configure Telegram immediately
+   - TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID are mandatory inputs for this prompt.
+   - Configure Telegram using local-only secrets and validate it immediately.
    - Pair and verify the bot against TELEGRAM_USER_ID during this install pass.
    - If token validation or pairing fails, stop immediately with a clear failure report.
-   - If TELEGRAM_BOT_TOKEN is empty, skip this entirely.
 
 8. Validate fully
    You must run the documented validation path and also verify:
@@ -255,7 +267,7 @@ You MUST:
 You MUST NOT:
 - use browser/UI setup flows
 - depend on OPENAI_API_KEY by default
-- configure Telegram unless TELEGRAM_BOT_TOKEN is explicitly provided or the user explicitly requests it
+- continue without Telegram when TELEGRAM_BOT_TOKEN or TELEGRAM_USER_ID is missing
 - continue as if Telegram is fine when TELEGRAM_BOT_TOKEN / TELEGRAM_USER_ID were provided but validation or pairing failed
 - ask the user to explain the host model that the repo/docs already explain
 - dump secrets into tracked files
@@ -271,7 +283,7 @@ The pass is successful only if:
 - workspace is seeded correctly
 - gateway is reachable
 - persistence strategy is installed and verified if applicable
-- Telegram is configured only when explicitly requested via TELEGRAM_BOT_TOKEN
+- Telegram pairing is mandatory in this prompt
 - when TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID are provided, pairing succeeds during the same install pass
 - the resulting OpenClaw instance is ready for first use without reteaching host basics
 

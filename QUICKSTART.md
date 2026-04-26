@@ -98,5 +98,6 @@ Important rule:
 
 - keep the seeded workspace context intact before Telegram is connected
 - the bot should already know the host basics before the first DM
-- if the install prompt includes `TELEGRAM_BOT_TOKEN` and `TELEGRAM_USER_ID`, Telegram pairing is part of the same install pass
+- for the Telegram-paired installer prompt, `TELEGRAM_BOT_TOKEN` and `TELEGRAM_USER_ID` are mandatory from the start
+- if either is missing, stop before install/bootstrap actions
 - if token validation or pairing fails, stop immediately and report the exact cause

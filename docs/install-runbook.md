@@ -110,6 +110,8 @@ then Telegram setup is explicitly in scope for that install pass.
 
 Rules:
 
+- for the Telegram-paired installer prompt, both inputs are mandatory from the start
+- if either is missing, stop before install/bootstrap actions
 - keep the token in local-only secrets or local config
 - never commit the token or the owner-specific user ID to Git
 - validate the bot token during the install pass

@@ -115,9 +115,10 @@ The installer prompt may begin with:
 
 Rules:
 
-- if both are provided, Telegram setup and pairing are explicitly in scope for that install pass
+- for the Telegram-paired installer prompt, both are mandatory inputs
 - the token must stay in local-only runtime secrets or local config
 - do not commit Telegram secrets or owner-specific IDs into Git
+- if either input is missing, stop before install/bootstrap actions
 - if token validation or pairing fails, stop immediately and report the exact problem instead of pretending the install is complete
 
 ## Shared Host Context
