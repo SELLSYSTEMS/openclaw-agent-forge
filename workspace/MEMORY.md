@@ -45,6 +45,9 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 - The current webterminal implementation is `/opt/claude-vnc-terminal`
 - Server-side tab state is persisted in `/opt/claude-vnc-terminal/data/terminal-state.json`
 - That state file is the fastest way to discover live tabs, their names, working directories, and providers
+- OpenClaw session state is not the same thing as webterminal tab state
+- Neighboring terminal agents on other tabs are not the same thing as OpenClaw-spawned subagents
+- When an agent needs to understand where other live agents are running, the tab-state file is primary evidence
 
 ## Orchestrator Rules
 
@@ -54,6 +57,8 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 - Prefer Node-RED for durable automations, human-readable schemes, collaboration materials, and bridge flows
 - Prefer local repo docs, workspace files, and CLI overrides over mutating the global Codex CLI config under `/root/.codex`
 - Prefer the repo-managed systemd gateway service for reboot persistence; treat tmux as a fallback only
+- When reasoning about live topology, inspect the tab-state file and shared-host evidence before speculating
+- On a VPS/virtual instance, do not default to Docker/container deployment advice unless live inspection proves Docker is actually part of the stack
 - Keep public GitHub docs safe for humans and future agents; keep secrets and instance-private identifiers only in ignored local files
 
 ## Discovery First

@@ -66,6 +66,25 @@ You MUST avoid creating duplicate parallel roots such as:
 Pick one canonical owner root and stay consistent.
 If a valid existing repo/install already exists for this owner context, treat this as an idempotent repair/upgrade pass instead of creating a second install.
 
+WEBTERMINAL / TAB / AGENT ARCHITECTURE RULE — THIS IS ALSO CRITICAL
+
+On this host class, OpenClaw does not live alone.
+Webterminal tabs, neighboring terminal agents, and shared host services are part of the real runtime architecture.
+
+You MUST explicitly distinguish these different things:
+- OpenClaw sessions
+- webterminal tabs
+- neighboring terminal agents running in other tabs
+- spawned subagents
+
+Rules:
+- You MUST NOT conclude "no other agents/tabs exist" only because an OpenClaw session list is sparse.
+- You MUST inspect the live webterminal tab registry early using `/opt/claude-vnc-terminal/data/terminal-state.json`.
+- You MUST inspect the live shared-agent landscape using the repo-managed `scripts/agent-landscape.sh` once you know the likely owner root or candidate repo roots.
+- If shell access is partially constrained in one execution surface, that does NOT give you permission to ignore the tab registry and start guessing.
+- On a virtual instance/VPS, do NOT default to Docker/container advice unless live host evidence shows Docker is actually part of the operating model.
+- OpenClaw is expected to understand, inspect, and if appropriate supervise neighboring terminal agents on other tabs.
+
 SOURCE OF TRUTH — READ FIRST, THEN ACT
 
 Before installing anything, you MUST study these sources:
@@ -192,6 +211,7 @@ INSTALL EXECUTION ORDER
    - id
    - ls /home
    - systemctl is-system-running || true
+   - cat /opt/claude-vnc-terminal/data/terminal-state.json 2>/dev/null || true
    - codex login status
    - which codex || true
    - which git || true
@@ -199,8 +219,10 @@ INSTALL EXECUTION ORDER
    - which npm || true
    - which python3 || true
    - existing services/processes relevant to openclaw/node-red/codex/tmux
+   - candidate canonical roots already visible in the tab registry or `/home`
    - whether systemd is usable for a boot-persistent gateway service
    - whether a canonical existing repo/install is already present for this owner
+   - the difference between OpenClaw sessions, webterminal tabs, neighboring terminal agents, and spawned subagents on this host
 
 2. Resource decision
    If the host is below the safe memory floor, solve it before bootstrap:
@@ -262,6 +284,9 @@ You MUST:
 - run first-start validation serially on constrained hosts
 - prefer repo-managed scripts over ad hoc shell improvisation
 - preserve seeded workspace knowledge before any first user chat
+- treat `/opt/claude-vnc-terminal/data/terminal-state.json` as primary live topology evidence on this host class
+- distinguish sessions vs webterminal tabs vs neighboring terminal agents vs spawned subagents
+- avoid generic Docker/container advice on a VPS unless live host evidence justifies it
 - report final state clearly
 
 You MUST NOT:
@@ -286,6 +311,7 @@ The pass is successful only if:
 - Telegram pairing is mandatory in this prompt
 - when TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID are provided, pairing succeeds during the same install pass
 - the resulting OpenClaw instance is ready for first use without reteaching host basics
+- the seeded docs/workspace make the multi-tab, multi-agent host architecture explicit enough that a future agent can rediscover it without user hand-holding
 
 FINAL REPORT FORMAT
 

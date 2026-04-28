@@ -16,6 +16,32 @@ Rules:
 For this tracked host, the canonical root is `/home/OpenClaw`.
 For future installs, document and use the actual detected `<REPO_ROOT>` on that machine.
 
+## Live Topology Discovery Is Mandatory
+
+Do not treat OpenClaw as the only thing on the box.
+On this host class, the installer must seed enough knowledge that future agents can rediscover neighboring tabs and agents without the user reteaching it.
+
+The minimum live topology checks are:
+
+- `cat /opt/claude-vnc-terminal/data/terminal-state.json`
+- `<REPO_ROOT>/scripts/agent-landscape.sh`
+- `ps -ef | rg -i 'codex|openclaw|node-red|tmux'`
+- `tmux ls`
+
+Future agents must explicitly distinguish:
+
+- OpenClaw sessions
+- webterminal tabs
+- neighboring terminal agents in other tabs
+- spawned subagents
+
+Rules:
+
+- do not infer "no other agents exist" from OpenClaw session state alone
+- do not ignore the tab registry just because one shell surface is constrained
+- on a VPS/virtual instance, do not default to Docker/container deployment advice unless the live host evidence shows Docker is actually present and intended
+- treat the webterminal tab registry as first-class live evidence, not trivia
+
 ## Target Layout
 
 - install prefix: `<REPO_ROOT>/.openclaw`

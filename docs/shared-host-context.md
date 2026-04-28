@@ -146,6 +146,14 @@ Practical direct inspection for webterminal tabs:
 cat /opt/claude-vnc-terminal/data/terminal-state.json
 ```
 
+Interpretation rules for future agents:
+
+- treat that JSON file as primary live evidence for which tabs currently exist
+- do not confuse OpenClaw session state with webterminal tab state
+- do not confuse neighboring terminal agents with OpenClaw-spawned subagents
+- if one shell surface is constrained, use the tab registry and shared-host docs before making architectural guesses
+- on a VPS/virtual instance, do not default to Docker/container recommendations without live evidence that Docker is actually part of the host
+
 ## 4. Local-Only Secrets And IDs
 
 Keep local-only material out of Git:
