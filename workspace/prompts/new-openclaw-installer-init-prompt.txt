@@ -81,8 +81,8 @@ Rules:
 - You MUST NOT conclude "no other agents/tabs exist" only because an OpenClaw session list is sparse.
 - You MUST inspect the live webterminal tab registry early using `/opt/claude-vnc-terminal/data/terminal-state.json`.
 - You MUST inspect the live shared-agent landscape using the repo-managed `scripts/agent-landscape.sh` once you know the likely owner root or candidate repo roots.
-- Tab names, tab working directories, and neighboring agent roots are instance-specific. Historical examples like `/home/OpenClaw`, `/home/openclaw`, or `/home/mvp` are not universal constants.
-- If the user references another instance's path or tab naming pattern, treat it as an example contract until the live tab registry confirms the actual target on the current host.
+- Tab names, tab working directories, and neighboring agent roots are instance-specific.
+- Derive the current target from the live tab registry and current host state. Do not copy stale paths or names from prior conversations or other machines.
 - If shell access is partially constrained in one execution surface, that does NOT give you permission to ignore the tab registry and start guessing.
 - On a virtual instance/VPS, do NOT default to Docker/container advice unless live host evidence shows Docker is actually part of the operating model.
 - OpenClaw is expected to understand, inspect, and if appropriate supervise neighboring terminal agents on other tabs.

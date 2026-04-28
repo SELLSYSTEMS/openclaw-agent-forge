@@ -151,8 +151,8 @@ Interpretation rules for future agents:
 - treat that JSON file as primary live evidence for which tabs currently exist
 - do not confuse OpenClaw session state with webterminal tab state
 - do not confuse neighboring terminal agents with OpenClaw-spawned subagents
-- tab names and working directories are instance-specific; tracked examples from one host are not universal constants for another host
-- if a user shows a control contract from another instance (for example `/home/mvp/control/...`), treat it as a pattern until the current host confirms the actual agent root
+- tab names and working directories are instance-specific; do not carry stale path assumptions across hosts
+- derive the actual agent root from the current host before applying any control contract
 - if one shell surface is constrained, use the tab registry and shared-host docs before making architectural guesses
 - on a VPS/virtual instance, do not default to Docker/container recommendations without live evidence that Docker is actually part of the host
 

@@ -39,8 +39,8 @@ Rules:
 
 - do not infer "no other agents exist" from OpenClaw session state alone
 - do not ignore the tab registry just because one shell surface is constrained
-- tab names and working directories are instance-specific; do not hardcode another instance's naming scheme as if it were universal
-- if a user references another instance's path pattern (for example `/home/mvp/...`), treat it as a contract example until the live host confirms the real target root
+- tab names and working directories are instance-specific; do not hardcode another machine's naming scheme as if it were universal
+- derive the real target root from the live host before applying any control contract or path convention
 - on a VPS/virtual instance, do not default to Docker/container deployment advice unless the live host evidence shows Docker is actually present and intended
 - treat the webterminal tab registry as first-class live evidence, not trivia
 
