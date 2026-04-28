@@ -51,6 +51,8 @@ This file is the safe machine-context cheat sheet for this workspace.
 - Treat `/opt/claude-vnc-terminal/data/terminal-state.json` as primary live evidence for which tabs and neighboring agents exist on this host class.
 - Do not trust cached webterminal tab names/order during orchestration; reread `/opt/claude-vnc-terminal/data/terminal-state.json` (and, if needed, take a fresh UI snapshot) before steering a live tab.
 - Do not conclude "there are no other agents" from OpenClaw session state alone; distinguish OpenClaw sessions, webterminal tabs, neighboring terminal agents, and spawned subagents.
+- Tab names and working directories are instance-specific; `/home/mvp`, `/home/OpenClaw`, or any other path from another host may be only an example, not the current target.
+- If the user gives a control contract from another instance, parameterize it by the detected target agent root instead of copying the path literally.
 - If one shell surface is constrained, use the tab registry and shared-host docs before you speculate.
 - On a VPS/virtual instance, do not default to Docker/container deployment advice unless live inspection actually finds Docker in the stack.
 - If `claude-vnc-terminal.service` restarts, expect all webterminal-backed Codex tabs to relaunch; restore the needed Codex conversation with `/resume` so the last session context is recovered after the restart. Be conservative: better to run `/resume` twice and verify you are back on the intended thread than to accidentally create a fresh session and lose continuity.

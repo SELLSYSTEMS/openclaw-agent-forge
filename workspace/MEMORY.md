@@ -58,6 +58,8 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 - Prefer local repo docs, workspace files, and CLI overrides over mutating the global Codex CLI config under `/root/.codex`
 - Prefer the repo-managed systemd gateway service for reboot persistence; treat tmux as a fallback only
 - When reasoning about live topology, inspect the tab-state file and shared-host evidence before speculating
+- Tab names and working directories are instance-specific; examples from another host are not universal constants
+- If a user shows a control contract from another instance, parameterize it by the detected agent root instead of copying the path literally
 - On a VPS/virtual instance, do not default to Docker/container deployment advice unless live inspection proves Docker is actually part of the stack
 - Keep public GitHub docs safe for humans and future agents; keep secrets and instance-private identifiers only in ignored local files
 
