@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export OPENCLAW_HOME="/home/OpenClaw/.openclaw-home"
-export PATH="/home/OpenClaw/.openclaw/bin:${PATH}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export OPENCLAW_HOME="${ROOT}/.openclaw-home"
+export PATH="${ROOT}/.openclaw/bin:${PATH}"
 
-exec /home/OpenClaw/.openclaw/bin/openclaw "$@"
+if [[ -f "${OPENCLAW_HOME}/openclaw-gateway.env" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "${OPENCLAW_HOME}/openclaw-gateway.env"
+  set +a
+fi
+
+exec "${ROOT}/.openclaw/bin/openclaw" "$@"

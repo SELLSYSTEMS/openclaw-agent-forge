@@ -4,12 +4,12 @@
 
 ### Use an isolated local OpenClaw runtime
 
-- Decision: set `OPENCLAW_HOME=/home/OpenClaw/.openclaw-home`
+- Decision: set `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`
 - Why: prevents session, config, and runtime state from colliding with other agents or global CLI state
 
 ### Use file-based memory as the primary memory system
 
-- Decision: store memory in local Markdown files under `/home/OpenClaw/memory`
+- Decision: store memory in local Markdown files under `<REPO_ROOT>/memory`
 - Why: transparent, local, easy for agents to read, easy to diff, and operationally simpler than a vector database
 
 ### Keep Obsidian optional
@@ -21,12 +21,12 @@
 
 ### Use Codex CLI as the default OpenClaw model path
 
-- Decision: keep `agents.defaults.model.primary` on `codex-cli/gpt-5.4` as the current minimum floor, inherit `xhigh` reasoning from the shared Codex user config, and move to a newer shared GPT model once it is numerically newer than 5.4 and validated locally
-- Why: this reuses the installed Codex CLI login, avoids making `OPENAI_API_KEY` the default auth path, and keeps OpenClaw aligned with the newest stable shared-user Codex model instead of freezing forever on 5.4
+- Decision: keep the primary model floor on `gpt-5.5`, treat Codex CLI as the intended backend path, inherit `xhigh` reasoning from the shared Codex user config, and move to a newer shared GPT model once it is numerically newer than 5.5 and validated locally
+- Why: this reuses the installed Codex CLI login, avoids making `OPENAI_API_KEY` the default auth path, and keeps OpenClaw aligned with the newest stable shared-user Codex model instead of freezing forever on 5.5
 
 ### Keep repo knowledge public-safe and secrets local-only
 
-- Decision: store channel tokens and similar secrets only under ignored local paths such as `/home/OpenClaw/.openclaw-home/secrets/`
+- Decision: store channel tokens and similar secrets only under ignored local paths such as `<REPO_ROOT>/.openclaw-home/secrets/`
 - Why: `SELLSYSTEMS/openclaw-agent-forge` is public and should preserve operational knowledge without leaking credentials
 
 ### Keep Telegram setup reproducible without tracking credentials

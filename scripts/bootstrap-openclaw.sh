@@ -7,7 +7,7 @@ OPENCLAW_HOME_DIR="${ROOT}/.openclaw-home"
 WORKSPACE_DIR="${ROOT}/workspace"
 MEMORY_DIR="${ROOT}/memory"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
-BASELINE_MODEL="gpt-5.4"
+BASELINE_MODEL="gpt-5.5"
 BASELINE_REASONING="xhigh"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -30,13 +30,13 @@ model_is_newer_than_baseline() {
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
     local minor="${BASH_REMATCH[3]:-0}"
-    (( major > 5 || (major == 5 && minor > 4) ))
+    (( major > 5 || (major == 5 && minor > 5) ))
     return
   fi
   return 1
 }
 
-resolve_openclaw_primary_model() {
+resolve_requested_model_ref() {
   local shared_model=""
   if [[ -f "${SHARED_CODEX_CONFIG}" ]]; then
     shared_model="$(extract_toml_string model "${SHARED_CODEX_CONFIG}" || true)"
@@ -78,7 +78,7 @@ if [[ ! -x "${PREFIX}/bin/openclaw" ]]; then
   curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --prefix "${PREFIX}" --no-onboard
 fi
 
-TARGET_PRIMARY_MODEL="$(resolve_openclaw_primary_model)"
+TARGET_PRIMARY_MODEL="$(resolve_requested_model_ref)"
 
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.workspace "${WORKSPACE_DIR}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" models set "${TARGET_PRIMARY_MODEL}"
@@ -96,7 +96,7 @@ else
   echo "Install/login Codex CLI before using Codex-backed OpenClaw turns."
 fi
 
-echo "Selected OpenClaw primary model: ${TARGET_PRIMARY_MODEL}"
+echo "Requested OpenClaw primary model: ${TARGET_PRIMARY_MODEL}"
 if [[ "$(resolve_shared_reasoning)" != "${BASELINE_REASONING}" ]]; then
   echo "Warning: shared Codex reasoning is not ${BASELINE_REASONING}. OpenClaw is expected to run with ${BASELINE_REASONING} reasoning on this host." >&2
 fi

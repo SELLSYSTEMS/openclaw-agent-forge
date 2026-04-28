@@ -18,13 +18,13 @@ Reference paths below reflect this tracked host. On another host, use the same r
 ## 1. Bootstrap
 
 ```bash
-/home/OpenClaw/scripts/bootstrap-openclaw.sh
+./scripts/bootstrap-openclaw.sh
 ```
 
 This bootstrap sets:
 
-- workspace: `/home/OpenClaw/workspace`
-- primary model floor: `codex-cli/gpt-5.5`
+- workspace: `<REPO_ROOT>/workspace`
+- primary model floor: `gpt-5.5` with Codex CLI as the intended backend path
 - gateway mode: `local`
 - gateway bind: `loopback`
 
@@ -37,7 +37,7 @@ codex login status
 ## 2. Validate
 
 ```bash
-/home/OpenClaw/scripts/validate-local-setup.sh
+./scripts/validate-local-setup.sh
 ```
 
 This validation also confirms the seeded workspace context files exist before first chat or channel setup.
@@ -45,29 +45,29 @@ This validation also confirms the seeded workspace context files exist before fi
 ## 3. Run
 
 ```bash
-/home/OpenClaw/bin/openclaw-local
+./bin/openclaw-local
 ```
 
 For an always-on server, install the reboot-persistent systemd gateway service:
 
 ```bash
-/home/OpenClaw/scripts/install-gateway-systemd.sh
-/home/OpenClaw/scripts/gateway-systemd-status.sh
-/home/OpenClaw/bin/openclaw-local gateway probe
+./scripts/install-gateway-systemd.sh
+./scripts/gateway-systemd-status.sh
+./bin/openclaw-local gateway probe --timeout 20000
 ```
 
 If systemd is unavailable, use the tmux fallback:
 
 ```bash
-/home/OpenClaw/scripts/start-gateway-tmux.sh
-/home/OpenClaw/scripts/gateway-tmux-status.sh
-/home/OpenClaw/bin/openclaw-local gateway probe
+./scripts/start-gateway-tmux.sh
+./scripts/gateway-tmux-status.sh
+./bin/openclaw-local gateway probe --timeout 20000
 ```
 
 Minimal live checks:
 
 ```bash
-/home/OpenClaw/bin/openclaw-local health
+./bin/openclaw-local health
 codex exec --model gpt-5.5 --skip-git-repo-check --sandbox workspace-write --color never --json "reply with exactly: codex-ok"
 ```
 
@@ -81,7 +81,7 @@ codex exec --model gpt-5.5 --skip-git-repo-check --sandbox workspace-write --col
 
 - do not commit `.openclaw/`
 - do not commit `.openclaw-home/`
-- keep `/home/OpenClaw/workspace` as the default agent workspace
+- keep the repo-local `workspace/` as the default agent workspace
 - keep Markdown as the default memory backend unless there is a concrete reason to introduce semantic retrieval
 
 ## 6. Canonical Repo

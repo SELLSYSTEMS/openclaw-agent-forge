@@ -33,13 +33,13 @@ The public repo is not a place for:
 
 ## 2. Repo-Local OpenClaw Context
 
-For this tracked host, OpenClaw-owned paths are:
+OpenClaw-owned paths under the canonical repo-local root are:
 
-- install prefix: `/home/OpenClaw/.openclaw`
-- runtime home: `/home/OpenClaw/.openclaw-home`
-- launcher: `/home/OpenClaw/bin/openclaw-local`
-- workspace: `/home/OpenClaw/workspace`
-- memory: `/home/OpenClaw/memory`
+- install prefix: `<REPO_ROOT>/.openclaw`
+- runtime home: `<REPO_ROOT>/.openclaw-home`
+- launcher: `<REPO_ROOT>/bin/openclaw-local`
+- workspace: `<REPO_ROOT>/workspace`
+- memory: `<REPO_ROOT>/memory`
 
 OpenClaw defaults in this repo:
 
@@ -105,6 +105,10 @@ Operational rule:
 - treat Node-RED as the preferred automation fabric when a workflow needs repeatability, fan-out, or a human-readable flow diagram
 - do not copy passwords, hashes, or credentials into tracked docs
 
+Tracked host example:
+
+- current canonical OpenClaw root on this machine: `/home/OpenClaw`
+
 ### Other Active Agents
 
 This host can have multiple long-running terminal agents at once.
@@ -131,7 +135,7 @@ Known current roots:
 Practical discovery commands:
 
 ```bash
-/home/OpenClaw/scripts/agent-landscape.sh
+<REPO_ROOT>/scripts/agent-landscape.sh
 ps -ef | rg -i 'codex|openclaw|node-red|tmux'
 tmux ls
 ```
@@ -165,6 +169,6 @@ For this repo, OpenClaw should be treated as the main orchestrator.
 That separation keeps the machine understandable:
 
 - public-safe knowledge in GitHub
-- repo-local behavior in `/home/OpenClaw`
+- repo-local behavior under the canonical `<REPO_ROOT>`
 - shared host services in `/root/.codex` and `/root/.node-red`
 - sensitive material in ignored local paths

@@ -6,4 +6,5 @@ if [[ $# -eq 0 ]]; then
   exit 1
 fi
 
-exec rg -n --hidden --glob '*.md' "$@" /home/OpenClaw/memory
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec rg -n --hidden --glob '*.md' "$@" "${ROOT}/memory"

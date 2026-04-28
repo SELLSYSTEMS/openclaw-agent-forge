@@ -5,13 +5,14 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/OpenClaw
+WorkingDirectory=__ROOT__
 Environment=HOME=/root
-ExecStart=/home/OpenClaw/bin/openclaw-local gateway run --verbose
+EnvironmentFile=-__ROOT__/.openclaw-home/openclaw-gateway.env
+ExecStart=__ROOT__/bin/openclaw-local gateway run --verbose
 Restart=always
 RestartSec=5
 TimeoutStopSec=30
-TimeoutStartSec=30
+TimeoutStartSec=90
 SuccessExitStatus=0 143
 KillMode=control-group
 

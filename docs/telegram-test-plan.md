@@ -4,11 +4,11 @@ This is the shortest safe path to wire a test Telegram bot into the local OpenCl
 
 ## Current Local Status
 
-- OpenClaw runtime is isolated under `/home/OpenClaw/.openclaw-home`
-- primary model is `codex-cli/gpt-5.4`
+- OpenClaw runtime is isolated under `<REPO_ROOT>/.openclaw-home`
+- primary model floor is `gpt-5.5` with Codex CLI as the intended backend path
 - gateway target is local loopback
 - Codex CLI auth is the intended path, not `OPENAI_API_KEY`
-- Telegram bot credentials should live only in `/home/OpenClaw/.openclaw-home/secrets/`
+- Telegram bot credentials should live only in `<REPO_ROOT>/.openclaw-home/secrets/`
 - Seeded workspace knowledge should already be in place before Telegram is connected
 
 ## What Is Needed From The User
@@ -31,27 +31,27 @@ This is the shortest safe path to wire a test Telegram bot into the local OpenCl
 2. Start the local gateway:
 
 ```bash
-/home/OpenClaw/scripts/install-gateway-systemd.sh
-/home/OpenClaw/scripts/gateway-systemd-status.sh
-/home/OpenClaw/bin/openclaw-local gateway probe
+./scripts/install-gateway-systemd.sh
+./scripts/gateway-systemd-status.sh
+./bin/openclaw-local gateway probe --timeout 20000
 ```
 
 If systemd is unavailable, use the tmux fallback instead:
 
 ```bash
-/home/OpenClaw/scripts/start-gateway-tmux.sh
+./scripts/start-gateway-tmux.sh
 ```
 
 3. Add the Telegram channel account:
 
 ```bash
-/home/OpenClaw/bin/openclaw-local channels add --channel telegram --name test-telegram --token-file /path/to/bot.token
+./bin/openclaw-local channels add --channel telegram --name test-telegram --token-file /path/to/bot.token
 ```
 
 Recommended local path:
 
 ```bash
-/home/OpenClaw/.openclaw-home/secrets/<bot-name>.token
+<REPO_ROOT>/.openclaw-home/secrets/<bot-name>.token
 ```
 
 4. DM the bot from the target Telegram account.

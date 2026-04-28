@@ -2,10 +2,10 @@
 
 ## Current Environment
 
-- OpenClaw is installed locally in `/home/OpenClaw/.openclaw`
-- OpenClaw runtime home is isolated in `/home/OpenClaw/.openclaw-home`
-- Default agent workspace is `/home/OpenClaw/workspace`
-- Local memory vault is `/home/OpenClaw/memory`
+- OpenClaw is installed locally under the canonical repo-local root
+- OpenClaw runtime home is isolated under `<REPO_ROOT>/.openclaw-home`
+- Default agent workspace is `<REPO_ROOT>/workspace`
+- Local memory vault is `<REPO_ROOT>/memory`
 - Shared Codex CLI host state exists under `/root/.codex`
 - Shared Node-RED host state exists under `/root/.node-red`
 - Known current agent roots currently include `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
@@ -17,13 +17,13 @@
 
 ## Current Defaults
 
-- Prefer local launch via `/home/OpenClaw/bin/openclaw-local`
+- Prefer local launch via `<REPO_ROOT>/bin/openclaw-local`
 - Keep agent notes in Markdown
 - Promote durable facts into `decisions.md` or `references/`
 - Keep ad hoc captures in `inbox/`
-- Keep the primary model floor on `codex-cli/gpt-5.4`
+- Keep the primary model floor on `gpt-5.5` with Codex CLI as the intended backend path
 - Prefer `xhigh` reasoning through the shared Codex user config
-- If the shared Codex user model becomes numerically newer than 5.4, OpenClaw should follow it after validation
+- If the shared Codex user model becomes numerically newer than 5.5, OpenClaw should follow it after validation
 - Keep secrets only in ignored local paths, not tracked repo files
 - Treat OpenClaw as the main orchestrator for this repo
 - Prefer Node-RED for durable automations and cross-system flows when possible

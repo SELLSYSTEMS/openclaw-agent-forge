@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base="/home/OpenClaw/memory"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+base="${ROOT}/memory"
 timestamp="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 slug="${1:-note}"
 

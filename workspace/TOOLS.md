@@ -34,25 +34,35 @@ This file is the safe machine-context cheat sheet for this workspace.
 
 ### OpenClaw
 
-- Repo-local launcher: `/home/OpenClaw/bin/openclaw-local`
-- Repo-local runtime home: `/home/OpenClaw/.openclaw-home`
-- Repo-local workspace: `/home/OpenClaw/workspace`
-- Repo-local memory: `/home/OpenClaw/memory`
-- Default model path: `codex-cli/gpt-5.4`
+- Repo-local launcher lives under the canonical repo root (tracked host example: `/home/OpenClaw/bin/openclaw-local`)
+- Repo-local runtime home lives under the canonical repo root
+- Repo-local workspace lives under the canonical repo root
+- Repo-local memory lives under the canonical repo root
+- Default model floor: `gpt-5.5` with Codex CLI as the intended backend path
 
 ## Discovery
 
-- Shared landscape snapshot: `/home/OpenClaw/scripts/agent-landscape.sh`
+- Shared landscape snapshot: `<REPO_ROOT>/scripts/agent-landscape.sh`
 - Active processes: `ps -ef | rg -i 'codex|openclaw|node-red|tmux'`
 - tmux sessions: `tmux ls`
-- OpenClaw health: `/home/OpenClaw/bin/openclaw-local health`
-- OpenClaw gateway probe: `/home/OpenClaw/bin/openclaw-local gateway probe`
+- OpenClaw health: `<REPO_ROOT>/bin/openclaw-local health`
+- OpenClaw gateway probe: `<REPO_ROOT>/bin/openclaw-local gateway probe`
+
+- Do not trust cached webterminal tab names/order during orchestration; reread `/opt/claude-vnc-terminal/data/terminal-state.json` (and, if needed, take a fresh UI snapshot) before steering a live tab.
+- If `claude-vnc-terminal.service` restarts, expect all webterminal-backed Codex tabs to relaunch; restore the needed Codex conversation with `/resume` so the last session context is recovered after the restart. Be conservative: better to run `/resume` twice and verify you are back on the intended thread than to accidentally create a fresh session and lose continuity.
 - Known current agent roots:
   - `/home/admin` → Default AI
   - `/home/langchain` → learnLangChain
   - `/home/udacity` → learnUdacity
-  - `/home/OpenClaw` → OpenClaw
+  - tracked host example: `/home/OpenClaw` → OpenClaw
 - If present, read `WEBTERMINAL.local.md` for the current instance's browser-terminal entrypoint.
+
+
+## Messaging / File Delivery Rules
+
+- When the user asks for a file in chat, attach the file immediately in the reply using a safe relative `MEDIA:` path; do not answer with only a server-side filesystem path.
+- Keep one canonical installer prompt file; do not create duplicate prompt files/variants unless the user explicitly asks for a separate version.
+- For the OpenClaw installer prompt, keep Telegram pairing placeholders (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_USER_ID`) in the single canonical prompt and keep owner-context detection / duplicate-root prevention aligned with the repo docs.
 
 ## Collaboration Rules
 

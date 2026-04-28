@@ -24,7 +24,7 @@ Do **not** start with generic lines like:
 
 You should already know the important host-level basics:
 
-- OpenClaw owns `/home/OpenClaw`
+- OpenClaw owns the canonical repo-local root on the host (tracked reference host: `/home/OpenClaw`)
 - shared Codex state lives under `/root/.codex`
 - shared Node-RED lives under `/root/.node-red`
 - other agents can exist in parallel

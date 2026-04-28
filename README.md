@@ -68,30 +68,30 @@ Reference paths in this repo are examples from the current tracked host, not uni
 ## Bootstrap
 
 ```bash
-/home/OpenClaw/scripts/bootstrap-openclaw.sh
+./scripts/bootstrap-openclaw.sh
 ```
 
 ## Validate
 
 ```bash
-/home/OpenClaw/scripts/validate-local-setup.sh
+./scripts/validate-local-setup.sh
 ```
 
 ## Run
 
 ```bash
-/home/OpenClaw/bin/openclaw-local
+./bin/openclaw-local
 ```
 
 ## Model Path
 
-This setup uses `codex-cli/gpt-5.4` as the current minimum baseline, with `xhigh` reasoning inherited from the shared Codex user config.
+This setup uses `gpt-5.5` as the current minimum baseline, with Codex CLI as the intended backend path and `xhigh` reasoning inherited from the shared Codex user config.
 
 - OpenClaw delegates agent turns to the installed `codex` CLI.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
-- If the shared Codex user default later moves to a numerically newer GPT model than 5.4, OpenClaw should be updated to follow that newer model after a local validation pass.
+- If the shared Codex user default later moves to a numerically newer GPT model than 5.5, OpenClaw should be updated to follow that newer model after a local validation pass.
 
 ## Positioning
 

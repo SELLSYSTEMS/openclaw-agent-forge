@@ -14,14 +14,15 @@ Rules:
 - do not create duplicate near-identical roots such as `/home/OpenClaw` and `/home/openclaw`
 
 For this tracked host, the canonical root is `/home/OpenClaw`.
+For future installs, document and use the actual detected `<REPO_ROOT>` on that machine.
 
 ## Target Layout
 
-- install prefix: `/home/OpenClaw/.openclaw`
-- runtime home: `/home/OpenClaw/.openclaw-home`
-- launcher: `/home/OpenClaw/bin/openclaw-local`
-- workspace: `/home/OpenClaw/workspace`
-- memory vault: `/home/OpenClaw/memory`
+- install prefix: `<REPO_ROOT>/.openclaw`
+- runtime home: `<REPO_ROOT>/.openclaw-home`
+- launcher: `<REPO_ROOT>/bin/openclaw-local`
+- workspace: `<REPO_ROOT>/workspace`
+- memory vault: `<REPO_ROOT>/memory`
 - primary model floor: `codex-cli/gpt-5.5`
 - preferred reasoning floor: `xhigh`
 - gateway: `local` mode on loopback
@@ -38,15 +39,15 @@ For this tracked host, the canonical root is `/home/OpenClaw`.
 Run:
 
 ```bash
-/home/OpenClaw/scripts/bootstrap-openclaw.sh
+./scripts/bootstrap-openclaw.sh
 ```
 
 What it does:
 
-1. Installs OpenClaw into `/home/OpenClaw/.openclaw` via the official installer.
-2. Creates `/home/OpenClaw/.openclaw-home`.
-3. Configures OpenClaw with `OPENCLAW_HOME=/home/OpenClaw/.openclaw-home`.
-4. Sets `agents.defaults.workspace` to `/home/OpenClaw/workspace`.
+1. Installs OpenClaw into `<REPO_ROOT>/.openclaw` via the official installer.
+2. Creates `<REPO_ROOT>/.openclaw-home`.
+3. Configures OpenClaw with `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`.
+4. Sets `agents.defaults.workspace` to `<REPO_ROOT>/workspace`.
 5. Sets the primary model to `codex-cli/gpt-5.5`, or to the shared Codex user model if it is numerically newer than 5.5.
 6. Sets `gateway.mode=local`.
 7. Sets `gateway.bind=loopback`.
@@ -67,7 +68,7 @@ This keeps auth ownership with Codex CLI instead of storing OpenAI API credentia
 
 This repository ships a tracked, public-safe workspace memory seed:
 
-- `/home/OpenClaw/workspace/MEMORY.md`
+- `<REPO_ROOT>/workspace/MEMORY.md`
 
 Future agents should read `workspace/README.md` and `workspace/MEMORY.md` before changing workspace prompts, identity files, or local overrides.
 
@@ -83,13 +84,13 @@ A fresh OpenClaw install from this repo should **not** behave like a blank slate
 
 Before the first user message or Telegram connection, the workspace should already contain and preserve these tracked context files:
 
-- `/home/OpenClaw/workspace/AGENTS.md`
-- `/home/OpenClaw/workspace/MEMORY.md`
-- `/home/OpenClaw/workspace/TOOLS.md`
-- `/home/OpenClaw/workspace/WEBTERMINAL.md`
-- `/home/OpenClaw/workspace/SOUL.md`
-- `/home/OpenClaw/workspace/IDENTITY.md`
-- `/home/OpenClaw/workspace/USER.md`
+- `<REPO_ROOT>/workspace/AGENTS.md`
+- `<REPO_ROOT>/workspace/MEMORY.md`
+- `<REPO_ROOT>/workspace/TOOLS.md`
+- `<REPO_ROOT>/workspace/WEBTERMINAL.md`
+- `<REPO_ROOT>/workspace/SOUL.md`
+- `<REPO_ROOT>/workspace/IDENTITY.md`
+- `<REPO_ROOT>/workspace/USER.md`
 
 Behavior rule:
 
@@ -141,7 +142,7 @@ If you need to start Codex in a specific project root, use:
 codex -C /home/admin
 codex -C /home/langchain
 codex -C /home/udacity
-codex -C /home/OpenClaw
+codex -C <REPO_ROOT>
 ```
 
 For OpenClaw's own TUI, the prerequisites are different:
@@ -155,15 +156,15 @@ For OpenClaw's own TUI, the prerequisites are different:
 Run:
 
 ```bash
-/home/OpenClaw/scripts/validate-local-setup.sh
+./scripts/validate-local-setup.sh
 ```
 
 Expected outcomes:
 
 - `openclaw-local --version` prints a version
 - `openclaw config validate` reports a valid config
-- the configured workspace resolves to `/home/OpenClaw/workspace`
-- the configured primary model resolves to `codex-cli/gpt-5.5` or a newer shared Codex user model
+- the configured workspace resolves to `<REPO_ROOT>/workspace`
+- the configured primary model resolves to either `codex-cli/<model>` or the current upstream canonical `openai/<model>` plus `agents.defaults.agentRuntime.id=codex-cli`
 - the configured gateway mode resolves to `local`
 - the configured gateway bind resolves to `loopback`
 - `codex login status` succeeds
@@ -174,14 +175,14 @@ Expected outcomes:
 Preferred local launcher:
 
 ```bash
-/home/OpenClaw/bin/openclaw-local
+./bin/openclaw-local
 ```
 
 For an always-on shared Linux server, prefer the repo-managed systemd service:
 
 ```bash
-/home/OpenClaw/scripts/install-gateway-systemd.sh
-/home/OpenClaw/scripts/gateway-systemd-status.sh
+./scripts/install-gateway-systemd.sh
+./scripts/gateway-systemd-status.sh
 ```
 
 Why this repo uses a system service:
@@ -193,8 +194,8 @@ Why this repo uses a system service:
 If systemd is unavailable, keep the gateway alive with tmux:
 
 ```bash
-/home/OpenClaw/scripts/start-gateway-tmux.sh
-/home/OpenClaw/scripts/gateway-tmux-status.sh
+./scripts/start-gateway-tmux.sh
+./scripts/gateway-tmux-status.sh
 ```
 
 ## Publishable Files

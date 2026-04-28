@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKSPACE_DIR="${ROOT}/workspace"
+OPENCLAW_HOME_DIR="${ROOT}/.openclaw-home"
+LAUNCHER="${ROOT}/bin/openclaw-local"
+
 echo "== Shared Host Context =="
 echo
 
@@ -58,7 +63,7 @@ for entry in \
   "/home/admin:Default AI" \
   "/home/langchain:learnLangChain" \
   "/home/udacity:learnUdacity" \
-  "/home/OpenClaw:OpenClaw"
+  "${ROOT}:OpenClaw"
 do
   path="${entry%%:*}"
   label="${entry#*:}"
@@ -68,16 +73,16 @@ do
     echo "${path} -> ${label} (missing)"
   fi
 done
-if [[ -f /home/OpenClaw/workspace/WEBTERMINAL.local.md ]]; then
-  echo "webterminal note: /home/OpenClaw/workspace/WEBTERMINAL.local.md"
+if [[ -f "${WORKSPACE_DIR}/WEBTERMINAL.local.md" ]]; then
+  echo "webterminal note: ${WORKSPACE_DIR}/WEBTERMINAL.local.md"
 fi
 echo
 
 echo "[openclaw]"
-if [[ -x /home/OpenClaw/bin/openclaw-local ]]; then
-  echo "repo: /home/OpenClaw"
-  echo "launcher: /home/OpenClaw/bin/openclaw-local"
-  env OPENCLAW_HOME=/home/OpenClaw/.openclaw-home /home/OpenClaw/bin/openclaw-local health || true
+if [[ -x "${LAUNCHER}" ]]; then
+  echo "repo: ${ROOT}"
+  echo "launcher: ${LAUNCHER}"
+  env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${LAUNCHER}" health || true
 else
   echo "OpenClaw launcher not found"
 fi

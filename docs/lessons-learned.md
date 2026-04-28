@@ -10,7 +10,7 @@
 ## Isolation
 
 - OpenClaw config normally lives under `~/.openclaw/openclaw.json`.
-- For this setup, `OPENCLAW_HOME=/home/OpenClaw/.openclaw-home` is mandatory.
+- For this setup, `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home` is mandatory.
 - Without isolated runtime home, sessions and config can mix with unrelated agent state.
 - `gateway.mode=local` plus `gateway.bind=loopback` is the safe default on a shared machine.
 
@@ -24,9 +24,9 @@
 
 ## Model And Auth
 
-- `codex-cli/gpt-5.4` is the current minimum model floor for this repo, not a forever pin.
+- `gpt-5.5` is the current minimum model floor for this repo, with Codex CLI as the intended backend path, not a forever pin.
 - Shared Codex reasoning should stay on `xhigh`.
-- If the shared Codex user default moves to a numerically newer GPT model than 5.4, OpenClaw should follow it after validation.
+- If the shared Codex user default moves to a numerically newer GPT model than 5.5, OpenClaw should follow it after validation.
 - This setup should prefer Codex CLI login reuse over `OPENAI_API_KEY`.
 - On this host class, all webterminal tabs share the same Unix user, so Codex login is a shared user-level state rather than a per-tab concern.
 - A successful `codex login status` plus a successful `codex exec ...` smoke test proves the auth path is usable.

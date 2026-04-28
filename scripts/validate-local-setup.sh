@@ -6,8 +6,9 @@ LAUNCHER="${ROOT}/bin/openclaw-local"
 EXPECTED_WORKSPACE="${ROOT}/workspace"
 EXPECTED_GATEWAY_MODE="local"
 EXPECTED_GATEWAY_BIND="loopback"
-BASELINE_MODEL="gpt-5.4"
+BASELINE_MODEL="gpt-5.5"
 EXPECTED_REASONING="xhigh"
+EXPECTED_RUNTIME_ID="codex-cli"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -30,24 +31,24 @@ model_is_newer_than_baseline() {
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
     local minor="${BASH_REMATCH[3]:-0}"
-    (( major > 5 || (major == 5 && minor > 4) ))
+    (( major > 5 || (major == 5 && minor > 5) ))
     return
   fi
   return 1
 }
 
-resolve_expected_model() {
+resolve_expected_base_model_name() {
   local shared_model=""
   if [[ -f "${SHARED_CODEX_CONFIG}" ]]; then
     shared_model="$(extract_toml_string model "${SHARED_CODEX_CONFIG}" || true)"
   fi
 
   if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}"; then
-    printf 'codex-cli/%s\n' "${shared_model}"
+    printf '%s\n' "${shared_model}"
     return
   fi
 
-  printf 'codex-cli/%s\n' "${BASELINE_MODEL}"
+  printf '%s\n' "${BASELINE_MODEL}"
 }
 
 resolve_shared_reasoning() {
@@ -57,7 +58,9 @@ resolve_shared_reasoning() {
   extract_toml_string model_reasoning_effort "${SHARED_CODEX_CONFIG}"
 }
 
-EXPECTED_MODEL="$(resolve_expected_model)"
+EXPECTED_BASE_MODEL="$(resolve_expected_base_model_name)"
+EXPECTED_LEGACY_MODEL="codex-cli/${EXPECTED_BASE_MODEL}"
+EXPECTED_CANONICAL_MODEL="openai/${EXPECTED_BASE_MODEL}"
 
 "${LAUNCHER}" --version
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
@@ -84,8 +87,20 @@ actual_model="$(
     "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.model.primary
 )"
 
-if [[ "${actual_model}" != "${EXPECTED_MODEL}" ]]; then
-  echo "Model mismatch: expected ${EXPECTED_MODEL}, got ${actual_model}" >&2
+actual_runtime_id="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.agentRuntime.id 2>/dev/null || true
+)"
+
+model_ok=0
+if [[ "${actual_model}" == "${EXPECTED_LEGACY_MODEL}" ]]; then
+  model_ok=1
+elif [[ "${actual_model}" == "${EXPECTED_CANONICAL_MODEL}" && "${actual_runtime_id}" == "${EXPECTED_RUNTIME_ID}" ]]; then
+  model_ok=1
+fi
+
+if [[ "${model_ok}" -ne 1 ]]; then
+  echo "Model/runtime mismatch: expected either ${EXPECTED_LEGACY_MODEL} or ${EXPECTED_CANONICAL_MODEL} with agentRuntime.id=${EXPECTED_RUNTIME_ID}, got model=${actual_model} runtime=${actual_runtime_id:-<unset>}" >&2
   exit 1
 fi
 

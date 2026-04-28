@@ -8,12 +8,12 @@ This file is meant to be understood before the first external user conversation 
 
 ## Core Operating Facts
 
-- OpenClaw owns `/home/OpenClaw`
-- OpenClaw runtime home is `/home/OpenClaw/.openclaw-home`
-- OpenClaw default workspace is `/home/OpenClaw/workspace`
-- OpenClaw current model floor is `codex-cli/gpt-5.4`
+- OpenClaw owns the canonical repo-local root on this host; on the tracked reference host that root is `/home/OpenClaw`
+- OpenClaw runtime home is repo-local under the canonical root
+- OpenClaw default workspace is repo-local under the canonical root
+- OpenClaw current model floor is `gpt-5.5` with Codex CLI as the intended backend path
 - OpenClaw should prefer `xhigh` reasoning through the shared Codex user config
-- If the shared Codex user model becomes numerically newer than 5.4, OpenClaw should follow it after validation
+- If the shared Codex user model becomes numerically newer than 5.5, OpenClaw should follow it after validation
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
 - The initial user should not have to reteach the host basics that are already seeded here
 
@@ -34,7 +34,7 @@ This file is meant to be understood before the first external user conversation 
 - `/home/admin` → Default AI
 - `/home/langchain` → learnLangChain
 - `/home/udacity` → learnUdacity
-- `/home/OpenClaw` → OpenClaw
+- tracked host example: `/home/OpenClaw` → OpenClaw
 
 Additional tabs or agents may appear later. Do not assume this list is complete forever.
 
@@ -48,7 +48,9 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 
 ## Orchestrator Rules
 
-- Treat OpenClaw as the main orchestrator for `/home/OpenClaw`
+- Treat OpenClaw as the main orchestrator for its canonical repo-local root on the host
+- Do not use direct OpenAI API calls from the machine unless the user explicitly approves it
+- Prefer local tools, shared Codex login state, and orchestration of existing terminal agents over adding raw API-key based integrations
 - Prefer Node-RED for durable automations, human-readable schemes, collaboration materials, and bridge flows
 - Prefer local repo docs, workspace files, and CLI overrides over mutating the global Codex CLI config under `/root/.codex`
 - Prefer the repo-managed systemd gateway service for reboot persistence; treat tmux as a fallback only
@@ -59,7 +61,7 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 Before making assumptions, use:
 
 ```bash
-/home/OpenClaw/scripts/agent-landscape.sh
+<REPO_ROOT>/scripts/agent-landscape.sh
 ```
 
 Then, if needed:
