@@ -27,11 +27,10 @@ codex
 From a specific folder:
 
 ```bash
-codex -C /home/admin
-codex -C /home/langchain
-codex -C /home/udacity
-codex -C /home/OpenClaw
+codex -C <PROJECT_ROOT>
 ```
+
+Derive `<PROJECT_ROOT>` from the live host and current task. Do not hardcode another instance's paths as if they were universal.
 
 ## What Must Be Installed On The Server
 
@@ -78,7 +77,7 @@ codex login
 You can also simply run `codex` and follow the first-run sign-in prompt.
 
 This repo still prefers ChatGPT/Codex CLI reuse over `OPENAI_API_KEY`.
-API-key login exists, but it is not the default operating model for `/home/OpenClaw`.
+API-key login exists, but it is not the default operating model for `<REPO_ROOT>`.
 
 ## Best Flag For Webterminal
 
@@ -116,15 +115,11 @@ The shared global Codex config at `/root/.codex/config.toml` currently shows:
 - `model = "gpt-5.4"`
 - `model_reasoning_effort = "xhigh"`
 
-Trusted project roots currently include:
+Project roots are dynamic and must be rediscovered from the live host when needed. Prefer:
 
-- `/home/admin`
-- `/home/langchain`
-- `/home/udacity`
-- `/home/STONfiHackathon`
-- `/home/OpenClaw`
-- `/home/OpenClaw/workspace`
-- `/home/freelance`
+- `scripts/agent-landscape.sh`
+- `/opt/claude-vnc-terminal/data/terminal-state.json`
+- the current tab/session working directory
 
 Operational rule:
 
@@ -133,10 +128,11 @@ Operational rule:
 
 ## Relationship To OpenClaw
 
-- Codex CLI TUI is the main interactive surface for the other terminal agents
-- OpenClaw uses `gpt-5.4` as its current minimum model floor, with Codex CLI as the intended backend path
+- Codex CLI TUI is one interactive surface used by other terminal agents on this host class
+- OpenClaw uses `gpt-5.4` as its baseline model, with Codex CLI as the intended backend path
 - OpenClaw should follow the shared Codex user model once it becomes numerically newer than 5.5 and is validated locally
-- OpenClaw should understand Codex CLI TUI behavior, but keep its own repo-local orchestration rules under `/home/OpenClaw`
+- OpenClaw should not use `gpt-5.5`; if it resolves by default, override it to `gpt-5.4` or a validated model newer than 5.5
+- OpenClaw should understand Codex CLI TUI behavior, but discover live agent-control paths dynamically instead of assuming one fixed TUI layout
 
 ## Official References
 

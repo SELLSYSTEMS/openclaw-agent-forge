@@ -153,37 +153,13 @@ Rules:
 - attempt pairing/verification against `TELEGRAM_USER_ID` during the same pass
 - if token validation fails or pairing cannot be completed, stop immediately and report the exact issue
 
-## Codex CLI TUI On This Server
+## Codex CLI Notes
 
-No separate server-side TUI package is required for Codex.
+For generic Codex CLI TUI behavior, auth, and flags, see:
 
-What the server actually needs is:
+- `docs/codex-cli-tui.md`
 
-- a working `codex` binary on `PATH`
-- a successful one-time `codex login` under the Unix account that will run the agent sessions
-- a readable `~/.codex` home for that same account
-- a terminal surface that can render interactive TUIs
-
-On browser terminals or strict multiplexers, prefer:
-
-```bash
-codex --no-alt-screen
-```
-
-If you need to start Codex in a specific project root, use:
-
-```bash
-codex -C /home/admin
-codex -C /home/langchain
-codex -C /home/udacity
-codex -C <REPO_ROOT>
-```
-
-For OpenClaw's own TUI, the prerequisites are different:
-
-- OpenClaw must already be installed locally
-- the local gateway must be reachable
-- operator pairing or approval may still be required even when the TUI itself launches
+This install runbook must not hardcode current-host tab names, neighboring agent roots, or specific project paths from one machine as if they were universal install facts.
 
 ## Validation
 
