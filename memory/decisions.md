@@ -21,7 +21,7 @@
 
 ### Use Codex CLI as the default OpenClaw model path
 
-- Decision: keep the primary model floor on `gpt-5.5`, treat Codex CLI as the intended backend path, inherit `xhigh` reasoning from the shared Codex user config, and move to a newer shared GPT model once it is numerically newer than 5.5 and validated locally
+- Decision: keep the primary model floor on `gpt-5.4`, treat Codex CLI as the intended backend path, inherit `xhigh` reasoning from the shared Codex user config, and move to a newer shared GPT model once it is numerically newer than 5.5 and validated locally
 - Why: this reuses the installed Codex CLI login, avoids making `OPENAI_API_KEY` the default auth path, and keeps OpenClaw aligned with the newest stable shared-user Codex model instead of freezing forever on 5.5
 
 ### Keep repo knowledge public-safe and secrets local-only

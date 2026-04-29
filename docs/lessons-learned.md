@@ -24,7 +24,7 @@
 
 ## Model And Auth
 
-- `gpt-5.5` is the current minimum model floor for this repo, with Codex CLI as the intended backend path, not a forever pin.
+- `gpt-5.4` is the current minimum model floor for this repo, with Codex CLI as the intended backend path, not a forever pin.
 - Shared Codex reasoning should stay on `xhigh`.
 - If the shared Codex user default moves to a numerically newer GPT model than 5.5, OpenClaw should follow it after validation.
 - This setup should prefer Codex CLI login reuse over `OPENAI_API_KEY`.

@@ -1,5 +1,6 @@
 .openclaw/
 .openclaw-home/
+.openclaw-stt/
 .DS_Store
 
 workspace/.scratch/

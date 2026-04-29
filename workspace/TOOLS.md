@@ -38,7 +38,7 @@ This file is the safe machine-context cheat sheet for this workspace.
 - Repo-local runtime home lives under the canonical repo root
 - Repo-local workspace lives under the canonical repo root
 - Repo-local memory lives under the canonical repo root
-- Default model floor: `gpt-5.5` with Codex CLI as the intended backend path
+- Default model floor: `gpt-5.4` with Codex CLI as the intended backend path
 
 ## Discovery
 

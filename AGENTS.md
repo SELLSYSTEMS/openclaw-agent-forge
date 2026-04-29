@@ -20,7 +20,7 @@ Canonical repository identity:
 4. Keep the default agent workspace at `<REPO_ROOT>/workspace`.
 5. Treat `<REPO_ROOT>/memory` as the local memory source of truth.
 6. Use Markdown files first. Do not introduce a vector database unless keyword search has clearly stopped being enough.
-7. Keep the primary model floor on `gpt-5.5` with Codex CLI as the intended backend path and `xhigh` reasoning as the minimum default. If the shared Codex user default moves to a numerically newer GPT model than 5.5 and is validated locally, OpenClaw should follow that newer model.
+7. Keep the primary model floor on `gpt-5.4` with Codex CLI as the intended backend path and `xhigh` reasoning as the minimum default. If the shared Codex user default moves to a numerically newer GPT model than 5.5 and is validated locally, OpenClaw should follow that newer model.
 8. Do not introduce `OPENAI_API_KEY` as the default auth path when Codex CLI reuse is available.
 9. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
 10. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.

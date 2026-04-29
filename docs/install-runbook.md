@@ -51,7 +51,7 @@ Rules:
 - launcher: `<REPO_ROOT>/bin/openclaw-local`
 - workspace: `<REPO_ROOT>/workspace`
 - memory vault: `<REPO_ROOT>/memory`
-- primary model floor: `codex-cli/gpt-5.5`
+- primary model floor: `codex-cli/gpt-5.4`
 - preferred reasoning floor: `xhigh`
 - gateway: `local` mode on loopback
 
@@ -76,7 +76,7 @@ What it does:
 2. Creates `<REPO_ROOT>/.openclaw-home`.
 3. Configures OpenClaw with `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `<REPO_ROOT>/workspace`.
-5. Sets the primary model to `codex-cli/gpt-5.5`, or to the shared Codex user model if it is numerically newer than 5.5.
+5. Sets the primary model to `codex-cli/gpt-5.4`, or to a validated shared Codex user model if it is numerically newer than 5.5.
 6. Sets `gateway.mode=local`.
 7. Sets `gateway.bind=loopback`.
 8. Validates the resulting config.
@@ -86,7 +86,8 @@ What it does:
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 - install and log in to the `codex` CLI
-- keep the OpenClaw model ref at `codex-cli/gpt-5.5` or a newer shared Codex user model when one exists
+- keep the OpenClaw model ref at `codex-cli/gpt-5.4` or a validated newer shared Codex user model when one exists
+- treat `gpt-5.5` as unsuitable and override it to `codex-cli/gpt-5.4`
 - let OpenClaw delegate turn execution to the installed Codex CLI
 - keep shared Codex reasoning at `xhigh`
 
@@ -113,12 +114,17 @@ A fresh OpenClaw install from this repo should **not** behave like a blank slate
 Before the first user message or Telegram connection, the workspace should already contain and preserve these tracked context files:
 
 - `<REPO_ROOT>/workspace/AGENTS.md`
+- `<REPO_ROOT>/workspace/BOOTSTRAP.md`
+- `<REPO_ROOT>/workspace/README.md`
 - `<REPO_ROOT>/workspace/MEMORY.md`
 - `<REPO_ROOT>/workspace/TOOLS.md`
 - `<REPO_ROOT>/workspace/WEBTERMINAL.md`
 - `<REPO_ROOT>/workspace/SOUL.md`
 - `<REPO_ROOT>/workspace/IDENTITY.md`
 - `<REPO_ROOT>/workspace/USER.md`
+- `<REPO_ROOT>/memory/README.md`
+- `<REPO_ROOT>/memory/active-context.md`
+- `<REPO_ROOT>/memory/decisions.md`
 
 Behavior rule:
 
@@ -197,6 +203,8 @@ Expected outcomes:
 - the configured gateway bind resolves to `loopback`
 - `codex login status` succeeds
 - the shared Codex reasoning default resolves to `xhigh`
+- if no verified STT path already exists, `scripts/setup-local-stt.sh` has run successfully
+- before declaring audio/STT ready, `scripts/transcribe-local.sh` transcribes a real sample file
 
 ## Keeping The Gateway Alive
 

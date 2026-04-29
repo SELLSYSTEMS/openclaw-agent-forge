@@ -87,6 +87,11 @@ Rules:
 - On a virtual instance/VPS, do NOT default to Docker/container advice unless live host evidence shows Docker is actually part of the operating model.
 - OpenClaw is expected to understand, inspect, and if appropriate supervise neighboring terminal agents on other tabs.
 
+CAPABILITY CONTRACT RULE — THIS IS ALSO CRITICAL
+
+Read and enforce:
+- `docs/installer-capability-contract.md`
+
 SOURCE OF TRUTH — READ FIRST, THEN ACT
 
 Before installing anything, you MUST study these sources:
@@ -106,6 +111,11 @@ After cloning the operator repo, you MUST read these files in this order:
 - docs/install-runbook.md
 - docs/shared-host-context.md
 - docs/agent-topology.md
+- docs/data-sources.md
+- docs/memory-architecture.md
+- docs/model-policy.md
+- docs/installer-capability-contract.md
+- docs/stt-path.md
 - docs/lessons-learned.md
 - workspace/BOOTSTRAP.md
 - workspace/MEMORY.md
@@ -115,22 +125,16 @@ Do not ask the user to reteach anything already covered there.
 
 PRE-FLIGHT RESOURCE AND HOST GATE
 
-Before bootstrap, you MUST check host capacity and fail early if the box is too small for a clean first-start.
+Before bootstrap, you MUST confirm the host matches the standard supported install class.
 
 Check at minimum:
 - total RAM
 - cgroup/container RAM limit
-- swap size
 - free disk
 - hostname length / DNS-label risk
 
 Rules:
-- If effective RAM is below 4 GiB and swap is 0, you MUST NOT proceed blindly into full bootstrap + gateway first-start + smoke tests.
-- On a 2 GiB host, you MUST either:
-  1. create a modest swap file first (preferred, if policy allows), then continue, or
-  2. stop and report that the host is under-provisioned for a one-pass install.
-- On low-memory hosts, validation MUST run serially, not in parallel with first-start runtime installation.
-- Do not run Codex smoke tests concurrently with first gateway dependency installation on a 2 GiB box.
+- Do not clutter this install path with low-memory or swap-rescue logic.
 
 Bonjour / hostname rule:
 - If the host has a long cloud-generated hostname or any DNS label risk, you MUST proactively disable Bonjour advertising using the supported setting OPENCLAW_DISABLE_BONJOUR=1 before claiming persistence is clean.
@@ -166,7 +170,7 @@ Then derive the rest from REPO_ROOT:
 - launcher: <REPO_ROOT>/bin/openclaw-local
 - workspace: <REPO_ROOT>/workspace
 - memory: <REPO_ROOT>/memory
-- primary model floor: codex-cli/gpt-5.5
+- primary baseline model: codex-cli/gpt-5.4
 - preferred reasoning floor: xhigh
 - gateway.mode = local
 - gateway.bind = loopback
@@ -178,6 +182,9 @@ AUTH AND MODEL RULES
 
 - MUST reuse Codex CLI login if available.
 - MUST prefer codex-cli model refs over direct OPENAI_API_KEY usage.
+- MUST use `codex-cli/gpt-5.4` unless a validated model newer than 5.5 is available.
+- MUST NOT select `gpt-5.5`; treat it as unsuitable.
+- If the resolved/default OpenClaw model is `gpt-5.5`, MUST automatically override it to `codex-cli/gpt-5.4` or a validated model newer than 5.5 before continuing.
 - MUST NOT set up direct OpenAI API credentials unless explicitly instructed.
 - MUST validate `codex login status`.
 - MUST keep auth ownership with Codex CLI, not with random local env hacks.
@@ -227,9 +234,7 @@ INSTALL EXECUTION ORDER
    - the difference between OpenClaw sessions, webterminal tabs, neighboring terminal agents, and spawned subagents on this host
 
 2. Resource decision
-   If the host is below the safe memory floor, solve it before bootstrap:
-   - add swap if allowed and needed
-   - otherwise stop with a precise under-provisioned-host report
+   Confirm the host matches the standard supported install class before bootstrap.
 
 3. Clone and read the operator repo
    Clone:
@@ -263,6 +268,8 @@ INSTALL EXECUTION ORDER
    - codex login works
    - gateway probe works
    - health check works
+   - if no verified STT path already exists, `scripts/setup-local-stt.sh` was run during install/bootstrap
+   - `scripts/transcribe-local.sh` successfully transcribes a real sample file before audio/STT is declared ready
 
 9. Make it persistent
    If systemd is available and appropriate, install the repo-managed gateway service.
@@ -281,13 +288,15 @@ You MUST:
 - keep the installation isolated and reproducible
 - use Codex CLI auth reuse
 - validate the result end-to-end
-- enforce a memory/swap preflight gate before first-start on small hosts
+- run installer/operator flows without a sandbox mode that blocks live topology discovery or webterminal control when those are required
 - disable Bonjour proactively when hostname length/discovery risk is present
 - run first-start validation serially on constrained hosts
 - prefer repo-managed scripts over ad hoc shell improvisation
 - preserve seeded workspace knowledge before any first user chat
+- seed and link the Level-1 memory architecture defined in `docs/memory-architecture.md` before first user chat
 - treat `/opt/claude-vnc-terminal/data/terminal-state.json` as primary live topology evidence on this host class
 - distinguish sessions vs webterminal tabs vs neighboring terminal agents vs spawned subagents
+- prefer PTY/WebSocket bridge first, tmux bridge second, browser UI last when the requirement is live control of an existing webterminal agent
 - avoid generic Docker/container advice on a VPS unless live host evidence justifies it
 - report final state clearly
 
@@ -306,12 +315,14 @@ SUCCESS CRITERIA
 The pass is successful only if:
 - the install exists in one canonical owner-root layout
 - Codex-backed model resolution works
+- the effective OpenClaw model is `gpt-5.4` or a validated model newer than `5.5`, never `gpt-5.5`
 - config is valid
 - workspace is seeded correctly
 - gateway is reachable
 - persistence strategy is installed and verified if applicable
 - Telegram pairing is mandatory in this prompt
 - when TELEGRAM_BOT_TOKEN and TELEGRAM_USER_ID are provided, pairing succeeds during the same install pass
+- the Level-1 memory architecture is present, linked, and usable before first chat
 - the resulting OpenClaw instance is ready for first use without reteaching host basics
 - the seeded docs/workspace make the multi-tab, multi-agent host architecture explicit enough that a future agent can rediscover it without user hand-holding
 

@@ -21,6 +21,11 @@ jobs:
           test -f LICENSE
           test -f docs/shared-host-context.md
           test -f docs/agent-topology.md
+          test -f docs/data-sources.md
+          test -f docs/memory-architecture.md
+          test -f docs/model-policy.md
+          test -f docs/installer-capability-contract.md
+          test -f docs/stt-path.md
           test -f docs/codex-cli-tui.md
           test -f docs/orchestrator-roadmap.md
           test -f docs/prompt-patterns.md
@@ -30,6 +35,8 @@ jobs:
           test -f scripts/bootstrap-openclaw.sh
           test -f scripts/install-gateway-systemd.sh
           test -f scripts/gateway-systemd-status.sh
+          test -f scripts/setup-local-stt.sh
+          test -f scripts/transcribe-local.sh
           test -f scripts/validate-local-setup.sh
           test -f bin/openclaw-local
           test -f workspace/AGENTS.md
@@ -53,8 +60,10 @@ jobs:
           bash -n scripts/gateway-tmux-status.sh
           bash -n scripts/install-gateway-systemd.sh
           bash -n scripts/publish-github.sh
+          bash -n scripts/setup-local-stt.sh
           bash -n scripts/start-gateway-tmux.sh
           bash -n scripts/stop-gateway-tmux.sh
+          bash -n scripts/transcribe-local.sh
           bash -n scripts/validate-local-setup.sh
 
       - name: Validate docs links target files

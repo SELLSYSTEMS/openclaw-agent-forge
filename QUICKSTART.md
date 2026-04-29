@@ -24,7 +24,7 @@ Reference paths below reflect this tracked host. On another host, use the same r
 This bootstrap sets:
 
 - workspace: `<REPO_ROOT>/workspace`
-- primary model floor: `gpt-5.5` with Codex CLI as the intended backend path
+- primary model floor: `gpt-5.4` with Codex CLI as the intended backend path
 - gateway mode: `local`
 - gateway bind: `loopback`
 
@@ -68,7 +68,7 @@ Minimal live checks:
 
 ```bash
 ./bin/openclaw-local health
-codex exec --model gpt-5.5 --skip-git-repo-check --sandbox workspace-write --color never --json "reply with exactly: codex-ok"
+codex exec --model gpt-5.4 --skip-git-repo-check --sandbox workspace-write --color never --json "reply with exactly: codex-ok"
 ```
 
 ## 4. Memory

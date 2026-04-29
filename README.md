@@ -30,6 +30,11 @@ It must also stay free of secrets because the repository is public.
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
 - [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
 - [docs/agent-topology.md](docs/agent-topology.md) - known agent folders, roles, and rediscovery rules
+- [docs/data-sources.md](docs/data-sources.md) - live and static source precedence for installers
+- [docs/memory-architecture.md](docs/memory-architecture.md) - Level-1 memory seed contract
+- [docs/model-policy.md](docs/model-policy.md) - Codex CLI model baseline and override rules
+- [docs/installer-capability-contract.md](docs/installer-capability-contract.md) - required installer capabilities and claims
+- [docs/stt-path.md](docs/stt-path.md) - local speech-to-text setup and validation path
 - [docs/codex-cli-tui.md](docs/codex-cli-tui.md) - how the shared OpenAI Codex CLI TUI works on this host
 - [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) - recommended direction for orchestration, TUI, and cross-agent visibility
 - [docs/prompt-patterns.md](docs/prompt-patterns.md) - starter prompts for future agents on this host
@@ -39,6 +44,8 @@ It must also stay free of secrets because the repository is public.
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
 - [scripts/agent-landscape.sh](scripts/agent-landscape.sh) - safe status snapshot of shared agents and services
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap
+- [scripts/setup-local-stt.sh](scripts/setup-local-stt.sh) - local speech-to-text runtime setup
+- [scripts/transcribe-local.sh](scripts/transcribe-local.sh) - local speech-to-text transcription check
 - [scripts/install-gateway-systemd.sh](scripts/install-gateway-systemd.sh) - install the boot-persistent systemd gateway service
 - [scripts/gateway-systemd-status.sh](scripts/gateway-systemd-status.sh) - inspect the systemd-managed gateway
 - [scripts/validate-local-setup.sh](scripts/validate-local-setup.sh) - smoke-test and validation
@@ -85,12 +92,13 @@ Reference paths in this repo are examples from the current tracked host, not uni
 
 ## Model Path
 
-This setup uses `gpt-5.5` as the current minimum baseline, with Codex CLI as the intended backend path and `xhigh` reasoning inherited from the shared Codex user config.
+This setup uses `gpt-5.4` as the current minimum baseline, with Codex CLI as the intended backend path and `xhigh` reasoning inherited from the shared Codex user config.
 
 - OpenClaw delegates agent turns to the installed `codex` CLI.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
+- Do not use `gpt-5.5`; if it is resolved from existing config, override it to `codex-cli/gpt-5.4`.
 - If the shared Codex user default later moves to a numerically newer GPT model than 5.5, OpenClaw should be updated to follow that newer model after a local validation pass.
 
 ## Positioning

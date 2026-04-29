@@ -43,7 +43,7 @@ OpenClaw-owned paths under the canonical repo-local root are:
 
 OpenClaw defaults in this repo:
 
-- primary model floor: `codex-cli/gpt-5.5`
+- primary model floor: `codex-cli/gpt-5.4`
 - preferred reasoning floor: `xhigh`
 - gateway mode: `local`
 - gateway bind: `loopback`

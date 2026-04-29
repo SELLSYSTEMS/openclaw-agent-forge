@@ -21,7 +21,7 @@
 - Keep agent notes in Markdown
 - Promote durable facts into `decisions.md` or `references/`
 - Keep ad hoc captures in `inbox/`
-- Keep the primary model floor on `gpt-5.5` with Codex CLI as the intended backend path
+- Keep the primary model floor on `gpt-5.4` with Codex CLI as the intended backend path
 - Prefer `xhigh` reasoning through the shared Codex user config
 - If the shared Codex user model becomes numerically newer than 5.5, OpenClaw should follow it after validation
 - Keep secrets only in ignored local paths, not tracked repo files

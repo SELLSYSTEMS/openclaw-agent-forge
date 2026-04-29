@@ -112,8 +112,8 @@ Why:
 The shared global Codex config at `/root/.codex/config.toml` currently shows:
 
 - `approval_policy = "on-request"`
-- `sandbox_mode = "workspace-write"`
-- `model = "gpt-5.5"`
+- `sandbox_mode = "danger-full-access"`
+- `model = "gpt-5.4"`
 - `model_reasoning_effort = "xhigh"`
 
 Trusted project roots currently include:
@@ -134,7 +134,7 @@ Operational rule:
 ## Relationship To OpenClaw
 
 - Codex CLI TUI is the main interactive surface for the other terminal agents
-- OpenClaw uses `gpt-5.5` as its current minimum model floor, with Codex CLI as the intended backend path
+- OpenClaw uses `gpt-5.4` as its current minimum model floor, with Codex CLI as the intended backend path
 - OpenClaw should follow the shared Codex user model once it becomes numerically newer than 5.5 and is validated locally
 - OpenClaw should understand Codex CLI TUI behavior, but keep its own repo-local orchestration rules under `/home/OpenClaw`
 

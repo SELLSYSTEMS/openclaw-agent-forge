@@ -11,7 +11,7 @@ This file is meant to be understood before the first external user conversation 
 - OpenClaw owns the canonical repo-local root on this host; on the tracked reference host that root is `/home/OpenClaw`
 - OpenClaw runtime home is repo-local under the canonical root
 - OpenClaw default workspace is repo-local under the canonical root
-- OpenClaw current model floor is `gpt-5.5` with Codex CLI as the intended backend path
+- OpenClaw current model floor is `gpt-5.4` with Codex CLI as the intended backend path
 - OpenClaw should prefer `xhigh` reasoning through the shared Codex user config
 - If the shared Codex user model becomes numerically newer than 5.5, OpenClaw should follow it after validation
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
