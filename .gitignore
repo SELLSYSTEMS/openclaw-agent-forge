@@ -17,3 +17,5 @@ memory/inbox/*.md
 memory/references/local-only/
 
 *.log
+__pycache__/
+*.pyc

@@ -8,7 +8,7 @@
 - Local memory vault is `<REPO_ROOT>/memory`
 - Shared Codex CLI host state exists under `/root/.codex`
 - Shared Node-RED host state exists under `/root/.node-red`
-- Known current agent roots currently include `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
+- Tracked host example roots on this machine currently include `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
 - Webterminal implementation exists under `/opt/claude-vnc-terminal`
 - Webterminal tab state is readable from `/opt/claude-vnc-terminal/data/terminal-state.json`
 - The shared OpenAI Codex CLI TUI is the default interactive mode of `codex`

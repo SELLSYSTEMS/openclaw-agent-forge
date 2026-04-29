@@ -125,7 +125,7 @@ That file stores tab metadata such as:
 - provider
 - created/updated timestamps
 
-Known current roots:
+Tracked host example roots on this machine:
 
 - `/home/admin` → Default AI
 - `/home/langchain` → learnLangChain
@@ -146,12 +146,19 @@ Practical direct inspection for webterminal tabs:
 cat /opt/claude-vnc-terminal/data/terminal-state.json
 ```
 
+Practical direct resolution for same-tab neighboring-agent control:
+
+```bash
+<REPO_ROOT>/scripts/find-live-terminal.py --tab-name <tab-name> --json
+<REPO_ROOT>/scripts/write-live-terminal.sh --tab-name <tab-name> -- 'echo "hello"'
+```
+
 Interpretation rules for future agents:
 
 - treat that JSON file as primary live evidence for which tabs currently exist
 - do not confuse OpenClaw session state with webterminal tab state
 - do not confuse neighboring terminal agents with OpenClaw-spawned subagents
-- tab names and working directories are instance-specific; do not carry stale path assumptions across hosts
+- tracked host examples are not universal install facts; tab names and working directories are instance-specific, so do not carry stale path assumptions across hosts
 - derive the actual agent root from the current host before applying any control contract
 - if one shell surface is constrained, use the tab registry and shared-host docs before making architectural guesses
 - on a VPS/virtual instance, do not default to Docker/container recommendations without live evidence that Docker is actually part of the host

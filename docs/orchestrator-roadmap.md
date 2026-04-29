@@ -17,10 +17,10 @@ Make the system understandable for both humans and future AI agents:
 From local inspection:
 
 - multiple Codex CLI processes can run in parallel on this host
-- OpenClaw has its own isolated runtime under `/home/OpenClaw/.openclaw-home`
+- OpenClaw has its own isolated runtime under the repo-local `<REPO_ROOT>/.openclaw-home`
 - Node-RED is already installed and running locally
 - the global Codex CLI home lives under `/root/.codex`
-- known current agent roots are `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
+- tracked host example roots on this machine include `/home/admin`, `/home/langchain`, `/home/udacity`, and `/home/OpenClaw`
 - browser access commonly happens through an instance-specific webterminal URL
 - the current webterminal implementation lives under `/opt/claude-vnc-terminal`
 - server-side tab state is persisted in `/opt/claude-vnc-terminal/data/terminal-state.json`
@@ -45,12 +45,12 @@ OpenClaw should remain the coordination layer for this repo because it already o
 - the Codex CLI-backed model path
 - the gateway and session model
 
-### 2. Use The Official OpenClaw TUI As The Main Operator Surface
+### 2. Use The Official OpenClaw TUI As The Main OpenClaw Operator Surface
 
 The first TUI to adopt should be the one OpenClaw already ships:
 
 ```bash
-/home/OpenClaw/bin/openclaw-local tui
+<REPO_ROOT>/bin/openclaw-local tui
 ```
 
 Why:
@@ -58,6 +58,11 @@ Why:
 - it already understands agents and sessions
 - it shows history and streaming tool output
 - it avoids inventing a parallel control plane too early
+
+Boundary rule:
+
+- this does **not** make OpenClaw TUI the control path for an already-running neighboring webterminal tab
+- same-tab neighboring-agent control should use the live PTY path documented in `docs/agent-topology.md`
 
 Current caveat from local testing:
 
@@ -75,6 +80,7 @@ Important rule:
 - enabling that TUI on a server means installing `codex` itself and keeping a valid `~/.codex` login for the session user
 - in browser terminals, `codex --no-alt-screen` is the safer default because it preserves scrollback
 - shared Codex TUI behavior belongs in `docs/codex-cli-tui.md`
+- none of that changes the neighboring-agent live-control rule: for same-tab control, resolve and write to the live PTY instead
 
 ### 3. Use Node-RED For Durable Automations And Bridges
 
@@ -103,7 +109,7 @@ But it should not become repo-owned state.
 Preferred pattern:
 
 - read and summarize what matters
-- store durable repo-specific conclusions in `/home/OpenClaw/docs` or `/home/OpenClaw/memory`
+- store durable repo-specific conclusions in `<REPO_ROOT>/docs` or `<REPO_ROOT>/memory`
 - avoid mutating `/root/.codex/config.toml` unless the user explicitly asks
 
 ### 5. Bridge Systems Explicitly
@@ -145,7 +151,7 @@ This gives a fast answer to “what is running now?”
 Adopt the official OpenClaw TUI first:
 
 ```bash
-/home/OpenClaw/bin/openclaw-local tui
+<REPO_ROOT>/bin/openclaw-local tui
 ```
 
 Only after that should a custom dashboard or alternate TUI be considered.

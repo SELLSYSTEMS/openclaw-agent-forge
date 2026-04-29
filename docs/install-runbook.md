@@ -43,6 +43,7 @@ Rules:
 - derive the real target root from the live host before applying any control contract or path convention
 - on a VPS/virtual instance, do not default to Docker/container deployment advice unless the live host evidence shows Docker is actually present and intended
 - treat the webterminal tab registry as first-class live evidence, not trivia
+- if the user needs OpenClaw to type into an already-running neighboring webterminal tab, use the direct PTY path documented in `docs/agent-topology.md` instead of inventing a TUI-only control story
 
 ## Target Layout
 

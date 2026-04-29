@@ -2,6 +2,8 @@
 
 This document explains the OpenAI Codex CLI terminal UI on this host and how future agents should enable or use it safely.
 
+It is not the live-control path for an already-running neighboring webterminal tab. For same-tab control, use `docs/agent-topology.md` plus `scripts/find-live-terminal.py` / `scripts/write-live-terminal.sh`.
+
 Official sources checked for this runbook:
 
 - `https://developers.openai.com/codex/cli`

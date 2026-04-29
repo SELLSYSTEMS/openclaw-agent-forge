@@ -58,21 +58,15 @@ if [[ -f /opt/claude-vnc-terminal/data/terminal-state.json ]]; then
   echo
 fi
 
-echo "[known-workspaces]"
-for entry in \
-  "/home/admin:Default AI" \
-  "/home/langchain:learnLangChain" \
-  "/home/udacity:learnUdacity" \
-  "${ROOT}:OpenClaw"
-do
-  path="${entry%%:*}"
-  label="${entry#*:}"
-  if [[ -d "${path}" ]]; then
-    echo "${path} -> ${label}"
-  else
-    echo "${path} -> ${label} (missing)"
-  fi
-done
+echo "[observed-workspaces]"
+echo "${ROOT} -> OpenClaw (current repo root)"
+if [[ -f /opt/claude-vnc-terminal/data/terminal-state.json ]]; then
+  jq -r '
+    .terminals[]?
+    | select(.cwd != null and .cwd != "")
+    | .cwd + " -> tab:" + (.name // "unnamed") + " provider=" + (.provider // "?")
+  ' /opt/claude-vnc-terminal/data/terminal-state.json 2>/dev/null | awk '!seen[$0]++' || true
+fi
 if [[ -f "${WORKSPACE_DIR}/WEBTERMINAL.local.md" ]]; then
   echo "webterminal note: ${WORKSPACE_DIR}/WEBTERMINAL.local.md"
 fi

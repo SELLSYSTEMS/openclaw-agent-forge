@@ -27,14 +27,16 @@ It must also stay free of secrets because the repository is public.
 - [AGENTS.md](AGENTS.md) - instructions for future AI agents
 - [QUICKSTART.md](QUICKSTART.md) - shortest path for a fresh operator or AI agent
 - [docs/install-runbook.md](docs/install-runbook.md) - step-by-step installation model
+- [docs/data-sources.md](docs/data-sources.md) - source-of-truth map for future agents
+- [docs/memory-architecture.md](docs/memory-architecture.md) - portable Level-1 memory layout and topology rules
+- [docs/model-policy.md](docs/model-policy.md) - allowed OpenClaw model selection rules
+- [docs/installer-capability-contract.md](docs/installer-capability-contract.md) - install-time capability requirements
+- [docs/stt-path.md](docs/stt-path.md) - repo-local speech-to-text path and validation
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
 - [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
-- [docs/agent-topology.md](docs/agent-topology.md) - known agent folders, roles, and rediscovery rules
-- [docs/data-sources.md](docs/data-sources.md) - live and static source precedence for installers
-- [docs/memory-architecture.md](docs/memory-architecture.md) - Level-1 memory seed contract
-- [docs/model-policy.md](docs/model-policy.md) - Codex CLI model baseline and override rules
-- [docs/installer-capability-contract.md](docs/installer-capability-contract.md) - required installer capabilities and claims
-- [docs/stt-path.md](docs/stt-path.md) - local speech-to-text setup and validation path
+- [docs/agent-topology.md](docs/agent-topology.md) - live topology rediscovery and same-tab neighboring-agent control
+- [scripts/find-live-terminal.py](scripts/find-live-terminal.py) - resolve a live PTY from a tab name or cwd
+- [scripts/write-live-terminal.sh](scripts/write-live-terminal.sh) - write text into an already-running neighboring terminal tab
 - [docs/codex-cli-tui.md](docs/codex-cli-tui.md) - how the shared OpenAI Codex CLI TUI works on this host
 - [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) - recommended direction for orchestration, TUI, and cross-agent visibility
 - [docs/prompt-patterns.md](docs/prompt-patterns.md) - starter prompts for future agents on this host
@@ -44,11 +46,12 @@ It must also stay free of secrets because the repository is public.
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
 - [scripts/agent-landscape.sh](scripts/agent-landscape.sh) - safe status snapshot of shared agents and services
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap
-- [scripts/setup-local-stt.sh](scripts/setup-local-stt.sh) - local speech-to-text runtime setup
-- [scripts/transcribe-local.sh](scripts/transcribe-local.sh) - local speech-to-text transcription check
 - [scripts/install-gateway-systemd.sh](scripts/install-gateway-systemd.sh) - install the boot-persistent systemd gateway service
 - [scripts/gateway-systemd-status.sh](scripts/gateway-systemd-status.sh) - inspect the systemd-managed gateway
 - [scripts/validate-local-setup.sh](scripts/validate-local-setup.sh) - smoke-test and validation
+- [scripts/setup-local-stt.sh](scripts/setup-local-stt.sh) - provision the repo-local offline STT path
+- [scripts/transcribe-local.sh](scripts/transcribe-local.sh) - use the repo-local offline STT path
+- [scripts/validate-local-stt.sh](scripts/validate-local-stt.sh) - validate STT on a real speech sample
 - [scripts/start-gateway-tmux.sh](scripts/start-gateway-tmux.sh) - fallback gateway runtime when systemd is unavailable
 - [systemd/openclaw-gateway.service](systemd/openclaw-gateway.service) - tracked system service for reboot persistence
 - [.github/workflows/smoke-check.yml](.github/workflows/smoke-check.yml) - repo sanity checks on GitHub Actions
@@ -78,11 +81,15 @@ Reference paths in this repo are examples from the current tracked host, not uni
 ./scripts/bootstrap-openclaw.sh
 ```
 
+This bootstrap now provisions the repo-local offline STT path and validates it on a real speech sample as part of install readiness.
+
 ## Validate
 
 ```bash
 ./scripts/validate-local-setup.sh
 ```
+
+Validation now checks that the repo-local STT venv exists, that `faster-whisper` is importable, and that the STT path can transcribe a real speech sample.
 
 ## Run
 
@@ -92,14 +99,14 @@ Reference paths in this repo are examples from the current tracked host, not uni
 
 ## Model Path
 
-This setup uses `gpt-5.4` as the current minimum baseline, with Codex CLI as the intended backend path and `xhigh` reasoning inherited from the shared Codex user config.
+This setup uses `gpt-5.4` as the baseline OpenClaw model, with Codex CLI as the intended backend path and `xhigh` reasoning inherited from the shared Codex user config.
 
 - OpenClaw delegates agent turns to the installed `codex` CLI.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
-- Do not use `gpt-5.5`; if it is resolved from existing config, override it to `codex-cli/gpt-5.4`.
 - If the shared Codex user default later moves to a numerically newer GPT model than 5.5, OpenClaw should be updated to follow that newer model after a local validation pass.
+- `gpt-5.5` is considered unsuitable and should be overridden to `gpt-5.4` or a validated model newer than 5.5.
 
 ## Positioning
 
