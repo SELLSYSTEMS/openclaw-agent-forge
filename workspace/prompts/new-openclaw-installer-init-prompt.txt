@@ -1,4 +1,4 @@
-MASTER INSTALL PROMPT — NEW OPENCLAW INSTANCE
+MASTER INSTALL PROMPT - NEW OPENCLAW INSTANCE
 
 TELEGRAM_BOT_TOKEN="<PASTE_YOUR_TELEGRAM_BOT_TOKEN_HERE_REQUIRED>"
 TELEGRAM_USER_ID="<PASTE_THE_TELEGRAM_USER_ID_TO_PAIR_WITH_THIS_BOT_REQUIRED>"
@@ -12,7 +12,7 @@ If either of these is missing:
 - TELEGRAM_USER_ID
 
 you MUST stop immediately before any install/bootstrap/config/channel action.
-Do not continue “without Telegram”.
+Do not continue "without Telegram".
 Do not partially install and plan to pair later.
 Do not improvise around missing Telegram input.
 
@@ -42,9 +42,9 @@ Rules:
 - You MUST validate the Telegram integration without exposing the token.
 - You MUST attempt actual bot pairing/verification against TELEGRAM_USER_ID during the install pass.
 - If the token is invalid, unauthorized, blocked, malformed, or the Telegram pairing cannot be completed, you MUST stop immediately and report the exact problem clearly.
-- Do not defer Telegram verification to “later”.
+- Do not defer Telegram verification to "later".
 
-OWNER CONTEXT RULE — THIS IS CRITICAL
+OWNER CONTEXT RULE - THIS IS CRITICAL
 
 You are not installing OpenClaw into some abstract default path copied from another machine.
 You are the owner/operator agent of this install pass.
@@ -66,7 +66,7 @@ You MUST avoid creating duplicate parallel roots such as:
 Pick one canonical owner root and stay consistent.
 If a valid existing repo/install already exists for this owner context, treat this as an idempotent repair/upgrade pass instead of creating a second install.
 
-WEBTERMINAL / TAB / AGENT ARCHITECTURE RULE — THIS IS ALSO CRITICAL
+WEBTERMINAL / TAB / AGENT ARCHITECTURE RULE - THIS IS ALSO CRITICAL
 
 On this host class, OpenClaw does not live alone.
 Webterminal tabs, neighboring terminal agents, and shared host services are part of the real runtime architecture.
@@ -87,12 +87,12 @@ Rules:
 - On a virtual instance/VPS, do NOT default to Docker/container advice unless live host evidence shows Docker is actually part of the operating model.
 - OpenClaw is expected to understand, inspect, and if appropriate supervise neighboring terminal agents on other tabs.
 
-CAPABILITY CONTRACT RULE — THIS IS ALSO CRITICAL
+CAPABILITY CONTRACT RULE - THIS IS ALSO CRITICAL
 
 Read and enforce:
 - `docs/installer-capability-contract.md`
 
-SOURCE OF TRUTH — READ FIRST, THEN ACT
+SOURCE OF TRUTH - READ FIRST, THEN ACT
 
 Before installing anything, you MUST study these sources:
 
@@ -151,8 +151,8 @@ Build a clean OpenClaw install that matches the reference operating model:
 - boot-persistent gateway service when systemd is available
 - compatibility with a multi-agent host where multiple terminal agents may coexist
 
-This is NOT just “install OpenClaw”.
-This is “understand the intended operator pattern, then reproduce it correctly inside the owner context you are actually running from”.
+This is NOT just "install OpenClaw".
+This is "understand the intended operator pattern, then reproduce it correctly inside the owner context you are actually running from".
 
 CANONICAL LAYOUT RULE
 
@@ -273,7 +273,7 @@ INSTALL EXECUTION ORDER
 
 9. Make it persistent
    If systemd is available and appropriate, install the repo-managed gateway service.
-   Do not leave the instance in a “works only in this shell” state if the intended setup is always-on.
+   Do not leave the instance in a "works only in this shell" state if the intended setup is always-on.
 
 10. Final topology sanity check
    Confirm the new instance can coexist with other agents cleanly.
