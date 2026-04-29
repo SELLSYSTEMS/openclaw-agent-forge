@@ -23,9 +23,7 @@ Then inspect the live targets directly if needed.
 
 ## Same-tab live control
 
-If the user wants OpenClaw to type into an already-running neighboring agent tab that is visible in the webterminal, use the live PTY path we tested.
-
-Do it in this order:
+If the user wants OpenClaw to type into an already-running neighboring agent tab that is visible in the webterminal, use one canonical path only:
 
 1. resolve the target tab or working directory from `/opt/claude-vnc-terminal/data/terminal-state.json`
 2. resolve the live PTY from `/proc/<pid>/cwd`, `/proc/<pid>/fd/0`, and `/proc/<pid>/cmdline`
@@ -44,6 +42,7 @@ Important rules:
 - do not use `/codex resume` when the requirement is to affect the already-visible tab
 - do not spawn a replacement agent or hide the action in a side channel
 - if multiple PTY candidates exist for one cwd, stop and inspect instead of guessing
+- if the current runtime cannot reach the PTY path, stop and report the access gap instead of inventing another control path
 
 ## Webterminal Context
 
