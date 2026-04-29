@@ -2,28 +2,31 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VENV="${ROOT}/.openclaw-stt"
+VENV="${VENV:-$ROOT/.venv-stt}"
+PYTHON="${PYTHON:-python3}"
 
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "python3 is required for local STT setup" >&2
-  exit 1
+if [[ -x "$VENV/bin/python" ]] && "$VENV/bin/python" -c 'import faster_whisper' >/dev/null 2>&1; then
+  cat <<EOF
+Local STT is ready.
+
+Venv: $VENV
+Run:
+  $ROOT/scripts/transcribe-local.sh path/to/audio.ogg
+EOF
+  exit 0
 fi
 
-python3 -m venv "${VENV}"
-"${VENV}/bin/python" -m pip install --upgrade pip wheel
-"${VENV}/bin/python" -m pip install faster-whisper
+"$PYTHON" -m venv "$VENV"
+# shellcheck disable=SC1091
+source "$VENV/bin/activate"
 
-cat > "${VENV}/README.local.md" <<'EOF'
-# Local STT runtime
+python -m pip install --upgrade pip
+python -m pip install faster-whisper
 
-This directory is local runtime state and must not be committed.
+cat <<EOF
+Local STT is ready.
 
-Use:
-
-```bash
-./scripts/transcribe-local.sh /path/to/real-sample.wav
-```
+Venv: $VENV
+Run:
+  $ROOT/scripts/transcribe-local.sh path/to/audio.ogg
 EOF
-
-echo "Local STT runtime ready at ${VENV}"
-echo "Validate with: ${ROOT}/scripts/transcribe-local.sh /path/to/real-sample.wav"
