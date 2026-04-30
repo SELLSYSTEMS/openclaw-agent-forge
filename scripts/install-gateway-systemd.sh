@@ -7,13 +7,16 @@ UNIT_SOURCE="${ROOT}/systemd/${UNIT_NAME}"
 UNIT_TARGET="/etc/systemd/system/${UNIT_NAME}"
 ENV_FILE="${ROOT}/.openclaw-home/openclaw-gateway.env"
 
-hostname_has_long_dns_label() {
+hostname_has_bonjour_risk() {
   local host_value
   host_value="$(hostname -f 2>/dev/null || hostname)"
+  if (( ${#host_value} > 55 )); then
+    return 0
+  fi
   IFS='.' read -r -a labels <<< "${host_value}"
   local label
   for label in "${labels[@]}"; do
-    if (( ${#label} > 63 )); then
+    if (( ${#label} > 31 )); then
       return 0
     fi
   done
@@ -32,7 +35,7 @@ fi
 
 mkdir -p "$(dirname "${ENV_FILE}")"
 
-if hostname_has_long_dns_label; then
+if hostname_has_bonjour_risk; then
   if [[ ! -f "${ENV_FILE}" ]] || ! grep -q '^OPENCLAW_DISABLE_BONJOUR=' "${ENV_FILE}" 2>/dev/null; then
     {
       [[ -f "${ENV_FILE}" ]] && cat "${ENV_FILE}"

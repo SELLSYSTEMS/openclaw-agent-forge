@@ -1,35 +1,52 @@
-# Local STT Path
+# Speech-to-Text Path Notes
 
-This repo defines a local speech-to-text validation path for OpenClaw installs that need audio or voice input.
+See also: `docs/data-sources.md`, `docs/memory-architecture.md`, `docs/installer-capability-contract.md`
 
-## Rule
+This file exists so future agents do not have to relearn the same runtime-surface distinction.
 
-If no verified STT path already exists on the target host, the installer must run:
+## Core rule
 
-```bash
-./scripts/setup-local-stt.sh
-```
+- Treat Telegram/OpenClaw chat turns, webterminal sessions, browser-side flows, and local shell flows as separate runtime surfaces.
+- A working media/STT path on one surface does **not** imply the same path exists on another.
 
-Before declaring audio/STT ready, the installer must transcribe a real sample file:
+## Operator rule
 
-```bash
-./scripts/transcribe-local.sh /path/to/sample.wav
-```
+Before claiming transcription support, verify the exact surface:
 
-## Implementation
+1. What surface is handling the message? Telegram turn, webterminal, browser tool, or local CLI?
+2. Is there a verified STT path for that surface right now?
+3. If yes, what implementation provides it?
+4. If no, state that the surface currently has no wired STT path.
 
-The default local path uses a repo-local Python virtual environment under:
+## Long-term fix
 
-- `.openclaw-stt/`
+To make this reliable across future instances, wire one canonical STT path for OpenClaw and record it here:
 
-The setup script installs a local STT runner there. The transcribe script uses that environment and writes text to stdout.
+- **Option A:** local/offline STT
+- **Option B:** explicit API-backed STT
 
-## Privacy
+## Repo-local offline path
 
-Do not commit audio samples or transcripts unless they are explicitly public-safe fixtures.
+Current repo-local offline path:
 
-Instance-private audio belongs in local-only scratch paths or runtime state.
+- setup: `scripts/setup-local-stt.sh`
+- use: `scripts/transcribe-local.sh path/to/audio.ogg`
+- validate: `scripts/validate-local-stt.sh`
+- implementation: `scripts/transcribe-local.py`
+- default model: `small`
+- default runtime: CPU + `int8`
+- installer rule: if no other verified STT path exists, provision this during install/bootstrap and validate it on a real sample before claiming audio is ready
 
-## Failure Rule
+## When the canonical path is implemented, document:
 
-If setup or transcription fails, report the exact command and error. Do not claim STT is ready.
+- exact command/tool entrypoint
+- which surfaces can use it
+- supported formats and limits
+- required credentials or local dependencies
+- failure mode / fallback wording
+- a quick verification checklist
+
+## Current status
+
+- Surface mismatch is a known fact.
+- A repo-local offline STT path now exists; surface integration and coverage still need to be wired/validated explicitly.
