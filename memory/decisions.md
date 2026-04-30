@@ -50,6 +50,11 @@
 - Decision: for normal installs on this host class, keep Codex CLI as the only default model/auth execution path, do not switch to direct `OPENAI_API_KEY` auth, and do not create cron-based automation unless the user explicitly asks for cron
 - Why: the shared Codex CLI login is already the intended repo execution path, while local Node-RED is the correct durable automation fabric and avoids hidden scheduler drift during install or repair
 
+### Treat Telegram audio readiness as an explicit install gate
+
+- Decision: for Telegram-enabled installs, do not claim completion from text transport alone; require validated local STT and explicitly state whether real inbound voice-note transcription has been proven yet
+- Why: Telegram text transport can succeed while audio handling is still broken or unverified, which creates false 'install complete' claims
+
 ### Treat `/root/.codex` as shared host context, not repo-owned state
 
 - Decision: let future agents read shared Codex CLI context from `/root/.codex`, but avoid mutating global config unless the user explicitly asks

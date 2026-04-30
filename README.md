@@ -105,6 +105,8 @@ This bootstrap now provisions the repo-local offline STT path and validates it o
 
 Validation now checks that the repo-local STT venv exists, that `faster-whisper` is importable, and that the STT path can transcribe a real speech sample.
 
+For installs that enable Telegram, treat the setup as incomplete until Telegram transport is working and the local STT path is ready for voice-note transcription. Do not call the install finished if Telegram replies work but audio/transcription readiness is still unknown.
+
 ## Run
 
 ```bash

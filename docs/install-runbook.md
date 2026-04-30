@@ -208,6 +208,8 @@ Expected outcomes:
 - the repo-local STT venv exists at `<REPO_ROOT>/.venv-stt`
 - `faster-whisper` imports successfully from that venv
 - `scripts/validate-local-stt.sh` succeeds on a real speech sample
+- if Telegram is enabled, Telegram transport must be working before install completion is claimed
+- if Telegram is expected to handle voice notes, do not call the install audio-ready until the local STT path is validated and any remaining gap to real inbound voice-note transcription is stated explicitly
 
 ## Keeping The Gateway Alive
 

@@ -40,6 +40,7 @@
 - Some higher-scope gateway RPCs can still trigger a local `pairing required` repair request even when health and probe are healthy. Treat that as a gateway authorization layer issue, not a model/auth failure.
 - Telegram channel probe can be healthy before any inbound DM arrives. Check `lastInboundAt` or send a fresh message after startup.
 - Telegram can initially reply with `access not configured` while in pairing mode. After the first owner DM, approve pairing, then move to local `allowFrom` plus `dmPolicy=allowlist` for a more durable owner-only setup.
+- Outbound Telegram success is not enough to claim audio readiness. For Telegram voice-note use, require validated local STT and state explicitly whether real inbound voice-note transcription has already been proven.
 
 ## Tooling Mistakes To Avoid
 
