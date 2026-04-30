@@ -7,23 +7,17 @@ EXPECTED_WORKSPACE="${ROOT}/workspace"
 EXPECTED_GATEWAY_MODE="local"
 EXPECTED_GATEWAY_BIND="loopback"
 BASELINE_MODEL="gpt-5.4"
-UNSUITABLE_MODEL="gpt-5.5"
 EXPECTED_REASONING="xhigh"
 EXPECTED_RUNTIME_ID="codex-cli"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
-  "${ROOT}/workspace/BOOTSTRAP.md"
-  "${ROOT}/workspace/README.md"
   "${ROOT}/workspace/MEMORY.md"
   "${ROOT}/workspace/TOOLS.md"
   "${ROOT}/workspace/WEBTERMINAL.md"
   "${ROOT}/workspace/SOUL.md"
   "${ROOT}/workspace/IDENTITY.md"
   "${ROOT}/workspace/USER.md"
-  "${ROOT}/memory/README.md"
-  "${ROOT}/memory/active-context.md"
-  "${ROOT}/memory/decisions.md"
 )
 
 extract_toml_string() {
@@ -32,7 +26,7 @@ extract_toml_string() {
   awk -F'"' -v key="${key}" '$0 ~ "^[[:space:]]*" key " = \"" { print $2; exit }' "${file}"
 }
 
-model_is_valid_newer_than_unsuitable() {
+model_is_newer_than_baseline() {
   local model="$1"
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
@@ -49,12 +43,7 @@ resolve_expected_base_model_name() {
     shared_model="$(extract_toml_string model "${SHARED_CODEX_CONFIG}" || true)"
   fi
 
-  if [[ "${shared_model}" == "${UNSUITABLE_MODEL}" ]]; then
-    printf '%s\n' "${BASELINE_MODEL}"
-    return
-  fi
-
-  if [[ -n "${shared_model}" ]] && model_is_valid_newer_than_unsuitable "${shared_model}"; then
+  if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}"; then
     printf '%s\n' "${shared_model}"
     return
   fi
@@ -142,5 +131,17 @@ if [[ "${actual_reasoning}" != "${EXPECTED_REASONING}" ]]; then
   echo "Shared Codex reasoning mismatch: expected ${EXPECTED_REASONING}, got ${actual_reasoning:-<unset>}" >&2
   exit 1
 fi
+
+if [[ ! -x "${ROOT}/.venv-stt/bin/python" ]]; then
+  echo "Missing repo-local STT venv: ${ROOT}/.venv-stt" >&2
+  exit 1
+fi
+
+if ! "${ROOT}/.venv-stt/bin/python" -c 'import faster_whisper' >/dev/null 2>&1; then
+  echo "Repo-local STT venv exists but faster-whisper is not importable." >&2
+  exit 1
+fi
+
+"${ROOT}/scripts/validate-local-stt.sh" >/dev/null
 
 echo "Local setup validated."

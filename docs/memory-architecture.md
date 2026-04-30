@@ -1,52 +1,131 @@
-# Memory Architecture
+# Portable Level-1 Memory Architecture
 
-This repo uses a Level-1 memory architecture: simple, local, inspectable files before any vector database or external memory service.
+Purpose: give OpenClaw a portable first memory layer that survives across instances, agents, and fresh installs without depending on one oversized prompt.
 
-## Level-1 Memory Definition
+## Level-1 scope
 
-Level-1 memory is the minimum durable context a fresh OpenClaw install must have before first chat.
+Level-1 memory is the portable, GitHub-safe layer:
 
-It consists of:
+- contracts
+- startup read order
+- discovery methods
+- public-safe long-term operating facts
+- install-time requirements
 
-- `workspace/AGENTS.md` - behavior rules for future agents.
-- `workspace/BOOTSTRAP.md` - first-run expectations.
-- `workspace/MEMORY.md` - public-safe seeded operating memory.
-- `workspace/TOOLS.md` - tool and command assumptions.
-- `workspace/WEBTERMINAL.md` - webterminal topology rules.
-- `workspace/SOUL.md` - identity and operating style seed.
-- `workspace/IDENTITY.md` - role and name seed.
-- `workspace/USER.md` - user-facing assumptions that are safe to track.
-- `memory/README.md` - memory vault map.
-- `memory/active-context.md` - current public-safe operating context.
-- `memory/decisions.md` - durable decisions.
+It is not:
 
-## Install Rule
+- raw local notes
+- secrets
+- instance-private URLs/IDs
+- live tab names/order/path snapshots
+- vector/DB memory layers
 
-Before the first chat, Telegram pairing, or gateway handoff, the installer must confirm these files exist and are readable.
+## Canonical layout
 
-If any required Level-1 file is missing, stop and repair the workspace seed before proceeding.
+- `docs/` → global OpenClaw contracts and architecture
+- `BOOTSTRAP.md` → mandatory startup read order
+- `MEMORY.md` → public-safe long-term OpenClaw memory
+- `TOOLS.md` → discovery methods and operating notes
+- `*.local.md` → instance-private overrides
+- `memory/` → raw local notes (gitignored)
 
-## Linkage Rule
+## Dynamic topology rule
 
-The workspace and memory vault must be linked by content, not symlink tricks:
+Webterminal topology is dynamic:
 
-- `workspace/MEMORY.md` should point future agents to `memory/`.
-- `memory/README.md` should explain how to promote temporary notes into durable memory.
-- `memory/active-context.md` should summarize the current install model.
-- `memory/decisions.md` should record the model/auth/topology decisions.
+- tab names can change
+- working directories can change
+- tab order can change
+- neighboring agent roots can differ by instance
 
-## Privacy Boundary
+Therefore Level-1 memory must preserve discovery methods, not stale live values.
 
-Tracked memory must stay public-safe.
+Canonical live sources:
 
-Do not commit:
+- `/opt/claude-vnc-terminal/data/terminal-state.json`
+- `<REPO_ROOT>/scripts/agent-landscape.sh`
 
-- passwords
-- API keys
-- Telegram bot tokens
-- Telegram user IDs
-- private URLs
-- private transcripts
-- owner-specific secrets
+Never treat cached tab names, paths, or order as source of truth.
 
-Use local-only files such as `*.local.md` for instance-private notes.
+## Live webterminal control rule
+
+If the requirement is to interact with an already-running agent live in the same webterminal tab, use one canonical control path:
+
+1. resolve target tab/cwd from `/opt/claude-vnc-terminal/data/terminal-state.json`
+2. resolve the live `/dev/pts/N` from `/proc/<pid>/cwd`, `/proc/<pid>/fd/0`, and `/proc/<pid>/cmdline`
+3. write directly to that PTY
+
+Do not substitute these with:
+
+- `/codex resume`
+- ACP/new side-channel session
+- file mailbox
+- spawning a separate replacement agent
+- WebSocket/API control story
+- tmux bridge unless the actual tested path on that host is explicitly tmux-backed
+
+Those do not satisfy the same-live-tab requirement.
+
+## No-sandbox requirement
+
+When topology discovery or live webterminal control is required, the operator path must not use a sandbox mode that blocks:
+
+- `/opt/claude-vnc-terminal/data/terminal-state.json`
+- the corresponding webterminal server-side API/PTY path
+
+Do not continue pretending topology/control is solved if the active runtime cannot read the live topology source or reach the live PTY path.
+
+## Agent startup rule
+
+Before acting on multi-agent topology, an agent must re-ground itself in:
+
+1. current runtime surface
+2. current owner context
+3. current live tab registry
+4. current shared-agent landscape
+5. current memory scope (global vs local vs private)
+
+## Install/bootstrap requirement
+
+During install or bootstrap, OpenClaw must seed and link the Level-1 memory layer before first user chat:
+
+- `BOOTSTRAP.md`
+- `MEMORY.md`
+- `TOOLS.md`
+- `docs/memory-architecture.md`
+- other linked capability docs such as `docs/installer-capability-contract.md` and `docs/stt-path.md`
+
+The installer must also ensure:
+
+- local/private memory paths are gitignored
+- topology discovery commands are present and documented
+- startup docs point to each other clearly
+
+## Validation rule
+
+An install is not fully ready unless it can show:
+
+- the Level-1 memory files exist
+- they are linked together
+- dynamic topology discovery uses live host evidence
+- local/private memory is separated from tracked docs
+
+## Behavior rule
+
+For critical facts, store:
+
+- the rule
+- the scope
+- where to rediscover the live value
+
+Do not store changing live values as if they were durable truth.
+
+See also:
+
+- `docs/data-sources.md`
+- `BOOTSTRAP.md`
+- `MEMORY.md`
+- `TOOLS.md`
+- `docs/model-policy.md`
+- `docs/installer-capability-contract.md`
+- `docs/stt-path.md`

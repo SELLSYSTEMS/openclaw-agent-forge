@@ -43,6 +43,7 @@ Rules:
 - derive the real target root from the live host before applying any control contract or path convention
 - on a VPS/virtual instance, do not default to Docker/container deployment advice unless the live host evidence shows Docker is actually present and intended
 - treat the webterminal tab registry as first-class live evidence, not trivia
+- if the user needs OpenClaw to type into an already-running neighboring webterminal tab, use the direct PTY path documented in `docs/agent-topology.md` instead of inventing a TUI-only control story
 
 ## Target Layout
 
@@ -51,7 +52,7 @@ Rules:
 - launcher: `<REPO_ROOT>/bin/openclaw-local`
 - workspace: `<REPO_ROOT>/workspace`
 - memory vault: `<REPO_ROOT>/memory`
-- primary model floor: `codex-cli/gpt-5.4`
+- baseline model: `codex-cli/gpt-5.4`
 - preferred reasoning floor: `xhigh`
 - gateway: `local` mode on loopback
 
@@ -76,18 +77,19 @@ What it does:
 2. Creates `<REPO_ROOT>/.openclaw-home`.
 3. Configures OpenClaw with `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `<REPO_ROOT>/workspace`.
-5. Sets the primary model to `codex-cli/gpt-5.4`, or to a validated shared Codex user model if it is numerically newer than 5.5.
+5. Sets the primary model to `codex-cli/gpt-5.4`, or to the shared Codex user model if it is numerically newer than 5.5. If `gpt-5.5` resolves by default, it must be overridden.
 6. Sets `gateway.mode=local`.
 7. Sets `gateway.bind=loopback`.
-8. Validates the resulting config.
+8. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
+9. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
+10. Validates the resulting config.
 
 ## Authentication Model
 
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 - install and log in to the `codex` CLI
-- keep the OpenClaw model ref at `codex-cli/gpt-5.4` or a validated newer shared Codex user model when one exists
-- treat `gpt-5.5` as unsuitable and override it to `codex-cli/gpt-5.4`
+- keep the OpenClaw model ref at `codex-cli/gpt-5.4` or a newer shared Codex user model when one exists, never `gpt-5.5`
 - let OpenClaw delegate turn execution to the installed Codex CLI
 - keep shared Codex reasoning at `xhigh`
 
@@ -114,17 +116,12 @@ A fresh OpenClaw install from this repo should **not** behave like a blank slate
 Before the first user message or Telegram connection, the workspace should already contain and preserve these tracked context files:
 
 - `<REPO_ROOT>/workspace/AGENTS.md`
-- `<REPO_ROOT>/workspace/BOOTSTRAP.md`
-- `<REPO_ROOT>/workspace/README.md`
 - `<REPO_ROOT>/workspace/MEMORY.md`
 - `<REPO_ROOT>/workspace/TOOLS.md`
 - `<REPO_ROOT>/workspace/WEBTERMINAL.md`
 - `<REPO_ROOT>/workspace/SOUL.md`
 - `<REPO_ROOT>/workspace/IDENTITY.md`
 - `<REPO_ROOT>/workspace/USER.md`
-- `<REPO_ROOT>/memory/README.md`
-- `<REPO_ROOT>/memory/active-context.md`
-- `<REPO_ROOT>/memory/decisions.md`
 
 Behavior rule:
 
@@ -153,37 +150,13 @@ Rules:
 - attempt pairing/verification against `TELEGRAM_USER_ID` during the same pass
 - if token validation fails or pairing cannot be completed, stop immediately and report the exact issue
 
-## Codex CLI TUI On This Server
+## Codex CLI Notes
 
-No separate server-side TUI package is required for Codex.
+For generic Codex CLI TUI behavior, auth, and flags, see:
 
-What the server actually needs is:
+- `docs/codex-cli-tui.md`
 
-- a working `codex` binary on `PATH`
-- a successful one-time `codex login` under the Unix account that will run the agent sessions
-- a readable `~/.codex` home for that same account
-- a terminal surface that can render interactive TUIs
-
-On browser terminals or strict multiplexers, prefer:
-
-```bash
-codex --no-alt-screen
-```
-
-If you need to start Codex in a specific project root, use:
-
-```bash
-codex -C /home/admin
-codex -C /home/langchain
-codex -C /home/udacity
-codex -C <REPO_ROOT>
-```
-
-For OpenClaw's own TUI, the prerequisites are different:
-
-- OpenClaw must already be installed locally
-- the local gateway must be reachable
-- operator pairing or approval may still be required even when the TUI itself launches
+This install runbook must not hardcode current-host tab names, neighboring agent roots, or specific project paths from one machine as if they were universal install facts.
 
 ## Validation
 
@@ -203,8 +176,9 @@ Expected outcomes:
 - the configured gateway bind resolves to `loopback`
 - `codex login status` succeeds
 - the shared Codex reasoning default resolves to `xhigh`
-- if no verified STT path already exists, `scripts/setup-local-stt.sh` has run successfully
-- before declaring audio/STT ready, `scripts/transcribe-local.sh` transcribes a real sample file
+- the repo-local STT venv exists at `<REPO_ROOT>/.venv-stt`
+- `faster-whisper` imports successfully from that venv
+- `scripts/validate-local-stt.sh` succeeds on a real speech sample
 
 ## Keeping The Gateway Alive
 

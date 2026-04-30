@@ -53,3 +53,11 @@ Use this when OpenClaw needs to interact with another long-running agent or serv
 ```text
 Assume there is no invisible bot-to-bot magic. Design an explicit bridge using Node-RED, `openclaw agent --message ... --deliver`, or a small documented script. Include loop-prevention rules, ownership of config, and where the resulting operational knowledge should be saved.
 ```
+
+## 6. Same-tab neighboring agent control
+
+Use this when the user wants you to make text or a command appear in an already-running neighboring webterminal tab they are watching live.
+
+```text
+Resolve the target from `/opt/claude-vnc-terminal/data/terminal-state.json`, then resolve the live PTY from `/proc/<pid>/cwd`, `/proc/<pid>/fd/0`, and `/proc/<pid>/cmdline`. Use `scripts/find-live-terminal.py` and `scripts/write-live-terminal.sh` when available. Do not substitute OpenClaw TUI, `/codex resume`, WebSocket/API detours, a new side-channel session, or a replacement agent when the user explicitly wants the already-visible tab.
+```

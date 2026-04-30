@@ -6,11 +6,16 @@
 workspace/.scratch/
 workspace/tmp/
 workspace/.openclaw/
+workspace/.playwright-cli/
 workspace/memory/
+workspace/deliverables/
 workspace/*.local.md
+workspace/*.local.env
 
 memory/inbox/*.md
 !memory/inbox/.gitkeep
 memory/references/local-only/
 
 *.log
+__pycache__/
+*.pyc

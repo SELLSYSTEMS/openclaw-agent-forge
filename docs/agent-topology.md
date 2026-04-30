@@ -1,29 +1,48 @@
 # Agent Topology
 
-This document records the known current agent layout on this server class and how future agents should rediscover it safely.
+This document records how future agents should rediscover the live agent layout safely instead of trusting stale copied examples.
 
-## Known Current Roots
+## Dynamic-first rule
 
-- `/home/admin` → Default AI
-- `/home/langchain` → learnLangChain
-- `/home/udacity` → learnUdacity
-- `/home/OpenClaw` → OpenClaw
-
-These names and roots are part of the current known topology.
+Do not treat another instance's tab names, root paths, or tab order as durable truth.
+This repo may include tracked host examples, but future agents must rediscover the live topology on the current machine before acting.
 
 ## Discovery Rule
 
-Future agents should not rely only on static assumptions.
+Future agents should not rely on static assumptions.
 
 Use these first:
 
 ```bash
-/home/OpenClaw/scripts/agent-landscape.sh
+<REPO_ROOT>/scripts/agent-landscape.sh
 ps -ef | rg -i 'codex|openclaw|node-red|tmux'
 tmux ls
 ```
 
-Then inspect the known roots directly if needed.
+Then inspect the live targets directly if needed.
+
+## Same-tab live control
+
+If the user wants OpenClaw to type into an already-running neighboring agent tab that is visible in the webterminal, use one canonical path only:
+
+1. resolve the target tab or working directory from `/opt/claude-vnc-terminal/data/terminal-state.json`
+2. resolve the live PTY from `/proc/<pid>/cwd`, `/proc/<pid>/fd/0`, and `/proc/<pid>/cmdline`
+3. write the exact text or command to that `/dev/pts/N`
+
+Canonical helpers in this repo:
+
+```bash
+scripts/find-live-terminal.py --tab-name <tab-name> --json
+scripts/write-live-terminal.sh --tab-name <tab-name> -- 'echo "hello"'
+```
+
+Important rules:
+
+- do not substitute OpenClaw TUI for same-tab neighboring-agent control
+- do not use `/codex resume` when the requirement is to affect the already-visible tab
+- do not spawn a replacement agent or hide the action in a side channel
+- if multiple PTY candidates exist for one cwd, stop and inspect instead of guessing
+- if the current runtime cannot reach the PTY path, stop and report the access gap instead of inventing another control path
 
 ## Webterminal Context
 
@@ -37,7 +56,7 @@ Important rule:
 
 Recommended local-only file:
 
-- `/home/OpenClaw/workspace/WEBTERMINAL.local.md`
+- `<REPO_ROOT>/workspace/WEBTERMINAL.local.md`
 
 Use that file for the current instance's browser-terminal URL and any safe local notes about how to access it.
 

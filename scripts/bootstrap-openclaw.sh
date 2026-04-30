@@ -8,21 +8,15 @@ WORKSPACE_DIR="${ROOT}/workspace"
 MEMORY_DIR="${ROOT}/memory"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 BASELINE_MODEL="gpt-5.4"
-UNSUITABLE_MODEL="gpt-5.5"
 BASELINE_REASONING="xhigh"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
-  "${ROOT}/workspace/BOOTSTRAP.md"
-  "${ROOT}/workspace/README.md"
   "${ROOT}/workspace/MEMORY.md"
   "${ROOT}/workspace/TOOLS.md"
   "${ROOT}/workspace/WEBTERMINAL.md"
   "${ROOT}/workspace/SOUL.md"
   "${ROOT}/workspace/IDENTITY.md"
   "${ROOT}/workspace/USER.md"
-  "${ROOT}/memory/README.md"
-  "${ROOT}/memory/active-context.md"
-  "${ROOT}/memory/decisions.md"
 )
 
 extract_toml_string() {
@@ -31,7 +25,7 @@ extract_toml_string() {
   awk -F'"' -v key="${key}" '$0 ~ "^[[:space:]]*" key " = \"" { print $2; exit }' "${file}"
 }
 
-model_is_valid_newer_than_unsuitable() {
+model_is_newer_than_baseline() {
   local model="$1"
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
@@ -48,12 +42,7 @@ resolve_requested_model_ref() {
     shared_model="$(extract_toml_string model "${SHARED_CODEX_CONFIG}" || true)"
   fi
 
-  if [[ "${shared_model}" == "${UNSUITABLE_MODEL}" ]]; then
-    printf 'codex-cli/%s\n' "${BASELINE_MODEL}"
-    return
-  fi
-
-  if [[ -n "${shared_model}" ]] && model_is_valid_newer_than_unsuitable "${shared_model}"; then
+  if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}"; then
     printf 'codex-cli/%s\n' "${shared_model}"
     return
   fi
@@ -96,6 +85,9 @@ env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" models set "${
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set gateway.mode local
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set gateway.bind loopback
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config validate
+
+"${ROOT}/scripts/setup-local-stt.sh"
+"${ROOT}/scripts/validate-local-stt.sh"
 
 if command -v codex >/dev/null 2>&1; then
   if ! codex login status >/dev/null 2>&1; then

@@ -296,7 +296,7 @@ You MUST:
 - seed and link the Level-1 memory architecture defined in `docs/memory-architecture.md` before first user chat
 - treat `/opt/claude-vnc-terminal/data/terminal-state.json` as primary live topology evidence on this host class
 - distinguish sessions vs webterminal tabs vs neighboring terminal agents vs spawned subagents
-- prefer PTY/WebSocket bridge first, tmux bridge second, browser UI last when the requirement is live control of an existing webterminal agent
+- when live control of an existing webterminal agent is required, use one canonical path only: resolve the target from `terminal-state.json`, resolve the live `/dev/pts/N` from `/proc`, and write directly to that PTY; do not invent alternate control paths
 - avoid generic Docker/container advice on a VPS unless live host evidence justifies it
 - report final state clearly
 
