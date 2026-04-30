@@ -28,6 +28,7 @@
 - Shared Codex reasoning should stay on `xhigh`.
 - If the shared Codex user default moves to a numerically newer GPT model than 5.5, OpenClaw should follow it after validation.
 - This setup should prefer Codex CLI login reuse over `OPENAI_API_KEY`.
+- Do not switch normal OpenClaw install/runtime behavior to direct API-key auth when Codex CLI reuse is available.
 - On this host class, all webterminal tabs share the same Unix user, so Codex login is a shared user-level state rather than a per-tab concern.
 - A successful `codex login status` plus a successful `codex exec ...` smoke test proves the auth path is usable.
 
@@ -51,3 +52,4 @@
 - Do not place bot tokens or other secrets into tracked docs, scripts, or memory files when the GitHub repo is public.
 - Do not place owner-specific Telegram IDs into tracked docs when the GitHub repo is public.
 - For fresh installs on this host class, no-sandbox / danger-full-access should be the default operator mode. If the shell sandbox throws `bwrap: Failed to make / slave: Permission denied`, treat that as proof the wrong runtime was used and switch immediately.
+- Do not introduce cron as default automation during install or repair. Use local Node-RED for durable automation unless the user explicitly asked for cron.

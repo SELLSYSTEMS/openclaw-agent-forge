@@ -113,8 +113,15 @@ This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 - keep the OpenClaw model ref at `codex-cli/gpt-5.4` or a newer shared Codex user model when one exists, never `gpt-5.5`
 - let OpenClaw delegate turn execution to the installed Codex CLI
 - keep shared Codex reasoning at `xhigh`
+- do not re-route install/runtime execution through direct API-key auth when Codex CLI reuse is available
 
 This keeps auth ownership with Codex CLI instead of storing OpenAI API credentials inside the OpenClaw repo or config flow.
+
+## Automation And Scheduling Policy
+
+- Do not add cron jobs, timers, or cron-driven repair loops during normal install/bootstrap unless the user explicitly asked for cron.
+- For durable automations, scheduled flows, and bridges on this host class, use the local shared Node-RED runtime under `/root/.node-red`.
+- Keep the install path repo-local and CLI-driven; do not add hidden external scheduler dependencies.
 
 ## Seeded Workspace Memory
 

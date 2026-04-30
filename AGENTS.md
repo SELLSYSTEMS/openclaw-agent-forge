@@ -21,9 +21,11 @@ Canonical repository identity:
 5. Treat `<REPO_ROOT>/memory` as the local memory source of truth.
 6. Use Markdown files first. Do not introduce a vector database unless keyword search has clearly stopped being enough.
 7. Keep the primary model floor on `gpt-5.4` with Codex CLI as the intended backend path and `xhigh` reasoning as the minimum default. If the shared Codex user default moves to a numerically newer GPT model than 5.5 and is validated locally, OpenClaw should follow that newer model.
-8. Do not introduce `OPENAI_API_KEY` as the default auth path when Codex CLI reuse is available.
-9. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
-10. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.
+8. Do not introduce `OPENAI_API_KEY` as the auth or execution path for normal OpenClaw installs on this host class. Reuse the installed Codex CLI login instead.
+9. Do not introduce cron-based automation or scheduled jobs unless the user explicitly asked for cron.
+10. For durable automations, scheduled flows, or bridges, prefer the local shared Node-RED under `/root/.node-red`, not cron.
+11. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
+12. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.
 
 ## Required Flow
 
@@ -58,5 +60,6 @@ Canonical repository identity:
 - Prefer local repo config, workspace files, CLI overrides, and agent docs over mutating global Codex CLI config.
 - Treat OpenClaw as the orchestrator for this repo's workflows.
 - Prefer Node-RED when you need durable automations, bridges, or human-readable flow diagrams.
+- Do not add cron jobs or cron-based scheduling unless the user explicitly asked for cron.
 - On always-on servers, prefer the repo-managed systemd gateway service over tmux.
 - Use `scripts/agent-landscape.sh` before assuming which agents or services are active on the host.

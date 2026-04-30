@@ -44,6 +44,11 @@
 - Decision: use OpenClaw as the coordination layer for this repo, and prefer Node-RED when building durable automations, bridges, or human-readable schemes
 - Why: OpenClaw owns the agent workflows here, while Node-RED is already present on the host and is a better fit for repeatable automation and visual flow management
 
+### Keep CLI auth/execution mandatory and cron opt-in only
+
+- Decision: for normal installs on this host class, keep Codex CLI as the only default model/auth execution path, do not switch to direct `OPENAI_API_KEY` auth, and do not create cron-based automation unless the user explicitly asks for cron
+- Why: the shared Codex CLI login is already the intended repo execution path, while local Node-RED is the correct durable automation fabric and avoids hidden scheduler drift during install or repair
+
 ### Treat `/root/.codex` as shared host context, not repo-owned state
 
 - Decision: let future agents read shared Codex CLI context from `/root/.codex`, but avoid mutating global config unless the user explicitly asks
