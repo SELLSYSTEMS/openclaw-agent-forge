@@ -50,7 +50,7 @@ Canonical repository identity:
 - The Codex TUI is already built into `codex`; do not invent a separate server-side TUI install step for it. In browser terminals, prefer `codex --no-alt-screen`.
 - If the user wants a message or command to appear in an already-running neighboring webterminal tab, use one canonical path only: resolve the target tab from `terminal-state.json`, resolve the live `/dev/pts/N` from `/proc`, and write directly to that PTY. Do not invent alternate control planes.
 - The built-in `openclaw gateway install` path expects systemd user services on Linux. On this host class, prefer the repo-managed system service under `systemd/openclaw-gateway.service` for reboot persistence.
-- If local shell/JS commands fail with `bwrap: Failed to make / slave: Permission denied`, treat that as a broken operator runtime for install work. Stop, move the session to no-sandbox / danger-full-access execution, and only then continue. Do not keep pretending bootstrap/validation can proceed from a broken bwrap runtime.
+- On this host class, install/operator work should start in no-sandbox / danger-full-access execution by default. If local shell/JS commands fail with `bwrap: Failed to make / slave: Permission denied`, that only confirms the rule was violated: stop immediately and move the session to the correct no-sandbox runtime before continuing.
 
 ## Shared Host Rules
 

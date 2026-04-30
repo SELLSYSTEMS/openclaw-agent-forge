@@ -20,6 +20,8 @@ For future installs, document and use the actual detected `<REPO_ROOT>` on that 
 
 Do not start bootstrap from a runtime that cannot execute local shell commands.
 
+For fresh installs on this host class, the operator/install session should start in no-sandbox / danger-full-access mode by default.
+
 If local shell or JS execution fails with:
 
 ```text
@@ -31,7 +33,7 @@ that is not an OpenClaw bootstrap problem. It is an operator-runtime problem.
 Rules:
 
 - stop immediately
-- switch the install/operator session to no-sandbox / danger-full-access execution
+- switch the install/operator session to the correct no-sandbox / danger-full-access execution
 - only continue once local shell execution actually works
 - do not fake host inspection, STT validation, or bootstrap results from a broken bwrap runtime
 

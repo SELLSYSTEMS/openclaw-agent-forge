@@ -79,13 +79,15 @@ Reference paths in this repo are examples from the current tracked host, not uni
 
 The installer session itself must be able to execute local shell commands.
 
+For fresh installs on this host class, that means the install/operator session should start in **no-sandbox / danger-full-access** mode by default.
+
 If local shell or JS execution fails with:
 
 ```text
 bwrap: Failed to make / slave: Permission denied
 ```
 
-stop immediately and move the install/operator session to no-sandbox / danger-full-access execution before continuing. Do not attempt bootstrap, validation, or topology discovery from a broken bwrap runtime.
+stop immediately and move the install/operator session to the correct no-sandbox / danger-full-access execution before continuing. Do not attempt bootstrap, validation, or topology discovery from a broken bwrap runtime.
 
 ## Bootstrap
 
