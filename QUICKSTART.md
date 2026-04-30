@@ -15,6 +15,8 @@ Before bootstrap:
 
 Reference paths below reflect this tracked host. On another host, use the same repo-local pattern under that host's canonical owner root.
 
+If local shell or JS execution fails with `bwrap: Failed to make / slave: Permission denied`, stop and rerun the install/operator session in no-sandbox / danger-full-access mode before continuing. Do not try to bootstrap from a broken bwrap runtime.
+
 ## 1. Bootstrap
 
 ```bash

@@ -16,6 +16,25 @@ Rules:
 For this tracked host, the canonical root is `/home/OpenClaw`.
 For future installs, document and use the actual detected `<REPO_ROOT>` on that machine.
 
+## Operator Runtime Must Work First
+
+Do not start bootstrap from a runtime that cannot execute local shell commands.
+
+If local shell or JS execution fails with:
+
+```text
+bwrap: Failed to make / slave: Permission denied
+```
+
+that is not an OpenClaw bootstrap problem. It is an operator-runtime problem.
+
+Rules:
+
+- stop immediately
+- switch the install/operator session to no-sandbox / danger-full-access execution
+- only continue once local shell execution actually works
+- do not fake host inspection, STT validation, or bootstrap results from a broken bwrap runtime
+
 ## Live Topology Discovery Is Mandatory
 
 Do not treat OpenClaw as the only thing on the box.

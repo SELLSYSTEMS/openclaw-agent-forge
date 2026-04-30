@@ -50,4 +50,4 @@
 - Do not write multiple `openclaw config set` updates in parallel against the same config file; one write can clobber the other.
 - Do not place bot tokens or other secrets into tracked docs, scripts, or memory files when the GitHub repo is public.
 - Do not place owner-specific Telegram IDs into tracked docs when the GitHub repo is public.
-- If the shell sandbox throws `bwrap: Failed to make / slave: Permission denied`, treat it as an execution environment issue and rerun with escalation.
+- If the shell sandbox throws `bwrap: Failed to make / slave: Permission denied`, treat it as an execution-environment failure for install work. Stop and move the session to no-sandbox / danger-full-access execution before continuing.

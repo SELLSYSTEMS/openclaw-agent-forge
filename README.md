@@ -75,6 +75,18 @@ This repo documents one installation pattern, but the installer agent must still
 
 Reference paths in this repo are examples from the current tracked host, not universal commands for every other machine.
 
+## Installer Runtime Requirement
+
+The installer session itself must be able to execute local shell commands.
+
+If local shell or JS execution fails with:
+
+```text
+bwrap: Failed to make / slave: Permission denied
+```
+
+stop immediately and move the install/operator session to no-sandbox / danger-full-access execution before continuing. Do not attempt bootstrap, validation, or topology discovery from a broken bwrap runtime.
+
 ## Bootstrap
 
 ```bash
