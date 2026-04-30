@@ -43,6 +43,7 @@
 
 - Decision: use OpenClaw as the coordination layer for this repo, and prefer Node-RED when building durable automations, bridges, or human-readable schemes
 - Why: OpenClaw owns the agent workflows here, while Node-RED is already present on the host and is a better fit for repeatable automation and visual flow management
+- Constraint: when Node-RED is shared with user-owned flows, keep OpenClaw work in a dedicated new OpenClaw-specific tab/project scope so it does not mix with or break unrelated flows
 
 ### Keep CLI auth/execution mandatory and cron opt-in only
 

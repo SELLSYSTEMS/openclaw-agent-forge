@@ -35,7 +35,7 @@ Take the working result and promote only the safe operational knowledge into doc
 Use this when deciding where a new integration or workflow should live.
 
 ```text
-Decide whether the task belongs in OpenClaw, Node-RED, or a small local script. Prefer OpenClaw for agent coordination, Node-RED for durable automations and visual flows, and repo-local scripts for small explicit utilities. Do not default to cron; use cron only when the user explicitly asked for cron. Avoid hidden cross-tool state and document the decision in memory/decisions.md.
+Decide whether the task belongs in OpenClaw, Node-RED, or a small local script. Prefer OpenClaw for agent coordination, Node-RED for durable automations and visual flows, and repo-local scripts for small explicit utilities. If you use shared Node-RED, create a dedicated new OpenClaw-specific tab/project scope and do not mix those flows into unrelated user flows. Do not default to cron; use cron only when the user explicitly asked for cron. Avoid hidden cross-tool state and document the decision in memory/decisions.md.
 ```
 
 ## 4. Shared Codex Hygiene

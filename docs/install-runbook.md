@@ -121,6 +121,7 @@ This keeps auth ownership with Codex CLI instead of storing OpenAI API credentia
 
 - Do not add cron jobs, timers, or cron-driven repair loops during normal install/bootstrap unless the user explicitly asked for cron.
 - For durable automations, scheduled flows, and bridges on this host class, use the local shared Node-RED runtime under `/root/.node-red`.
+- In shared Node-RED, create or use a dedicated new OpenClaw-specific tab/project scope; do not mix OpenClaw flows into unrelated user flows.
 - Keep the install path repo-local and CLI-driven; do not add hidden external scheduler dependencies.
 
 ## Seeded Workspace Memory

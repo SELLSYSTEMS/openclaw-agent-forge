@@ -103,6 +103,7 @@ Operational assumption for this server class:
 Operational rule:
 
 - treat Node-RED as the preferred automation fabric when a workflow needs repeatability, fan-out, or a human-readable flow diagram
+- in shared Node-RED, keep OpenClaw flows in a dedicated new OpenClaw-specific tab/project scope instead of mixing them into unrelated user flows
 - do not copy passwords, hashes, or credentials into tracked docs
 
 Tracked host example:

@@ -119,6 +119,7 @@ This setup uses `gpt-5.4` as the baseline OpenClaw model, with Codex CLI as the 
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
 - Normal installs on this host class should stay CLI-only for model/auth execution; do not switch the install path to direct API-key auth.
 - Durable automations and scheduled flows should live in the local shared Node-RED runtime, not cron, unless the user explicitly asked for cron.
+- OpenClaw Node-RED work should live in a dedicated new OpenClaw-specific tab/project scope so it does not mix with or break unrelated user flows.
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
 - If the shared Codex user default later moves to a numerically newer GPT model than 5.5, OpenClaw should be updated to follow that newer model after a local validation pass.

@@ -24,8 +24,9 @@ Canonical repository identity:
 8. Do not introduce `OPENAI_API_KEY` as the auth or execution path for normal OpenClaw installs on this host class. Reuse the installed Codex CLI login instead.
 9. Do not introduce cron-based automation or scheduled jobs unless the user explicitly asked for cron.
 10. For durable automations, scheduled flows, or bridges, prefer the local shared Node-RED under `/root/.node-red`, not cron.
-11. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
-12. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.
+11. If OpenClaw needs Node-RED flows, put them in a dedicated new OpenClaw-specific tab/project scope. Do not mix them into unrelated user flows.
+12. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
+13. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.
 
 ## Required Flow
 
@@ -60,6 +61,7 @@ Canonical repository identity:
 - Prefer local repo config, workspace files, CLI overrides, and agent docs over mutating global Codex CLI config.
 - Treat OpenClaw as the orchestrator for this repo's workflows.
 - Prefer Node-RED when you need durable automations, bridges, or human-readable flow diagrams.
+- In shared Node-RED, create or use a dedicated OpenClaw-specific tab/project scope instead of mixing OpenClaw flows into unrelated user flows.
 - Do not add cron jobs or cron-based scheduling unless the user explicitly asked for cron.
 - On always-on servers, prefer the repo-managed systemd gateway service over tmux.
 - Use `scripts/agent-landscape.sh` before assuming which agents or services are active on the host.
