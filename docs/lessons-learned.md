@@ -31,6 +31,7 @@
 - Do not switch normal OpenClaw install/runtime behavior to direct API-key auth when Codex CLI reuse is available.
 - On this host class, all webterminal tabs share the same Unix user, so Codex login is a shared user-level state rather than a per-tab concern.
 - A successful `codex login status` plus a successful `codex exec ...` smoke test proves the auth path is usable.
+- A healthy Codex login is not enough by itself. Embedded `codex-cli` turns can still die from OpenClaw's own no-output watchdog if the repo does not override it.
 
 ## Gateway Operations
 
@@ -43,6 +44,7 @@
 - Telegram channel probe can be healthy before any inbound DM arrives. Check `lastInboundAt` or send a fresh message after startup.
 - Telegram can initially reply with `access not configured` while in pairing mode. After the first owner DM, approve pairing, then move to local `allowFrom` plus `dmPolicy=allowlist` for a more durable owner-only setup.
 - Outbound Telegram success is not enough to claim audio readiness. For Telegram voice-note use, require validated local STT and state explicitly whether real inbound voice-note transcription has already been proven.
+- A healthy gateway and healthy Telegram transport do not prove a long embedded Codex turn will survive. The main failure can still be an internal `cli watchdog timeout` while the service stays up.
 
 ## Tooling Mistakes To Avoid
 
@@ -55,6 +57,7 @@
 - Do not place bot tokens or other secrets into tracked docs, scripts, or memory files when the GitHub repo is public.
 - Do not place owner-specific Telegram IDs into tracked docs when the GitHub repo is public.
 - Do not default to OpenClaw's built-in `coding-agent` / side `codex exec` worker path for long Telegram coding tasks. A silent PTY worker can be terminated after 180 seconds of no output and then surface to the human only as a generic bot failure.
+- Do not leave the embedded `codex-cli` backend on stock no-output watchdog settings for this host class. Set a day-scale agent timeout, disable `agents.defaults.llm.idleTimeoutSeconds`, use `contextInjection=continuation-skip`, and override the `codex-cli` fresh/resume watchdogs to a day-scale value.
 - If you intentionally spawn a side worker, monitor it as background work and keep the parent chat updated. Do not let the parent session sit idle while a child CLI runs off-screen.
 - For fresh installs on this host class, no-sandbox / danger-full-access should be the default operator mode. If the shell sandbox throws `bwrap: Failed to make / slave: Permission denied`, treat that as proof the wrong runtime was used and switch immediately.
 - Do not introduce cron as default automation during install or repair. Use local Node-RED for durable automation unless the user explicitly asked for cron.

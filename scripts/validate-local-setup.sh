@@ -9,6 +9,10 @@ EXPECTED_GATEWAY_BIND="loopback"
 BASELINE_MODEL="gpt-5.4"
 EXPECTED_REASONING="xhigh"
 EXPECTED_RUNTIME_ID="codex-cli"
+EXPECTED_AGENT_TIMEOUT_SECONDS=604800
+EXPECTED_LLM_IDLE_TIMEOUT_SECONDS=0
+EXPECTED_CONTEXT_INJECTION="continuation-skip"
+EXPECTED_CLI_WATCHDOG_TIMEOUT_MS=604800000
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -121,6 +125,56 @@ actual_gateway_bind="$(
 
 if [[ "${actual_gateway_bind}" != "${EXPECTED_GATEWAY_BIND}" ]]; then
   echo "Gateway bind mismatch: expected ${EXPECTED_GATEWAY_BIND}, got ${actual_gateway_bind}" >&2
+  exit 1
+fi
+
+actual_agent_timeout_seconds="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.timeoutSeconds 2>/dev/null || true
+)"
+
+if [[ ! "${actual_agent_timeout_seconds}" =~ ^[0-9]+$ ]] || (( actual_agent_timeout_seconds < EXPECTED_AGENT_TIMEOUT_SECONDS )); then
+  echo "Agent timeout mismatch: expected at least ${EXPECTED_AGENT_TIMEOUT_SECONDS}, got ${actual_agent_timeout_seconds:-<unset>}" >&2
+  exit 1
+fi
+
+actual_llm_idle_timeout_seconds="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.llm.idleTimeoutSeconds 2>/dev/null || true
+)"
+
+if [[ "${actual_llm_idle_timeout_seconds}" != "${EXPECTED_LLM_IDLE_TIMEOUT_SECONDS}" ]]; then
+  echo "LLM idle timeout mismatch: expected ${EXPECTED_LLM_IDLE_TIMEOUT_SECONDS}, got ${actual_llm_idle_timeout_seconds:-<unset>}" >&2
+  exit 1
+fi
+
+actual_context_injection="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.contextInjection 2>/dev/null || true
+)"
+
+if [[ "${actual_context_injection}" != "${EXPECTED_CONTEXT_INJECTION}" ]]; then
+  echo "Context injection mismatch: expected ${EXPECTED_CONTEXT_INJECTION}, got ${actual_context_injection:-<unset>}" >&2
+  exit 1
+fi
+
+actual_watchdog_fresh_ms="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.cliBackends.codex-cli.reliability.watchdog.fresh.noOutputTimeoutMs 2>/dev/null || true
+)"
+
+if [[ ! "${actual_watchdog_fresh_ms}" =~ ^[0-9]+$ ]] || (( actual_watchdog_fresh_ms < EXPECTED_CLI_WATCHDOG_TIMEOUT_MS )); then
+  echo "Codex CLI fresh watchdog mismatch: expected at least ${EXPECTED_CLI_WATCHDOG_TIMEOUT_MS}, got ${actual_watchdog_fresh_ms:-<unset>}" >&2
+  exit 1
+fi
+
+actual_watchdog_resume_ms="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.cliBackends.codex-cli.reliability.watchdog.resume.noOutputTimeoutMs 2>/dev/null || true
+)"
+
+if [[ ! "${actual_watchdog_resume_ms}" =~ ^[0-9]+$ ]] || (( actual_watchdog_resume_ms < EXPECTED_CLI_WATCHDOG_TIMEOUT_MS )); then
+  echo "Codex CLI resume watchdog mismatch: expected at least ${EXPECTED_CLI_WATCHDOG_TIMEOUT_MS}, got ${actual_watchdog_resume_ms:-<unset>}" >&2
   exit 1
 fi
 

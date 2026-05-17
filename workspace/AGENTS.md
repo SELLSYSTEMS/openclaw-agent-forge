@@ -143,8 +143,11 @@ For serious repo work, prefer doing the implementation directly in the main sess
 
 Rules:
 
+- do not remove or relax the repo-level no-interruption policy for embedded Codex runs; on this host class the main OpenClaw session must be allowed to run for hours or days when the work genuinely requires it
+- the baseline runtime policy is: `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, and day-scale `codex-cli` watchdog overrides for fresh and resume runs
 - do not automatically route big coding tasks through the built-in `coding-agent` skill or a side `codex exec` worker just because the task looks substantial
 - on this host class, a silent side worker can be killed after about 180 seconds and the human may only see a generic Telegram failure
+- without the repo override, the main embedded `codex-cli` run can also be killed by the same no-output watchdog even while the service itself stays healthy
 - if you intentionally spawn a side worker, keep it under active `process` monitoring and keep the parent session talking
 - after one side-worker timeout, do not blindly spawn the same pattern again; continue locally or report the exact blocker
 - if the user is talking to you through Telegram, optimize for reliable visible progress over hidden delegation

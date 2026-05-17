@@ -9,6 +9,9 @@ MEMORY_DIR="${ROOT}/memory"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 BASELINE_MODEL="gpt-5.4"
 BASELINE_REASONING="xhigh"
+LONG_RUN_TIMEOUT_SECONDS=604800
+LONG_RUN_WATCHDOG_TIMEOUT_MS=604800000
+EXPECTED_CONTEXT_INJECTION="continuation-skip"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
   "${ROOT}/workspace/MEMORY.md"
@@ -82,6 +85,12 @@ TARGET_PRIMARY_MODEL="$(resolve_requested_model_ref)"
 
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.workspace "${WORKSPACE_DIR}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" models set "${TARGET_PRIMARY_MODEL}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.timeoutSeconds "${LONG_RUN_TIMEOUT_SECONDS}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.llm.idleTimeoutSeconds 0
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.contextInjection "${EXPECTED_CONTEXT_INJECTION}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.command codex
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.reliability.watchdog.fresh.noOutputTimeoutMs "${LONG_RUN_WATCHDOG_TIMEOUT_MS}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.reliability.watchdog.resume.noOutputTimeoutMs "${LONG_RUN_WATCHDOG_TIMEOUT_MS}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set gateway.mode local
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set gateway.bind loopback
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config validate
@@ -104,6 +113,7 @@ if [[ "$(resolve_shared_reasoning)" != "${BASELINE_REASONING}" ]]; then
   echo "Warning: shared Codex reasoning is not ${BASELINE_REASONING}. OpenClaw is expected to run with ${BASELINE_REASONING} reasoning on this host." >&2
 fi
 
+echo "Embedded Codex no-interruption policy: timeoutSeconds=${LONG_RUN_TIMEOUT_SECONDS}, llm.idleTimeoutSeconds=0, contextInjection=${EXPECTED_CONTEXT_INJECTION}, codex-cli watchdog=${LONG_RUN_WATCHDOG_TIMEOUT_MS}ms."
 echo "If Telegram is enabled later on this host, set channels.telegram.execApprovals.enabled=false unless you intentionally configure Telegram as a native exec-approval client."
 
 echo "Bootstrap complete."

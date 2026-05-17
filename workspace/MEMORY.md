@@ -15,6 +15,7 @@ This file is meant to be understood before the first external user conversation 
 - OpenClaw should prefer `xhigh` reasoning through the shared Codex user config
 - If the shared Codex user model becomes numerically newer than 5.5, OpenClaw should follow it after validation
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
+- OpenClaw should keep a no-interruption embedded Codex policy on this host class: `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, and day-scale `codex-cli` watchdog overrides
 - The initial user should not have to reteach the host basics that are already seeded here
 
 ## Shared Host Facts
@@ -56,6 +57,7 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 - Prefer local tools, shared Codex login state, and orchestration of existing terminal agents over adding raw API-key based integrations
 - For serious coding work arriving through Telegram, prefer direct main-session execution over the built-in `coding-agent` side-worker path
 - A side `codex exec --full-auto` PTY worker that produces no visible progress for about 180 seconds can be killed by the outer session watchdog and surface to the human only as a generic OpenClaw failure
+- The main embedded `codex-cli` run can also be killed by a default no-output watchdog if this repo's override is missing; keep the day-scale watchdog override in place
 - Prefer Node-RED for durable automations, human-readable schemes, collaboration materials, and bridge flows
 - Prefer local repo docs, workspace files, and CLI overrides over mutating the global Codex CLI config under `/root/.codex`
 - Prefer the repo-managed systemd gateway service for reboot persistence; treat tmux as a fallback only

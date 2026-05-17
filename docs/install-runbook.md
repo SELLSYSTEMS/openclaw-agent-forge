@@ -76,6 +76,7 @@ Rules:
 - baseline model: `codex-cli/gpt-5.4`
 - preferred reasoning floor: `xhigh`
 - gateway: `local` mode on loopback
+- embedded Codex runs: no-interruption policy with day-scale agent timeout and CLI watchdog override
 
 ## Why This Layout
 
@@ -99,11 +100,15 @@ What it does:
 3. Configures OpenClaw with `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `<REPO_ROOT>/workspace`.
 5. Sets the primary model to `codex-cli/gpt-5.4`, or to the shared Codex user model if it is numerically newer than 5.5. If `gpt-5.5` resolves by default, it must be overridden.
-6. Sets `gateway.mode=local`.
-7. Sets `gateway.bind=loopback`.
-8. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
-9. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
-10. Validates the resulting config.
+6. Sets `agents.defaults.timeoutSeconds=604800`.
+7. Sets `agents.defaults.llm.idleTimeoutSeconds=0`.
+8. Sets `agents.defaults.contextInjection=continuation-skip` so continuation turns do not keep reinjecting the full bootstrap payload.
+9. Sets day-scale `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+10. Sets `gateway.mode=local`.
+11. Sets `gateway.bind=loopback`.
+12. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
+13. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
+14. Validates the resulting config.
 
 ## Authentication Model
 
@@ -116,6 +121,26 @@ This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 - do not re-route install/runtime execution through direct API-key auth when Codex CLI reuse is available
 
 This keeps auth ownership with Codex CLI instead of storing OpenAI API credentials inside the OpenClaw repo or config flow.
+
+## No-Interruption Embedded Codex Policy
+
+This host class should not kill serious work just because Codex stays silent while reasoning.
+
+Required baseline:
+
+- `agents.defaults.timeoutSeconds >= 604800`
+- `agents.defaults.llm.idleTimeoutSeconds = 0`
+- `agents.defaults.contextInjection = continuation-skip`
+- `agents.defaults.cliBackends.codex-cli.reliability.watchdog.fresh.noOutputTimeoutMs` set at day scale
+- `agents.defaults.cliBackends.codex-cli.reliability.watchdog.resume.noOutputTimeoutMs` set at day scale
+
+Why:
+
+- the OpenClaw gateway can stay healthy while an embedded `codex-cli` turn dies internally
+- the stock fresh watchdog floor can kill a quiet turn after about 180 seconds
+- Telegram then only shows a generic failure even though the project itself did not fail
+
+Do not revert this repo to the stock no-output watchdog behavior.
 
 ## Automation And Scheduling Policy
 
@@ -205,6 +230,10 @@ Expected outcomes:
 - the configured primary model resolves to either `codex-cli/<model>` or the current upstream canonical `openai/<model>` plus `agents.defaults.agentRuntime.id=codex-cli`
 - the configured gateway mode resolves to `local`
 - the configured gateway bind resolves to `loopback`
+- `agents.defaults.timeoutSeconds` is at least `604800`
+- `agents.defaults.llm.idleTimeoutSeconds` equals `0`
+- `agents.defaults.contextInjection` equals `continuation-skip`
+- the configured `codex-cli` fresh and resume no-output watchdog overrides are set at day scale
 - `codex login status` succeeds
 - the shared Codex reasoning default resolves to `xhigh`
 - the repo-local STT venv exists at `<REPO_ROOT>/.venv-stt`
