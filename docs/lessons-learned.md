@@ -38,6 +38,8 @@
 - In this environment, running the gateway in tmux was more reliable than backgrounding it with `nohup`.
 - OpenClaw's built-in Linux gateway install path expects systemd user services; on this host class, a repo-managed system service is the better reboot-persistent path.
 - Some higher-scope gateway RPCs can still trigger a local `pairing required` repair request even when health and probe are healthy. Treat that as a gateway authorization layer issue, not a model/auth failure.
+- Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`. On this host class, the stable default is to set `channels.telegram.execApprovals.enabled=false` unless native approvals are explicitly required.
+- A read-only local device token such as `gateway:health` is insufficient for Telegram native approvals and creates repeating `pairing required` connect loops.
 - Telegram channel probe can be healthy before any inbound DM arrives. Check `lastInboundAt` or send a fresh message after startup.
 - Telegram can initially reply with `access not configured` while in pairing mode. After the first owner DM, approve pairing, then move to local `allowFrom` plus `dmPolicy=allowlist` for a more durable owner-only setup.
 - Outbound Telegram success is not enough to claim audio readiness. For Telegram voice-note use, require validated local STT and state explicitly whether real inbound voice-note transcription has already been proven.
@@ -52,5 +54,7 @@
 - Do not write multiple `openclaw config set` updates in parallel against the same config file; one write can clobber the other.
 - Do not place bot tokens or other secrets into tracked docs, scripts, or memory files when the GitHub repo is public.
 - Do not place owner-specific Telegram IDs into tracked docs when the GitHub repo is public.
+- Do not default to OpenClaw's built-in `coding-agent` / side `codex exec` worker path for long Telegram coding tasks. A silent PTY worker can be terminated after 180 seconds of no output and then surface to the human only as a generic bot failure.
+- If you intentionally spawn a side worker, monitor it as background work and keep the parent chat updated. Do not let the parent session sit idle while a child CLI runs off-screen.
 - For fresh installs on this host class, no-sandbox / danger-full-access should be the default operator mode. If the shell sandbox throws `bwrap: Failed to make / slave: Permission denied`, treat that as proof the wrong runtime was used and switch immediately.
 - Do not introduce cron as default automation during install or repair. Use local Node-RED for durable automation unless the user explicitly asked for cron.

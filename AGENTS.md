@@ -46,11 +46,15 @@ Canonical repository identity:
 - Helper scripts should be smoke-tested after creation. One early `printf` bug created a partial note file.
 - OpenClaw config writes should be applied sequentially, not in parallel, or later writes can clobber earlier ones.
 - A healthy gateway probe does not guarantee full operator scope; `pairing required` on admin-style RPCs is a separate gateway authorization issue.
+- Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`. On this host class, keep `channels.telegram.execApprovals.enabled=false` unless the user explicitly wants native approvals and you intentionally pair an operator client with `operator.approvals`.
+- A read-only local device token such as `gateway:health` is not enough for Telegram native approvals. That mismatch causes repeating `pairing required` connect loops and noisy logs.
 - Telegram channel tokens should be loaded from a local `tokenFile` under `.openclaw-home/secrets`, never from tracked docs or scripts.
 - `/root/.codex` is a shared host-level Codex CLI home. Read it first, but do not rewrite global config casually from this repo.
 - `/root/.node-red` is a shared host service for automations and diagrams. Treat it as installed/available shared infrastructure, even when flows are still close to empty. Keep passwords, credential material, and user-specific data out of the public repo.
 - Browser webterminal access is part of the operating model on this host class, but the exact terminal URL is instance-specific and should stay in local-only notes, not public Git.
 - The Codex TUI is already built into `codex`; do not invent a separate server-side TUI install step for it. In browser terminals, prefer `codex --no-alt-screen`.
+- For long repo tasks coming through Telegram, do not default to OpenClaw's built-in `coding-agent` side-worker path. A spawned `codex exec --full-auto` PTY worker can stay silent long enough to hit the 180-second idle killer and surface only as a generic bot failure.
+- If you intentionally spawn a side worker, treat it as background work and monitor it actively. Do not leave the parent chat silent while waiting on a child CLI.
 - If the user wants a message or command to appear in an already-running neighboring webterminal tab, use one canonical path only: resolve the target tab from `terminal-state.json`, resolve the live `/dev/pts/N` from `/proc`, and write directly to that PTY. Do not invent alternate control planes.
 - The built-in `openclaw gateway install` path expects systemd user services on Linux. On this host class, prefer the repo-managed system service under `systemd/openclaw-gateway.service` for reboot persistence.
 - On this host class, install/operator work should start in no-sandbox / danger-full-access execution by default. If local shell/JS commands fail with `bwrap: Failed to make / slave: Permission denied`, that only confirms the rule was violated: stop immediately and move the session to the correct no-sandbox runtime before continuing.

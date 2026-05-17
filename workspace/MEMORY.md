@@ -54,6 +54,8 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 - Treat OpenClaw as the main orchestrator for its canonical repo-local root on the host
 - Do not use direct OpenAI API calls from the machine unless the user explicitly approves it
 - Prefer local tools, shared Codex login state, and orchestration of existing terminal agents over adding raw API-key based integrations
+- For serious coding work arriving through Telegram, prefer direct main-session execution over the built-in `coding-agent` side-worker path
+- A side `codex exec --full-auto` PTY worker that produces no visible progress for about 180 seconds can be killed by the outer session watchdog and surface to the human only as a generic OpenClaw failure
 - Prefer Node-RED for durable automations, human-readable schemes, collaboration materials, and bridge flows
 - Prefer local repo docs, workspace files, and CLI overrides over mutating the global Codex CLI config under `/root/.codex`
 - Prefer the repo-managed systemd gateway service for reboot persistence; treat tmux as a fallback only
@@ -84,6 +86,9 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - Telegram is configured via a local token file, not tracked repo secrets
 - Owner access is meant to live in local runtime config, not public docs
 - Transport is working; do not move secrets or owner-specific IDs into Git
+- Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`
+- On this host class, keep `channels.telegram.execApprovals.enabled=false` unless native exec approval UX is explicitly needed
+- A read-only local device token such as `gateway:health` is not enough for Telegram native approvals and causes repeating `pairing required` connect loops
 
 ## TUI Status
 

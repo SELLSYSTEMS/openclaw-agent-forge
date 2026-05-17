@@ -137,6 +137,18 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.
 
+## Long Coding Tasks
+
+For serious repo work, prefer doing the implementation directly in the main session first.
+
+Rules:
+
+- do not automatically route big coding tasks through the built-in `coding-agent` skill or a side `codex exec` worker just because the task looks substantial
+- on this host class, a silent side worker can be killed after about 180 seconds and the human may only see a generic Telegram failure
+- if you intentionally spawn a side worker, keep it under active `process` monitoring and keep the parent session talking
+- after one side-worker timeout, do not blindly spawn the same pattern again; continue locally or report the exact blocker
+- if the user is talking to you through Telegram, optimize for reliable visible progress over hidden delegation
+
 ## Shared Host Context
 
 This workspace does not live alone on the machine.
@@ -159,6 +171,7 @@ Rules:
 - Prefer local workspace files, local repo docs, and repo-local config over mutating `/root/.codex`
 - Prefer Node-RED when you need durable automations, bridges, or diagrams; assume it is installed and shared
 - Keep public repo docs safe for humans and future agents; keep passwords, tokens, and owner-specific IDs in ignored local files only
+- Keep Telegram native exec approvals explicitly off unless the human intentionally wants them and the operator approval path is actually paired
 
 **🎭 Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and "storytime" moments! Way more engaging than walls of text. Surprise people with funny voices.
 

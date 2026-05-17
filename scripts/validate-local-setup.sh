@@ -124,6 +124,23 @@ if [[ "${actual_gateway_bind}" != "${EXPECTED_GATEWAY_BIND}" ]]; then
   exit 1
 fi
 
+actual_telegram_enabled="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get channels.telegram.enabled 2>/dev/null || true
+)"
+
+if [[ "${actual_telegram_enabled}" == "true" ]]; then
+  actual_telegram_exec_approvals="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get channels.telegram.execApprovals.enabled 2>/dev/null || true
+  )"
+
+  if [[ -z "${actual_telegram_exec_approvals}" || "${actual_telegram_exec_approvals}" == "auto" ]]; then
+    echo "Telegram exec approvals must be explicitly configured on this host. Set channels.telegram.execApprovals.enabled=false for the stable default, or true only after intentional operator.approvals pairing." >&2
+    exit 1
+  fi
+fi
+
 codex login status >/dev/null
 
 actual_reasoning="$(resolve_shared_reasoning || true)"

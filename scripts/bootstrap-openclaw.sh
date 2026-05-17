@@ -104,5 +104,7 @@ if [[ "$(resolve_shared_reasoning)" != "${BASELINE_REASONING}" ]]; then
   echo "Warning: shared Codex reasoning is not ${BASELINE_REASONING}. OpenClaw is expected to run with ${BASELINE_REASONING} reasoning on this host." >&2
 fi
 
+echo "If Telegram is enabled later on this host, set channels.telegram.execApprovals.enabled=false unless you intentionally configure Telegram as a native exec-approval client."
+
 echo "Bootstrap complete."
 echo "Run: ${ROOT}/bin/openclaw-local"

@@ -64,6 +64,12 @@ Recommended local path:
 - `dmPolicy: pairing` for the fastest DM smoke test
 - `dmPolicy: allowlist` plus `allowFrom: ["<numeric-user-id>"]` for a durable owner-only bot
 
+Native exec approvals policy on this host class:
+
+- set `channels.telegram.execApprovals.enabled=false` for the stable default
+- only set it to `true` when you intentionally want Telegram to act as a native exec-approval client and you have a paired operator client with `operator.approvals`
+- do not leave it implicit in `auto` mode; Telegram can infer approvers from `allowFrom` and create a noisy `pairing required` loop later
+
 Recommended steady state after the first successful owner DM:
 
 - approve the initial pairing if the bot started in pairing mode
@@ -81,6 +87,7 @@ Recommended steady state after the first successful owner DM:
 - Telegram should not be used as the place where OpenClaw first learns the server architecture, shared agent roots, or host rules; that knowledge belongs in the seeded workspace files.
 - Pairing grants DM access only.
 - For groups, sender authorization still comes from explicit config allowlists.
+- Telegram native exec approvals are separate from normal DM access. They are not required for a healthy owner-only bot.
 - If the same owner should work in both DM and groups, store the numeric Telegram user ID in `channels.telegram.allowFrom`.
 - Group replies require mention by default unless group config relaxes it.
 - Never store the Telegram bot token in tracked repo files. Keep only the secret file path and safe operational notes in Git.

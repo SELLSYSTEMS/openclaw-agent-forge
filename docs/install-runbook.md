@@ -177,6 +177,8 @@ Rules:
 - never commit the token or the owner-specific user ID to Git
 - validate the bot token during the install pass
 - attempt pairing/verification against `TELEGRAM_USER_ID` during the same pass
+- for a normal owner-only Telegram bot on this host class, explicitly set `channels.telegram.execApprovals.enabled=false` unless the install is intentionally setting up Telegram as a native exec-approval client
+- do not leave Telegram native exec approvals in implicit `auto` mode during install; approvers can be inferred from `allowFrom` and later trigger `pairing required` loops if no operator client with `operator.approvals` is paired
 - if token validation fails or pairing cannot be completed, stop immediately and report the exact issue
 
 ## Codex CLI Notes
@@ -209,6 +211,7 @@ Expected outcomes:
 - `faster-whisper` imports successfully from that venv
 - `scripts/validate-local-stt.sh` succeeds on a real speech sample
 - if Telegram is enabled, Telegram transport must be working before install completion is claimed
+- if Telegram is enabled, `channels.telegram.execApprovals.enabled` must be explicit, not implicit `auto`; `false` is the stable default on this host class
 - if Telegram is expected to handle voice notes, do not call the install audio-ready until the local STT path is validated and any remaining gap to real inbound voice-note transcription is stated explicitly
 
 ## Keeping The Gateway Alive
