@@ -2,6 +2,8 @@
 
 OpenClaw can attach files to Telegram replies with `MEDIA:<path-or-url>`, but Telegram Bot API delivery has provider limits.
 
+For the cross-system rule, read [artifact-delivery-policy.md](artifact-delivery-policy.md) first. This file is only the Telegram-specific implementation note.
+
 ## Rule
 
 Before using `MEDIA:` for a local artifact, check the file size.

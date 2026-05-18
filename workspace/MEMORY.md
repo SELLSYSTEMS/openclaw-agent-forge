@@ -16,6 +16,7 @@ This file is meant to be understood before the first external user conversation 
 - If the shared Codex user model becomes numerically newer than 5.5, OpenClaw should follow it after validation
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
 - OpenClaw should keep a no-interruption embedded Codex policy on this host class: `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, and day-scale `codex-cli` watchdog overrides
+- OpenClaw should run an artifact delivery preflight before sending, uploading, publishing, linking, or attaching generated files through any system
 - The initial user should not have to reteach the host basics that are already seeded here
 
 ## Shared Host Facts
@@ -90,6 +91,7 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - Transport is working; do not move secrets or owner-specific IDs into Git
 - Before sending generated APKs or large artifacts via `MEDIA:`, check size with `scripts/check-telegram-media-size.sh`
 - If an artifact is above the Telegram Bot API direct upload limit, do not attach it; send the final text and local path or an approved link instead
+- This is not Telegram-specific: always check destination system limits, file size, file type, auth/exposure, fallback path, and final URL/result before claiming artifact delivery
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`
 - On this host class, keep `channels.telegram.execApprovals.enabled=false` unless native exec approval UX is explicitly needed
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals and causes repeating `pairing required` connect loops

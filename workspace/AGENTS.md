@@ -180,6 +180,24 @@ Rules:
 - if a file is too large, send the final text summary without `MEDIA:` and include the local path or an approved download link
 - do not let a failed attachment hide a successful build or implementation result behind a generic failure message
 
+## Artifact Delivery
+
+Telegram is only one delivery channel. Before sending, uploading, publishing, linking, or attaching any artifact through any system, run a destination-specific preflight.
+
+Use:
+
+```bash
+/home/OpenClaw/scripts/check-artifact-delivery.sh --target telegram-bot /path/to/file
+```
+
+Rules:
+
+- identify the real destination and transport before deciding how to deliver
+- check file size, file type, destination limits, auth, and exposure rules
+- for public links, verify the vhost/path and final URL before giving it to the user
+- for GitHub, Node-RED, cloud storage, dashboards, or future systems, check the live limits/config for that exact system
+- if direct delivery is unsafe, report the completed work plus the local path and a safe next delivery option
+
 ## Long Coding Tasks
 
 For serious repo work, prefer doing the implementation directly in the main session first.

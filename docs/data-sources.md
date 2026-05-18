@@ -15,6 +15,7 @@ Use the thinnest prompt possible. Put durable guidance here and make agents read
 - `docs/model-policy.md`
 - `docs/installer-capability-contract.md`
 - `docs/stt-path.md`
+- `docs/artifact-delivery-policy.md`
 - `BOOTSTRAP.md`
 - `MEMORY.md`
 - `TOOLS.md`
@@ -34,6 +35,14 @@ For topology / neighboring agents / webterminal:
 - process list / tmux state / actual runtime state
 
 Do not replace live host evidence with stale copied examples.
+
+For artifact delivery:
+
+- project repo deployment/domain docs for the target artifact
+- nginx or app vhost config for public download surfaces
+- destination system docs or live config for current upload limits
+- `<REPO_ROOT>/scripts/check-artifact-delivery.sh`
+- `<REPO_ROOT>/scripts/check-telegram-media-size.sh`
 
 ## Local/private overrides
 

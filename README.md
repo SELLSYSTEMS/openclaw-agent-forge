@@ -33,6 +33,7 @@ It must also stay free of secrets because the repository is public.
 - [docs/installer-capability-contract.md](docs/installer-capability-contract.md) - install-time capability requirements
 - [docs/stt-path.md](docs/stt-path.md) - repo-local speech-to-text path and validation
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
+- [docs/artifact-delivery-policy.md](docs/artifact-delivery-policy.md) - cross-system artifact delivery preflight rules
 - [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
 - [docs/agent-topology.md](docs/agent-topology.md) - live topology rediscovery and same-tab neighboring-agent control
 - [scripts/find-live-terminal.py](scripts/find-live-terminal.py) - resolve a live PTY from a tab name or cwd
@@ -53,6 +54,7 @@ It must also stay free of secrets because the repository is public.
 - [scripts/setup-local-stt.sh](scripts/setup-local-stt.sh) - provision the repo-local offline STT path
 - [scripts/transcribe-local.sh](scripts/transcribe-local.sh) - use the repo-local offline STT path
 - [scripts/validate-local-stt.sh](scripts/validate-local-stt.sh) - validate STT on a real speech sample
+- [scripts/check-artifact-delivery.sh](scripts/check-artifact-delivery.sh) - target-aware artifact delivery preflight helper
 - [scripts/check-telegram-media-size.sh](scripts/check-telegram-media-size.sh) - verify whether a file is safe to attach through Telegram Bot API
 - [scripts/start-gateway-tmux.sh](scripts/start-gateway-tmux.sh) - fallback gateway runtime when systemd is unavailable
 - [systemd/openclaw-gateway.service](systemd/openclaw-gateway.service) - tracked system service for reboot persistence
