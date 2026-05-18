@@ -31,7 +31,7 @@ Canonical repository identity:
 
 ## Required Flow
 
-1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), [docs/lessons-learned.md](docs/lessons-learned.md), and [docs/codex-cli-tui.md](docs/codex-cli-tui.md).
+1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), [docs/lessons-learned.md](docs/lessons-learned.md), [docs/codex-cli-tui.md](docs/codex-cli-tui.md), and [docs/telegram-large-artifacts.md](docs/telegram-large-artifacts.md).
 2. Read [docs/shared-host-context.md](docs/shared-host-context.md), [docs/agent-topology.md](docs/agent-topology.md), and [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) before changing operating assumptions about the host.
 3. Read [workspace/README.md](workspace/README.md) and [workspace/MEMORY.md](workspace/MEMORY.md) before changing workspace defaults or identity prompts.
 4. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
@@ -50,6 +50,7 @@ Canonical repository identity:
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`. On this host class, keep `channels.telegram.execApprovals.enabled=false` unless the user explicitly wants native approvals and you intentionally pair an operator client with `operator.approvals`.
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals. That mismatch causes repeating `pairing required` connect loops and noisy logs.
 - Telegram channel tokens should be loaded from a local `tokenFile` under `.openclaw-home/secrets`, never from tracked docs or scripts.
+- Telegram Bot API `sendDocument` has a practical 50 MB direct upload limit. Before using `MEDIA:` for APKs or other build artifacts, run `scripts/check-telegram-media-size.sh`; if the artifact is too large, send the text summary and path/link instead of attaching it.
 - `/root/.codex` is a shared host-level Codex CLI home. Read it first, but do not rewrite global config casually from this repo.
 - `/root/.node-red` is a shared host service for automations and diagrams. Treat it as installed/available shared infrastructure, even when flows are still close to empty. Keep passwords, credential material, and user-specific data out of the public repo.
 - Browser webterminal access is part of the operating model on this host class, but the exact terminal URL is instance-specific and should stay in local-only notes, not public Git.

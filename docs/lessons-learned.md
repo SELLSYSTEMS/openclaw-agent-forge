@@ -45,6 +45,7 @@
 - Telegram can initially reply with `access not configured` while in pairing mode. After the first owner DM, approve pairing, then move to local `allowFrom` plus `dmPolicy=allowlist` for a more durable owner-only setup.
 - Outbound Telegram success is not enough to claim audio readiness. For Telegram voice-note use, require validated local STT and state explicitly whether real inbound voice-note transcription has already been proven.
 - A healthy gateway and healthy Telegram transport do not prove a long embedded Codex turn will survive. The main failure can still be an internal `cli watchdog timeout` while the service stays up.
+- Telegram `MEDIA:` delivery can fail after the agent already produced a useful final answer. A 77.8 MB Android APK triggered `sendDocument` `413: Request Entity Too Large`, and Telegram showed a generic failure. Check artifact size before `MEDIA:` and avoid direct Telegram attachment for oversized APKs.
 
 ## Tooling Mistakes To Avoid
 

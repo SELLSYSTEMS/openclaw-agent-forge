@@ -41,6 +41,7 @@ It must also stay free of secrets because the repository is public.
 - [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) - recommended direction for orchestration, TUI, and cross-agent visibility
 - [docs/prompt-patterns.md](docs/prompt-patterns.md) - starter prompts for future agents on this host
 - [docs/telegram-test-plan.md](docs/telegram-test-plan.md) - Telegram prerequisites and approval flow
+- [docs/telegram-large-artifacts.md](docs/telegram-large-artifacts.md) - Telegram file-size guardrails for APKs and other build artifacts
 - [workspace/MEMORY.md](workspace/MEMORY.md) - seeded public-safe memory for future installs and agents
 - [workspace/BOOTSTRAP.md](workspace/BOOTSTRAP.md) - first-run behavior that assumes seeded context already exists
 - [bin/openclaw-local](bin/openclaw-local) - launcher with isolated `OPENCLAW_HOME`
@@ -52,6 +53,7 @@ It must also stay free of secrets because the repository is public.
 - [scripts/setup-local-stt.sh](scripts/setup-local-stt.sh) - provision the repo-local offline STT path
 - [scripts/transcribe-local.sh](scripts/transcribe-local.sh) - use the repo-local offline STT path
 - [scripts/validate-local-stt.sh](scripts/validate-local-stt.sh) - validate STT on a real speech sample
+- [scripts/check-telegram-media-size.sh](scripts/check-telegram-media-size.sh) - verify whether a file is safe to attach through Telegram Bot API
 - [scripts/start-gateway-tmux.sh](scripts/start-gateway-tmux.sh) - fallback gateway runtime when systemd is unavailable
 - [systemd/openclaw-gateway.service](systemd/openclaw-gateway.service) - tracked system service for reboot persistence
 - [.github/workflows/smoke-check.yml](.github/workflows/smoke-check.yml) - repo sanity checks on GitHub Actions

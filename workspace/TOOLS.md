@@ -67,6 +67,7 @@ This file is the safe machine-context cheat sheet for this workspace.
 ## Messaging / File Delivery Rules
 
 - When the user asks for a file in chat, attach the file immediately in the reply using a safe relative `MEDIA:` path; do not answer with only a server-side filesystem path.
+- Exception: for Telegram, check large generated artifacts before using `MEDIA:`. Run `<REPO_ROOT>/scripts/check-telegram-media-size.sh <file>`. If the file is above the Telegram Bot API direct upload limit, send the text summary and local path or approved download link instead of attaching it.
 - Keep one canonical installer prompt file; do not create duplicate prompt files/variants unless the user explicitly asks for a separate version.
 - For the OpenClaw installer prompt, keep Telegram pairing placeholders (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_USER_ID`) in the single canonical prompt and keep owner-context detection / duplicate-root prevention aligned with the repo docs.
 

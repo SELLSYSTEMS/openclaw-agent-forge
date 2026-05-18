@@ -88,6 +88,8 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - Telegram is configured via a local token file, not tracked repo secrets
 - Owner access is meant to live in local runtime config, not public docs
 - Transport is working; do not move secrets or owner-specific IDs into Git
+- Before sending generated APKs or large artifacts via `MEDIA:`, check size with `scripts/check-telegram-media-size.sh`
+- If an artifact is above the Telegram Bot API direct upload limit, do not attach it; send the final text and local path or an approved link instead
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`
 - On this host class, keep `channels.telegram.execApprovals.enabled=false` unless native exec approval UX is explicitly needed
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals and causes repeating `pairing required` connect loops
@@ -118,3 +120,13 @@ Do not promote:
 - owner-specific IDs
 - instance-private URLs
 - private transcripts
+
+## Project Memory Architecture
+
+- Do not rely on session continuity alone for active work.
+- Every serious project should have a canonical dossier under `memory/projects/`.
+- `memory/projects/_index.md` is the human-readable registry.
+- `memory/projects/registry.json` is the machine-readable registry.
+- Before resuming work on an existing project, first read its dossier, then the relevant repo docs, then the latest daily memory if needed.
+- Keep `MEMORY.md` for cross-project operating truths, not for dumping all project details into one giant blob.
+- Use daily notes for timeline, project dossiers for stable project truth, and repo docs for implementation truth.

@@ -44,6 +44,35 @@ You wake up fresh each session. These files are your continuity:
 - **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
 - **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory
 
+### Project memory discipline
+
+For any serious ongoing build, keep a canonical project dossier under `memory/projects/`.
+
+Use this split:
+- `MEMORY.md` → cross-project operating truths
+- `memory/YYYY-MM-DD.md` → dated timeline/events
+- `memory/projects/<project>.md` → stable project brief, constraints, paths, current truth, next steps
+- `memory/projects/registry.json` → machine-readable project registry for future retrieval/automation
+
+Before continuing an existing project after interruption:
+1. read the project dossier
+2. read the relevant repo docs
+3. read the newest daily note only if needed
+
+Do not depend on chat-session continuity for project memory.
+
+### New project protocol
+
+When a new serious project begins:
+
+1. create/update a project dossier in `memory/projects/`
+2. register it in `memory/projects/registry.json`
+3. ensure it appears in `memory/projects/_index.md`
+4. capture canonical root path, stack, constraints, and next steps immediately
+5. keep repo implementation truth in repo docs, not only in chat
+
+If a project already exists, resume from the dossier first instead of reconstructing from chat.
+
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
 
 ### 🧠 MEMORY.md - Your Long-Term Memory
@@ -136,6 +165,20 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 ## Tools
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.
+
+## Telegram File Delivery
+
+Before attaching generated APKs or large build artifacts with `MEDIA:`, check size with:
+
+```bash
+/home/OpenClaw/scripts/check-telegram-media-size.sh /path/to/file
+```
+
+Rules:
+
+- do not attach files above the Telegram Bot API direct upload limit
+- if a file is too large, send the final text summary without `MEDIA:` and include the local path or an approved download link
+- do not let a failed attachment hide a successful build or implementation result behind a generic failure message
 
 ## Long Coding Tasks
 
