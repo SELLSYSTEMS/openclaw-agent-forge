@@ -113,6 +113,15 @@ What it does:
 15. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
 16. Validates the resulting config.
 
+After bootstrap or any Codex/OpenClaw upgrade, run:
+
+```bash
+scripts/validate-codex-cli-contract.sh
+scripts/validate-local-setup.sh
+```
+
+The first script exists specifically to catch fresh/resume Codex CLI argument drift before a Telegram turn fails generically.
+
 ## Authentication Model
 
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
@@ -234,6 +243,7 @@ Run:
 
 Expected outcomes:
 
+- `scripts/validate-codex-cli-contract.sh` passes
 - `openclaw-local --version` prints a version
 - `openclaw config validate` reports a valid config
 - the configured workspace resolves to `<REPO_ROOT>/workspace`

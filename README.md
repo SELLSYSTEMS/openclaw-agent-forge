@@ -14,6 +14,7 @@ This repository captures a reproducible local OpenClaw installation pattern, the
 - systemd and tmux helpers for keeping the local gateway alive
 - Telegram test-channel preparation notes
 - lessons learned from the first installation pass
+- reliability playbooks and executable regression gates for failures already seen live
 
 Published repository:
 
@@ -33,6 +34,7 @@ It must also stay free of secrets because the repository is public.
 - [docs/installer-capability-contract.md](docs/installer-capability-contract.md) - install-time capability requirements
 - [docs/stt-path.md](docs/stt-path.md) - repo-local speech-to-text path and validation
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
+- [docs/operational-reliability-playbook.md](docs/operational-reliability-playbook.md) - recurring failure classes and required recovery gates
 - [docs/artifact-delivery-policy.md](docs/artifact-delivery-policy.md) - cross-system artifact delivery preflight rules
 - [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
 - [docs/agent-topology.md](docs/agent-topology.md) - live topology rediscovery and same-tab neighboring-agent control
@@ -111,6 +113,14 @@ Fresh and resume argument vectors are not symmetric. `codex exec` accepts `--col
 ```json
 ["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]
 ```
+
+Use the dedicated guardrail after install, repair, or upgrades:
+
+```bash
+scripts/validate-codex-cli-contract.sh
+```
+
+That script verifies the repo contract, the live OpenClaw config when installed, and the current Codex CLI help surface when `codex` is available.
 
 ## Bootstrap
 

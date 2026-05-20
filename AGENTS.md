@@ -32,13 +32,14 @@ Canonical repository identity:
 
 ## Required Flow
 
-1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), [docs/lessons-learned.md](docs/lessons-learned.md), [docs/codex-cli-tui.md](docs/codex-cli-tui.md), [docs/artifact-delivery-policy.md](docs/artifact-delivery-policy.md), and [docs/telegram-large-artifacts.md](docs/telegram-large-artifacts.md).
+1. Read [README.md](README.md), [docs/install-runbook.md](docs/install-runbook.md), [docs/lessons-learned.md](docs/lessons-learned.md), [docs/operational-reliability-playbook.md](docs/operational-reliability-playbook.md), [docs/codex-cli-tui.md](docs/codex-cli-tui.md), [docs/artifact-delivery-policy.md](docs/artifact-delivery-policy.md), and [docs/telegram-large-artifacts.md](docs/telegram-large-artifacts.md).
 2. Read [docs/shared-host-context.md](docs/shared-host-context.md), [docs/agent-topology.md](docs/agent-topology.md), and [docs/orchestrator-roadmap.md](docs/orchestrator-roadmap.md) before changing operating assumptions about the host.
 3. Read [workspace/README.md](workspace/README.md) and [workspace/MEMORY.md](workspace/MEMORY.md) before changing workspace defaults or identity prompts.
 4. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
 5. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
-6. Validate the setup with `scripts/validate-local-setup.sh`.
-7. If you change the operating model, update the docs in the same commit.
+6. Validate the Codex CLI backend contract with `scripts/validate-codex-cli-contract.sh`.
+7. Validate the setup with `scripts/validate-local-setup.sh`.
+8. If you change the operating model, update the docs in the same commit.
 
 ## Pitfalls Already Seen
 
@@ -60,6 +61,7 @@ Canonical repository identity:
 - The embedded `codex-cli` main session also has a default no-output watchdog. Without an explicit repo override, long silent reasoning windows can be killed even when the gateway and Telegram transport stay healthy.
 - The bundled OpenClaw `codex-cli` backend also defaults to `--sandbox workspace-write`. On this host class, that can make every shell read fail with `bwrap: Failed to make / slave: Permission denied`, so project memory exists but cannot be read. Override both fresh and resume args with `--dangerously-bypass-approvals-and-sandbox`.
 - Fresh and resume `codex-cli` args are different. `codex exec resume` does not accept `--color`; the expected resume vector is `["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]`.
+- `scripts/validate-codex-cli-contract.sh` is the permanent regression gate for this class of failure. Run it after any OpenClaw/Codex CLI install, upgrade, bootstrap edit, or runtime recovery.
 - For long repo tasks coming through Telegram, do not default to OpenClaw's built-in `coding-agent` side-worker path. A spawned `codex exec --full-auto` PTY worker can stay silent long enough to hit the 180-second idle killer and surface only as a generic bot failure.
 - If you intentionally spawn a side worker, treat it as background work and monitor it actively. Do not leave the parent chat silent while waiting on a child CLI.
 - If the user wants a message or command to appear in an already-running neighboring webterminal tab, use one canonical path only: resolve the target tab from `terminal-state.json`, resolve the live `/dev/pts/N` from `/proc`, and write directly to that PTY. Do not invent alternate control planes.

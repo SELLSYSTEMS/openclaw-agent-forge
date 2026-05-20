@@ -77,6 +77,7 @@ EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_RESU
 
 "${LAUNCHER}" --version
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
+"${ROOT}/scripts/validate-codex-cli-contract.sh"
 
 for required_file in "${REQUIRED_WORKSPACE_CONTEXT[@]}"; do
   if [[ ! -f "${required_file}" ]]; then

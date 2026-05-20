@@ -27,6 +27,7 @@ jobs:
           test -f docs/installer-capability-contract.md
           test -f docs/stt-path.md
           test -f docs/codex-cli-tui.md
+          test -f docs/operational-reliability-playbook.md
           test -f docs/orchestrator-roadmap.md
           test -f docs/prompt-patterns.md
           test -f docs/telegram-test-plan.md
@@ -37,6 +38,7 @@ jobs:
           test -f scripts/gateway-systemd-status.sh
           test -f scripts/setup-local-stt.sh
           test -f scripts/transcribe-local.sh
+          test -f scripts/validate-codex-cli-contract.sh
           test -f scripts/validate-local-setup.sh
           test -f bin/openclaw-local
           test -f workspace/AGENTS.md
@@ -64,7 +66,12 @@ jobs:
           bash -n scripts/start-gateway-tmux.sh
           bash -n scripts/stop-gateway-tmux.sh
           bash -n scripts/transcribe-local.sh
+          bash -n scripts/validate-codex-cli-contract.sh
           bash -n scripts/validate-local-setup.sh
+
+      - name: Validate static Codex CLI backend contract
+        run: |
+          scripts/validate-codex-cli-contract.sh
 
       - name: Validate docs links target files
         run: |
