@@ -136,5 +136,6 @@ Do not promote:
 - `memory/projects/_index.md` is the human-readable registry.
 - `memory/projects/registry.json` is the machine-readable registry.
 - Before resuming work on an existing project, first read its dossier, then the relevant repo docs, then the latest daily memory if needed.
+- For large dossiers, do not read only the first screenful. Read the identity/header plus the newest/current sections near the tail, and use `rg` for terms such as `current`, `latest`, `blocker`, the current date, and the target project name.
 - Keep `MEMORY.md` for cross-project operating truths, not for dumping all project details into one giant blob.
 - Use daily notes for timeline, project dossiers for stable project truth, and repo docs for implementation truth.

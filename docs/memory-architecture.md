@@ -124,6 +124,8 @@ For critical facts, store:
 
 Do not store changing live values as if they were durable truth.
 
+For project resumption, reading only the first block of a long dossier is a memory failure mode. Agents must read the stable header plus the latest/current sections near the tail, and use keyword search for the current date, project slug, blockers, and checkpoints before continuing.
+
 See also:
 
 - `docs/data-sources.md`

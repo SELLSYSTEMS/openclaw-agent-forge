@@ -78,6 +78,7 @@ If the user reports `Something went wrong`, `No response generated`, or silence 
 - Check `/tmp/openclaw/openclaw-YYYY-MM-DD.log`.
 - Check `workspace/memory/YYYY-MM-DD.md`.
 - Check relevant project dossier under `workspace/memory/projects/`.
+- For a large project dossier, check both the header and the latest/current sections near the tail; do not rely on only the first `sed` page.
 - Check whether the target project repo has completed work in `git status` and recent commits.
 - Tell the user the precise layer that failed.
 
