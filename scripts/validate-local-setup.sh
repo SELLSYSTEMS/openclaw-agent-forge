@@ -15,7 +15,7 @@ EXPECTED_CONTEXT_INJECTION="continuation-skip"
 EXPECTED_SANDBOX_MODE="off"
 EXPECTED_CLI_WATCHDOG_TIMEOUT_MS=604800000
 EXPECTED_CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
-EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","{sessionId}","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
+EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -195,7 +195,7 @@ actual_codex_cli_resume_args="$(
 )"
 
 if [[ "$(printf '%s' "${actual_codex_cli_resume_args}" | compact_json)" != "${EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT}" ]]; then
-  echo "Codex CLI resume args mismatch. Resume runs must also bypass the Codex CLI sandbox on this host class." >&2
+  echo "Codex CLI resume args mismatch. Resume runs must bypass the Codex CLI sandbox and must not include fresh-only flags such as --color." >&2
   echo "Expected: ${EXPECTED_CODEX_CLI_RESUME_ARGS_JSON}" >&2
   echo "Got: ${actual_codex_cli_resume_args:-<unset>}" >&2
   exit 1

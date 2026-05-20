@@ -96,6 +96,7 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - After any long Telegram task, prefer a local completion checkpoint in `memory/YYYY-MM-DD.md` and the project dossier before assuming the final chat reply was delivered
 - If the final Telegram reply fails after work completed, do not restart blindly on the next turn; first inspect the project dossier, `git status`, current diff, and the checks that already passed, then continue from that state
 - If project memory exists but shell reads fail with `bwrap: Failed to make / slave: Permission denied`, the issue is the embedded Codex CLI sandbox runtime, not missing memory; fix the OpenClaw `codex-cli.args` / `resumeArgs` no-sandbox config and retry the memory reads
+- If a resumed OpenClaw/Codex turn fails instantly with `unexpected argument '--color' found`, fix `agents.defaults.cliBackends.codex-cli.resumeArgs`; the working vector is `["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]`
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`
 - On this host class, keep `channels.telegram.execApprovals.enabled=false` unless native exec approval UX is explicitly needed
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals and causes repeating `pairing required` connect loops

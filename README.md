@@ -106,6 +106,12 @@ This repo must explicitly configure both fresh and resume Codex CLI backend args
 
 Validation must fail if `agents.defaults.cliBackends.codex-cli.args` or `resumeArgs` falls back to `--sandbox workspace-write`.
 
+Fresh and resume argument vectors are not symmetric. `codex exec` accepts `--color never`, but `codex exec resume` does not; resume options must be passed before `{sessionId}`. The expected resume vector is:
+
+```json
+["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]
+```
+
 ## Bootstrap
 
 ```bash

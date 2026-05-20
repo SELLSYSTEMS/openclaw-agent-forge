@@ -229,6 +229,8 @@ Rules:
 
 If project dossiers or daily memory exist but shell reads fail with `bwrap: Failed to make / slave: Permission denied`, do not ask the user to reteach the project. Report that the runtime is misconfigured and needs the embedded `codex-cli` no-sandbox args fixed, then retry memory/project reads after the runtime is corrected.
 
+If a resumed OpenClaw Telegram turn fails immediately with `unexpected argument '--color' found`, the resume args are wrong. `codex exec resume` needs the resume-specific vector `["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]`; do not copy the fresh `codex exec --json --color never ...` vector into `resumeArgs`.
+
 ## Long Coding Tasks
 
 For serious repo work, prefer doing the implementation directly in the main session first.
@@ -238,6 +240,7 @@ Rules:
 - do not remove or relax the repo-level no-interruption policy for embedded Codex runs; on this host class the main OpenClaw session must be allowed to run for hours or days when the work genuinely requires it
 - the baseline runtime policy is: `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, and day-scale `codex-cli` watchdog overrides for fresh and resume runs
 - fresh and resume embedded `codex-cli` args must use `--dangerously-bypass-approvals-and-sandbox`; the bundled `--sandbox workspace-write` default is not acceptable on this host class
+- resume embedded `codex-cli` args must not include `--color`; validate against `codex exec resume --help` after any Codex CLI upgrade
 - do not automatically route big coding tasks through the built-in `coding-agent` skill or a side `codex exec` worker just because the task looks substantial
 - on this host class, a silent side worker can be killed after about 180 seconds and the human may only see a generic Telegram failure
 - without the repo override, the main embedded `codex-cli` run can also be killed by the same no-output watchdog even while the service itself stays healthy

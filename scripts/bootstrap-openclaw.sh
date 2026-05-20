@@ -14,7 +14,7 @@ LONG_RUN_WATCHDOG_TIMEOUT_MS=604800000
 EXPECTED_CONTEXT_INJECTION="continuation-skip"
 EXPECTED_SANDBOX_MODE="off"
 CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
-CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","{sessionId}","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
+CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
   "${ROOT}/workspace/MEMORY.md"

@@ -136,7 +136,7 @@ Required baseline:
 - `agents.defaults.contextInjection = continuation-skip`
 - `agents.defaults.sandbox.mode = off`
 - `agents.defaults.cliBackends.codex-cli.args` uses `--dangerously-bypass-approvals-and-sandbox`, not `--sandbox workspace-write`
-- `agents.defaults.cliBackends.codex-cli.resumeArgs` uses `--dangerously-bypass-approvals-and-sandbox`, not `--sandbox workspace-write`
+- `agents.defaults.cliBackends.codex-cli.resumeArgs` uses `["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]`
 - `agents.defaults.cliBackends.codex-cli.reliability.watchdog.fresh.noOutputTimeoutMs` set at day scale
 - `agents.defaults.cliBackends.codex-cli.reliability.watchdog.resume.noOutputTimeoutMs` set at day scale
 
@@ -145,10 +145,12 @@ Why:
 - the OpenClaw gateway can stay healthy while an embedded `codex-cli` turn dies internally
 - the stock fresh watchdog floor can kill a quiet turn after about 180 seconds
 - the bundled `codex-cli` backend defaults to `--sandbox workspace-write`, which can make every local memory/project-dossier read fail with `bwrap: Failed to make / slave: Permission denied`
+- `codex exec resume` does not accept the same flags as fresh `codex exec`; in particular, do not include `--color never` in `resumeArgs`, and keep resume options before `{sessionId}`
 - Telegram then only shows a generic failure even though the project itself did not fail
 
 Do not revert this repo to the stock no-output watchdog behavior.
 Do not revert this repo to the bundled `codex-cli` sandbox args on this host class.
+Do not make fresh and resume `codex-cli` args identical without checking `codex exec resume --help`.
 
 ## Automation And Scheduling Policy
 
@@ -242,7 +244,8 @@ Expected outcomes:
 - `agents.defaults.llm.idleTimeoutSeconds` equals `0`
 - `agents.defaults.contextInjection` equals `continuation-skip`
 - `agents.defaults.sandbox.mode` equals `off`
-- the configured `codex-cli` fresh and resume args bypass the Codex CLI sandbox
+- the configured `codex-cli` fresh args bypass the Codex CLI sandbox
+- the configured `codex-cli` resume args use the resume-specific vector without `--color`
 - the configured `codex-cli` fresh and resume no-output watchdog overrides are set at day scale
 - `codex login status` succeeds
 - the shared Codex reasoning default resolves to `xhigh`
