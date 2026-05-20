@@ -77,6 +77,7 @@ Rules:
 - preferred reasoning floor: `xhigh`
 - gateway: `local` mode on loopback
 - embedded Codex runs: no-interruption policy with day-scale agent timeout and CLI watchdog override
+- embedded Codex CLI sandbox: explicit no-sandbox fresh and resume args
 
 ## Why This Layout
 
@@ -103,12 +104,14 @@ What it does:
 6. Sets `agents.defaults.timeoutSeconds=604800`.
 7. Sets `agents.defaults.llm.idleTimeoutSeconds=0`.
 8. Sets `agents.defaults.contextInjection=continuation-skip` so continuation turns do not keep reinjecting the full bootstrap payload.
-9. Sets day-scale `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
-10. Sets `gateway.mode=local`.
-11. Sets `gateway.bind=loopback`.
-12. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
-13. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
-14. Validates the resulting config.
+9. Sets `agents.defaults.sandbox.mode=off`.
+10. Sets explicit `agents.defaults.cliBackends.codex-cli.args` and `resumeArgs` that use `--dangerously-bypass-approvals-and-sandbox` instead of OpenClaw's bundled `--sandbox workspace-write` default.
+11. Sets day-scale `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+12. Sets `gateway.mode=local`.
+13. Sets `gateway.bind=loopback`.
+14. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
+15. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
+16. Validates the resulting config.
 
 ## Authentication Model
 
@@ -131,6 +134,9 @@ Required baseline:
 - `agents.defaults.timeoutSeconds >= 604800`
 - `agents.defaults.llm.idleTimeoutSeconds = 0`
 - `agents.defaults.contextInjection = continuation-skip`
+- `agents.defaults.sandbox.mode = off`
+- `agents.defaults.cliBackends.codex-cli.args` uses `--dangerously-bypass-approvals-and-sandbox`, not `--sandbox workspace-write`
+- `agents.defaults.cliBackends.codex-cli.resumeArgs` uses `--dangerously-bypass-approvals-and-sandbox`, not `--sandbox workspace-write`
 - `agents.defaults.cliBackends.codex-cli.reliability.watchdog.fresh.noOutputTimeoutMs` set at day scale
 - `agents.defaults.cliBackends.codex-cli.reliability.watchdog.resume.noOutputTimeoutMs` set at day scale
 
@@ -138,9 +144,11 @@ Why:
 
 - the OpenClaw gateway can stay healthy while an embedded `codex-cli` turn dies internally
 - the stock fresh watchdog floor can kill a quiet turn after about 180 seconds
+- the bundled `codex-cli` backend defaults to `--sandbox workspace-write`, which can make every local memory/project-dossier read fail with `bwrap: Failed to make / slave: Permission denied`
 - Telegram then only shows a generic failure even though the project itself did not fail
 
 Do not revert this repo to the stock no-output watchdog behavior.
+Do not revert this repo to the bundled `codex-cli` sandbox args on this host class.
 
 ## Automation And Scheduling Policy
 
@@ -233,6 +241,8 @@ Expected outcomes:
 - `agents.defaults.timeoutSeconds` is at least `604800`
 - `agents.defaults.llm.idleTimeoutSeconds` equals `0`
 - `agents.defaults.contextInjection` equals `continuation-skip`
+- `agents.defaults.sandbox.mode` equals `off`
+- the configured `codex-cli` fresh and resume args bypass the Codex CLI sandbox
 - the configured `codex-cli` fresh and resume no-output watchdog overrides are set at day scale
 - `codex login status` succeeds
 - the shared Codex reasoning default resolves to `xhigh`

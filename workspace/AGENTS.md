@@ -73,6 +73,22 @@ When a new serious project begins:
 
 If a project already exists, resume from the dossier first instead of reconstructing from chat.
 
+### Regression prevention protocol
+
+When a user reports a real regression or release blocker:
+
+1. fix the issue
+2. write the root cause down
+3. add a permanent prevention measure:
+   - test
+   - smoke check
+   - release gate
+   - checklist item
+   - operating rule
+4. update the project dossier and relevant docs/scripts
+
+Do not rely on memory alone after a user-visible regression.
+
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
 
 ### 🧠 MEMORY.md - Your Long-Term Memory
@@ -198,6 +214,21 @@ Rules:
 - for GitHub, Node-RED, cloud storage, dashboards, or future systems, check the live limits/config for that exact system
 - if direct delivery is unsafe, report the completed work plus the local path and a safe next delivery option
 
+## Text Reply Delivery Failures
+
+Artifacts are not the only thing that can fail at the delivery layer. Plain chat replies can fail too.
+
+Rules:
+
+- if a long task finishes locally but the final outbound chat send fails (`sendMessage`, `sendChatAction`, similar transport error), do not treat that as proof the work itself failed
+- before final delivery on serious project work, persist a concise local checkpoint in `memory/YYYY-MM-DD.md` and the project dossier
+- on the next user message after a delivery failure, do not restart blindly; first inspect the dossier, `git status`, current diff, and completed checks
+- recovery reply should report the true local state: what was done, what passed, what path/files changed, and what still remains
+
+## Memory Read Failures
+
+If project dossiers or daily memory exist but shell reads fail with `bwrap: Failed to make / slave: Permission denied`, do not ask the user to reteach the project. Report that the runtime is misconfigured and needs the embedded `codex-cli` no-sandbox args fixed, then retry memory/project reads after the runtime is corrected.
+
 ## Long Coding Tasks
 
 For serious repo work, prefer doing the implementation directly in the main session first.
@@ -206,6 +237,7 @@ Rules:
 
 - do not remove or relax the repo-level no-interruption policy for embedded Codex runs; on this host class the main OpenClaw session must be allowed to run for hours or days when the work genuinely requires it
 - the baseline runtime policy is: `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, and day-scale `codex-cli` watchdog overrides for fresh and resume runs
+- fresh and resume embedded `codex-cli` args must use `--dangerously-bypass-approvals-and-sandbox`; the bundled `--sandbox workspace-write` default is not acceptable on this host class
 - do not automatically route big coding tasks through the built-in `coding-agent` skill or a side `codex exec` worker just because the task looks substantial
 - on this host class, a silent side worker can be killed after about 180 seconds and the human may only see a generic Telegram failure
 - without the repo override, the main embedded `codex-cli` run can also be killed by the same no-output watchdog even while the service itself stays healthy

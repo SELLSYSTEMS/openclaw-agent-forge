@@ -12,7 +12,10 @@ EXPECTED_RUNTIME_ID="codex-cli"
 EXPECTED_AGENT_TIMEOUT_SECONDS=604800
 EXPECTED_LLM_IDLE_TIMEOUT_SECONDS=0
 EXPECTED_CONTEXT_INJECTION="continuation-skip"
+EXPECTED_SANDBOX_MODE="off"
 EXPECTED_CLI_WATCHDOG_TIMEOUT_MS=604800000
+EXPECTED_CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
+EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","{sessionId}","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -62,9 +65,15 @@ resolve_shared_reasoning() {
   extract_toml_string model_reasoning_effort "${SHARED_CODEX_CONFIG}"
 }
 
+compact_json() {
+  tr -d '[:space:]'
+}
+
 EXPECTED_BASE_MODEL="$(resolve_expected_base_model_name)"
 EXPECTED_LEGACY_MODEL="codex-cli/${EXPECTED_BASE_MODEL}"
 EXPECTED_CANONICAL_MODEL="openai/${EXPECTED_BASE_MODEL}"
+EXPECTED_CODEX_CLI_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_ARGS_JSON}" | compact_json)"
+EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_RESUME_ARGS_JSON}" | compact_json)"
 
 "${LAUNCHER}" --version
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
@@ -155,6 +164,40 @@ actual_context_injection="$(
 
 if [[ "${actual_context_injection}" != "${EXPECTED_CONTEXT_INJECTION}" ]]; then
   echo "Context injection mismatch: expected ${EXPECTED_CONTEXT_INJECTION}, got ${actual_context_injection:-<unset>}" >&2
+  exit 1
+fi
+
+actual_sandbox_mode="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.sandbox.mode 2>/dev/null || true
+)"
+
+if [[ "${actual_sandbox_mode}" != "${EXPECTED_SANDBOX_MODE}" ]]; then
+  echo "OpenClaw sandbox mode mismatch: expected ${EXPECTED_SANDBOX_MODE}, got ${actual_sandbox_mode:-<unset>}" >&2
+  exit 1
+fi
+
+actual_codex_cli_args="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.cliBackends.codex-cli.args 2>/dev/null || true
+)"
+
+if [[ "$(printf '%s' "${actual_codex_cli_args}" | compact_json)" != "${EXPECTED_CODEX_CLI_ARGS_COMPACT}" ]]; then
+  echo "Codex CLI args mismatch. The bundled OpenClaw default uses --sandbox workspace-write, which breaks this host class." >&2
+  echo "Expected: ${EXPECTED_CODEX_CLI_ARGS_JSON}" >&2
+  echo "Got: ${actual_codex_cli_args:-<unset>}" >&2
+  exit 1
+fi
+
+actual_codex_cli_resume_args="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.cliBackends.codex-cli.resumeArgs 2>/dev/null || true
+)"
+
+if [[ "$(printf '%s' "${actual_codex_cli_resume_args}" | compact_json)" != "${EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT}" ]]; then
+  echo "Codex CLI resume args mismatch. Resume runs must also bypass the Codex CLI sandbox on this host class." >&2
+  echo "Expected: ${EXPECTED_CODEX_CLI_RESUME_ARGS_JSON}" >&2
+  echo "Got: ${actual_codex_cli_resume_args:-<unset>}" >&2
   exit 1
 fi
 

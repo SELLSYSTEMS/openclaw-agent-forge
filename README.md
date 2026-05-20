@@ -93,6 +93,19 @@ bwrap: Failed to make / slave: Permission denied
 
 stop immediately and move the install/operator session to the correct no-sandbox / danger-full-access execution before continuing. Do not attempt bootstrap, validation, or topology discovery from a broken bwrap runtime.
 
+## Embedded Codex CLI Sandbox Contract
+
+OpenClaw's bundled `codex-cli` backend defaults to `--sandbox workspace-write`.
+That default is not acceptable on this host class because it can prevent the embedded agent from reading its own Markdown memory, project dossiers, and live topology files.
+
+This repo must explicitly configure both fresh and resume Codex CLI backend args with:
+
+```text
+--dangerously-bypass-approvals-and-sandbox
+```
+
+Validation must fail if `agents.defaults.cliBackends.codex-cli.args` or `resumeArgs` falls back to `--sandbox workspace-write`.
+
 ## Bootstrap
 
 ```bash
@@ -128,6 +141,7 @@ This setup uses `gpt-5.4` as the baseline OpenClaw model, with Codex CLI as the 
 - OpenClaw Node-RED work should live in a dedicated new OpenClaw-specific tab/project scope so it does not mix with or break unrelated user flows.
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
+- Embedded Codex CLI fresh and resume turns must bypass the Codex CLI sandbox on this host class; otherwise OpenClaw may have memory files on disk but be unable to read them.
 - If the shared Codex user default later moves to a numerically newer GPT model than 5.5, OpenClaw should be updated to follow that newer model after a local validation pass.
 - `gpt-5.5` is considered unsuitable and should be overridden to `gpt-5.4` or a validated model newer than 5.5.
 

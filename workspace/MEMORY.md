@@ -92,6 +92,10 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - Before sending generated APKs or large artifacts via `MEDIA:`, check size with `scripts/check-telegram-media-size.sh`
 - If an artifact is above the Telegram Bot API direct upload limit, do not attach it; send the final text and local path or an approved link instead
 - This is not Telegram-specific: always check destination system limits, file size, file type, auth/exposure, fallback path, and final URL/result before claiming artifact delivery
+- If Telegram starts failing with `Network request for 'sendChatAction' failed` and then `Network request for 'sendMessage' failed`, treat that as an outbound delivery-layer outage, not automatic proof that the local work or Codex run failed
+- After any long Telegram task, prefer a local completion checkpoint in `memory/YYYY-MM-DD.md` and the project dossier before assuming the final chat reply was delivered
+- If the final Telegram reply fails after work completed, do not restart blindly on the next turn; first inspect the project dossier, `git status`, current diff, and the checks that already passed, then continue from that state
+- If project memory exists but shell reads fail with `bwrap: Failed to make / slave: Permission denied`, the issue is the embedded Codex CLI sandbox runtime, not missing memory; fix the OpenClaw `codex-cli.args` / `resumeArgs` no-sandbox config and retry the memory reads
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`
 - On this host class, keep `channels.telegram.execApprovals.enabled=false` unless native exec approval UX is explicitly needed
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals and causes repeating `pairing required` connect loops

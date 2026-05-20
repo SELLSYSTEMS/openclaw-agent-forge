@@ -72,8 +72,12 @@ When topology discovery or live webterminal control is required, the operator pa
 
 - `/opt/claude-vnc-terminal/data/terminal-state.json`
 - the corresponding webterminal server-side API/PTY path
+- `<REPO_ROOT>/workspace/memory/`
+- `<REPO_ROOT>/workspace/memory/projects/`
 
 Do not continue pretending topology/control is solved if the active runtime cannot read the live topology source or reach the live PTY path.
+
+The same rule applies to project memory recovery. If daily memory and project dossiers exist but every read fails with `bwrap: Failed to make / slave: Permission denied`, the correct diagnosis is a broken execution runtime, not missing memory.
 
 ## Agent startup rule
 

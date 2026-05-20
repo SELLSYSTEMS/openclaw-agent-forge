@@ -21,6 +21,7 @@
 - Obsidian is acceptable as a user interface over the same folder.
 - A vector database should be added only after keyword retrieval becomes insufficient.
 - A fresh OpenClaw install needs tracked seeded context before first user contact; otherwise it falls back to generic blank-slate bootstrap behavior.
+- If OpenClaw says it cannot restore project context while project dossiers exist on disk, check the embedded Codex CLI sandbox args first. In one real failure, `codex-cli` started with bundled `--sandbox workspace-write`, every shell read failed with `bwrap: Failed to make / slave: Permission denied`, and the agent therefore could not read `memory/projects/interviewcoach.md` or daily memory.
 
 ## Model And Auth
 
@@ -60,6 +61,7 @@
 - Do not place owner-specific Telegram IDs into tracked docs when the GitHub repo is public.
 - Do not default to OpenClaw's built-in `coding-agent` / side `codex exec` worker path for long Telegram coding tasks. A silent PTY worker can be terminated after 180 seconds of no output and then surface to the human only as a generic bot failure.
 - Do not leave the embedded `codex-cli` backend on stock no-output watchdog settings for this host class. Set a day-scale agent timeout, disable `agents.defaults.llm.idleTimeoutSeconds`, use `contextInjection=continuation-skip`, and override the `codex-cli` fresh/resume watchdogs to a day-scale value.
+- Do not leave the embedded `codex-cli` backend on the bundled `--sandbox workspace-write` args for this host class. Override both `args` and `resumeArgs` to use `--dangerously-bypass-approvals-and-sandbox`, and make validation fail if the bundled sandbox default returns.
 - If you intentionally spawn a side worker, monitor it as background work and keep the parent chat updated. Do not let the parent session sit idle while a child CLI runs off-screen.
 - For fresh installs on this host class, no-sandbox / danger-full-access should be the default operator mode. If the shell sandbox throws `bwrap: Failed to make / slave: Permission denied`, treat that as proof the wrong runtime was used and switch immediately.
 - Do not introduce cron as default automation during install or repair. Use local Node-RED for durable automation unless the user explicitly asked for cron.

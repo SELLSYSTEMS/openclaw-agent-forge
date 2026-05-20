@@ -27,7 +27,7 @@ Canonical repository identity:
 11. If OpenClaw needs Node-RED flows, put them in a dedicated new OpenClaw-specific tab/project scope. Do not mix them into unrelated user flows.
 12. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
 13. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.
-14. Keep the embedded Codex CLI no-interruption policy on this host class: `agents.defaults.timeoutSeconds >= 604800`, `agents.defaults.llm.idleTimeoutSeconds = 0`, `agents.defaults.contextInjection = continuation-skip`, and day-scale `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+14. Keep the embedded Codex CLI no-interruption policy on this host class: `agents.defaults.timeoutSeconds >= 604800`, `agents.defaults.llm.idleTimeoutSeconds = 0`, `agents.defaults.contextInjection = continuation-skip`, `agents.defaults.sandbox.mode = off`, explicit no-sandbox `agents.defaults.cliBackends.codex-cli.args` / `resumeArgs`, and day-scale `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
 15. Before sending, uploading, publishing, linking, or attaching any artifact through any system, perform a delivery preflight: destination limits, file size, file type, auth/exposure, fallback path, and final URL/result verification.
 
 ## Required Flow
@@ -58,6 +58,7 @@ Canonical repository identity:
 - Browser webterminal access is part of the operating model on this host class, but the exact terminal URL is instance-specific and should stay in local-only notes, not public Git.
 - The Codex TUI is already built into `codex`; do not invent a separate server-side TUI install step for it. In browser terminals, prefer `codex --no-alt-screen`.
 - The embedded `codex-cli` main session also has a default no-output watchdog. Without an explicit repo override, long silent reasoning windows can be killed even when the gateway and Telegram transport stay healthy.
+- The bundled OpenClaw `codex-cli` backend also defaults to `--sandbox workspace-write`. On this host class, that can make every shell read fail with `bwrap: Failed to make / slave: Permission denied`, so project memory exists but cannot be read. Override both fresh and resume args with `--dangerously-bypass-approvals-and-sandbox`.
 - For long repo tasks coming through Telegram, do not default to OpenClaw's built-in `coding-agent` side-worker path. A spawned `codex exec --full-auto` PTY worker can stay silent long enough to hit the 180-second idle killer and surface only as a generic bot failure.
 - If you intentionally spawn a side worker, treat it as background work and monitor it actively. Do not leave the parent chat silent while waiting on a child CLI.
 - If the user wants a message or command to appear in an already-running neighboring webterminal tab, use one canonical path only: resolve the target tab from `terminal-state.json`, resolve the live `/dev/pts/N` from `/proc`, and write directly to that PTY. Do not invent alternate control planes.
