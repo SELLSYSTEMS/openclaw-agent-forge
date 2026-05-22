@@ -7,8 +7,13 @@ EXPECTED_WORKSPACE="${ROOT}/workspace"
 EXPECTED_GATEWAY_MODE="local"
 EXPECTED_GATEWAY_BIND="loopback"
 BASELINE_MODEL="gpt-5.4"
+BASELINE_MODEL_REF="codex/gpt-5.4"
 EXPECTED_REASONING="xhigh"
-EXPECTED_RUNTIME_ID="codex-cli"
+EXPECTED_HARNESS_RUNTIME="codex"
+EXPECTED_HARNESS_FALLBACK="none"
+EXPECTED_CODEX_APP_SERVER_APPROVAL_POLICY="never"
+EXPECTED_CODEX_APP_SERVER_SANDBOX="danger-full-access"
+EXPECTED_CODEX_APP_SERVER_TIMEOUT_MS=604800000
 EXPECTED_AGENT_TIMEOUT_SECONDS=604800
 EXPECTED_LLM_IDLE_TIMEOUT_SECONDS=0
 EXPECTED_CONTEXT_INJECTION="continuation-skip"
@@ -39,7 +44,7 @@ model_is_newer_than_baseline() {
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
     local minor="${BASH_REMATCH[3]:-0}"
-    (( major > 5 || (major == 5 && minor > 5) ))
+    (( major > 5 || (major == 5 && minor > 4) ))
     return
   fi
   return 1
@@ -71,13 +76,17 @@ compact_json() {
 }
 
 EXPECTED_BASE_MODEL="$(resolve_expected_base_model_name)"
-EXPECTED_LEGACY_MODEL="codex-cli/${EXPECTED_BASE_MODEL}"
-EXPECTED_CANONICAL_MODEL="openai/${EXPECTED_BASE_MODEL}"
+if [[ "${EXPECTED_BASE_MODEL}" == "${BASELINE_MODEL}" ]]; then
+  EXPECTED_PRIMARY_MODEL="${BASELINE_MODEL_REF}"
+else
+  EXPECTED_PRIMARY_MODEL="codex/${EXPECTED_BASE_MODEL}"
+fi
 EXPECTED_CODEX_CLI_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_ARGS_JSON}" | compact_json)"
 EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_RESUME_ARGS_JSON}" | compact_json)"
 
 "${LAUNCHER}" --version
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
+"${ROOT}/scripts/validate-codex-harness-contract.sh"
 "${ROOT}/scripts/validate-codex-cli-contract.sh"
 
 for required_file in "${REQUIRED_WORKSPACE_CONTEXT[@]}"; do
@@ -102,20 +111,69 @@ actual_model="$(
     "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.model.primary
 )"
 
-actual_runtime_id="$(
-  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
-    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.agentRuntime.id 2>/dev/null || true
-)"
-
-model_ok=0
-if [[ "${actual_model}" == "${EXPECTED_LEGACY_MODEL}" ]]; then
-  model_ok=1
-elif [[ "${actual_model}" == "${EXPECTED_CANONICAL_MODEL}" && "${actual_runtime_id}" == "${EXPECTED_RUNTIME_ID}" ]]; then
-  model_ok=1
+if [[ "${actual_model}" != "${EXPECTED_PRIMARY_MODEL}" ]]; then
+  echo "Model/runtime mismatch: expected primary ${EXPECTED_PRIMARY_MODEL} through the bundled Codex app-server harness, got ${actual_model}" >&2
+  echo "Do not use codex-cli/* as the primary Telegram/OpenClaw runtime on this host class; it is a fallback backend only." >&2
+  exit 1
 fi
 
-if [[ "${model_ok}" -ne 1 ]]; then
-  echo "Model/runtime mismatch: expected either ${EXPECTED_LEGACY_MODEL} or ${EXPECTED_CANONICAL_MODEL} with agentRuntime.id=${EXPECTED_RUNTIME_ID}, got model=${actual_model} runtime=${actual_runtime_id:-<unset>}" >&2
+actual_codex_plugin_enabled="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get plugins.entries.codex.enabled 2>/dev/null || true
+)"
+
+if [[ "${actual_codex_plugin_enabled}" != "true" ]]; then
+  echo "Codex plugin mismatch: expected plugins.entries.codex.enabled=true, got ${actual_codex_plugin_enabled:-<unset>}" >&2
+  exit 1
+fi
+
+actual_harness_runtime="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.embeddedHarness.runtime 2>/dev/null || true
+)"
+
+if [[ "${actual_harness_runtime}" != "${EXPECTED_HARNESS_RUNTIME}" ]]; then
+  echo "Embedded harness runtime mismatch: expected ${EXPECTED_HARNESS_RUNTIME}, got ${actual_harness_runtime:-<unset>}" >&2
+  exit 1
+fi
+
+actual_harness_fallback="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.embeddedHarness.fallback 2>/dev/null || true
+)"
+
+if [[ "${actual_harness_fallback}" != "${EXPECTED_HARNESS_FALLBACK}" ]]; then
+  echo "Embedded harness fallback mismatch: expected ${EXPECTED_HARNESS_FALLBACK}, got ${actual_harness_fallback:-<unset>}" >&2
+  exit 1
+fi
+
+actual_app_server_approval_policy="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get plugins.entries.codex.config.appServer.approvalPolicy 2>/dev/null || true
+)"
+
+if [[ "${actual_app_server_approval_policy}" != "${EXPECTED_CODEX_APP_SERVER_APPROVAL_POLICY}" ]]; then
+  echo "Codex app-server approval policy mismatch: expected ${EXPECTED_CODEX_APP_SERVER_APPROVAL_POLICY}, got ${actual_app_server_approval_policy:-<unset>}" >&2
+  exit 1
+fi
+
+actual_app_server_sandbox="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get plugins.entries.codex.config.appServer.sandbox 2>/dev/null || true
+)"
+
+if [[ "${actual_app_server_sandbox}" != "${EXPECTED_CODEX_APP_SERVER_SANDBOX}" ]]; then
+  echo "Codex app-server sandbox mismatch: expected ${EXPECTED_CODEX_APP_SERVER_SANDBOX}, got ${actual_app_server_sandbox:-<unset>}" >&2
+  exit 1
+fi
+
+actual_app_server_timeout_ms="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get plugins.entries.codex.config.appServer.requestTimeoutMs 2>/dev/null || true
+)"
+
+if [[ ! "${actual_app_server_timeout_ms}" =~ ^[0-9]+$ ]] || (( actual_app_server_timeout_ms < EXPECTED_CODEX_APP_SERVER_TIMEOUT_MS )); then
+  echo "Codex app-server request timeout mismatch: expected at least ${EXPECTED_CODEX_APP_SERVER_TIMEOUT_MS}, got ${actual_app_server_timeout_ms:-<unset>}" >&2
   exit 1
 fi
 

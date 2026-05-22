@@ -22,6 +22,8 @@ Do not close a recurring incident with documentation only when a script can dete
 - Generic Telegram failure after long work: can be transport delivery failure, artifact upload limit, or embedded CLI failure. Check logs and local repo state before restarting.
 - Long silent tasks killed internally: keep day-scale OpenClaw agent timeout and day-scale `codex-cli` watchdog overrides.
 - Raw JSONL/tool/code flood in Telegram after a completed Codex turn: check `agents.defaults.cliBackends.codex-cli.output` and `resumeOutput`. If Codex CLI args include `--json`, both output modes must be `jsonl`; otherwise OpenClaw can treat the whole Codex JSONL stream as a chat reply and hit Telegram `429 Too Many Requests`.
+- Repeated unrelated-looking Codex failures while the service remains healthy: check whether the primary model is still `codex-cli/*`. On this host class that is the architectural root cause, because OpenClaw documents CLI backends as fallback/safety-net runtime. Primary runtime must be `codex/*` through the bundled Codex app-server harness.
+- Telegram media turn fails with `No prompt provided via stdin` after media understanding succeeds: this is a `codex-cli` backend prompt/image delivery failure, not memory loss. Stop patching individual CLI symptoms and migrate the primary runtime to `codex/*` with `agents.defaults.embeddedHarness.runtime=codex`.
 - Oversized artifacts: Telegram direct upload can fail for APKs. Run delivery preflight and provide a safe link/path instead of forcing direct attachment.
 - `pairing required` on admin-style RPCs: separate gateway authorization issue. Do not confuse it with Telegram health, model auth, or memory loss.
 - Parallel OpenClaw config writes: can clobber each other. Apply config writes sequentially.
@@ -33,6 +35,7 @@ Run these after install, repair, or Codex/OpenClaw upgrade:
 
 ```bash
 scripts/validate-codex-cli-contract.sh
+scripts/validate-codex-harness-contract.sh
 scripts/validate-local-setup.sh
 ```
 
@@ -49,7 +52,29 @@ For host topology:
 scripts/agent-landscape.sh
 ```
 
-## Codex CLI Backend Contract
+## Codex App-Server Harness Contract
+
+The primary Telegram/OpenClaw runtime on this host class must be:
+
+```text
+agents.defaults.model.primary=codex/gpt-5.4
+plugins.entries.codex.enabled=true
+agents.defaults.embeddedHarness.runtime=codex
+agents.defaults.embeddedHarness.fallback=none
+plugins.entries.codex.config.appServer.sandbox=danger-full-access
+```
+
+Use a locally validated `codex/<newer-model>` when the shared Codex CLI default is newer than `gpt-5.4`.
+
+Do not use `codex-cli/*` as the primary model. The CLI backend remains useful as a fallback contract, but it is not the native Codex harness and has already failed on long silent turns, resume JSONL, and Telegram image/media prompts.
+
+Validate:
+
+```bash
+scripts/validate-codex-harness-contract.sh
+```
+
+## Codex CLI Fallback Contract
 
 Fresh and resume calls are intentionally different:
 
@@ -75,7 +100,7 @@ agents.defaults.cliBackends.codex-cli.output=jsonl
 agents.defaults.cliBackends.codex-cli.resumeOutput=jsonl
 ```
 
-Then update `scripts/bootstrap-openclaw.sh`, `scripts/validate-local-setup.sh`, `scripts/validate-codex-cli-contract.sh`, and this playbook in the same commit.
+Then update `scripts/bootstrap-openclaw.sh`, `scripts/validate-local-setup.sh`, `scripts/validate-codex-cli-contract.sh`, `scripts/validate-codex-harness-contract.sh`, and this playbook in the same commit.
 
 ## User-Visible Recovery Rule
 

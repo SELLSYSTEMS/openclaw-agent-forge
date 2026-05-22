@@ -95,10 +95,32 @@ bwrap: Failed to make / slave: Permission denied
 
 stop immediately and move the install/operator session to the correct no-sandbox / danger-full-access execution before continuing. Do not attempt bootstrap, validation, or topology discovery from a broken bwrap runtime.
 
-## Embedded Codex CLI Sandbox Contract
+## Embedded Codex Runtime Contract
+
+The primary Telegram/OpenClaw runtime on this host class is `codex/<model>` through the bundled Codex app-server harness. `codex-cli/*` is fallback-only.
+
+Required primary settings:
+
+```text
+plugins.entries.codex.enabled=true
+agents.defaults.model.primary=codex/gpt-5.4
+agents.defaults.embeddedHarness.runtime=codex
+agents.defaults.embeddedHarness.fallback=none
+plugins.entries.codex.config.appServer.sandbox=danger-full-access
+```
+
+This matters because OpenClaw's own docs describe CLI backends as fallback/safety-net runtime. Using `codex-cli/*` as the primary path caused repeated live failures here: long silent turn kills, raw JSONL delivery, Telegram rate-limit floods, and media turns failing before reply with `No prompt provided via stdin`.
+
+Use the dedicated guardrail after install, repair, or upgrades:
+
+```bash
+scripts/validate-codex-harness-contract.sh
+```
+
+## Codex CLI Fallback Contract
 
 OpenClaw's bundled `codex-cli` backend defaults to `--sandbox workspace-write`.
-That default is not acceptable on this host class because it can prevent the embedded agent from reading its own Markdown memory, project dossiers, and live topology files.
+That default is not acceptable even for fallback use on this host class because it can prevent the embedded agent from reading its own Markdown memory, project dossiers, and live topology files.
 
 This repo must explicitly configure both fresh and resume Codex CLI backend args with:
 
@@ -148,18 +170,17 @@ For installs that enable Telegram, treat the setup as incomplete until Telegram 
 
 ## Model Path
 
-This setup uses `gpt-5.4` as the baseline OpenClaw model, with Codex CLI as the intended backend path and `xhigh` reasoning inherited from the shared Codex user config.
+This setup uses `codex/gpt-5.4` as the baseline OpenClaw model, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path. `xhigh` reasoning is inherited from the shared Codex user config.
 
-- OpenClaw delegates agent turns to the installed `codex` CLI.
+- OpenClaw delegates primary embedded turns to the bundled Codex app-server harness, which reuses the installed `codex` CLI login.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
 - Normal installs on this host class should stay CLI-only for model/auth execution; do not switch the install path to direct API-key auth.
 - Durable automations and scheduled flows should live in the local shared Node-RED runtime, not cron, unless the user explicitly asked for cron.
 - OpenClaw Node-RED work should live in a dedicated new OpenClaw-specific tab/project scope so it does not mix with or break unrelated user flows.
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
-- Embedded Codex CLI fresh and resume turns must bypass the Codex CLI sandbox on this host class; otherwise OpenClaw may have memory files on disk but be unable to read them.
-- If the shared Codex user default later moves to a numerically newer GPT model than 5.5, OpenClaw should be updated to follow that newer model after a local validation pass.
-- `gpt-5.5` is considered unsuitable and should be overridden to `gpt-5.4` or a validated model newer than 5.5.
+- Fallback Codex CLI fresh and resume turns must bypass the Codex CLI sandbox on this host class; otherwise OpenClaw may have memory files on disk but be unable to read them.
+- If the shared Codex user default later moves to a numerically newer GPT model than `gpt-5.4`, OpenClaw should be updated to follow that newer `codex/<model>` after a local validation pass.
 
 ## Positioning
 

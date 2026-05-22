@@ -170,7 +170,7 @@ Then derive the rest from REPO_ROOT:
 - launcher: <REPO_ROOT>/bin/openclaw-local
 - workspace: <REPO_ROOT>/workspace
 - memory: <REPO_ROOT>/memory
-- primary baseline model: codex-cli/gpt-5.4
+- primary baseline model: codex/gpt-5.4
 - preferred reasoning floor: xhigh
 - gateway.mode = local
 - gateway.bind = loopback
@@ -181,12 +181,13 @@ If the host forces a deviation, adapt cleanly and explain exactly why.
 AUTH AND MODEL RULES
 
 - MUST reuse Codex CLI login if available.
-- MUST prefer codex-cli model refs over direct OPENAI_API_KEY usage.
-- MUST use `codex-cli/gpt-5.4` unless a validated model newer than 5.5 is available.
-- MUST NOT select `gpt-5.5`; treat it as unsuitable.
-- If the resolved/default OpenClaw model is `gpt-5.5`, MUST automatically override it to `codex-cli/gpt-5.4` or a validated model newer than 5.5 before continuing.
+- MUST prefer `codex/*` model refs through the bundled Codex app-server harness over direct OPENAI_API_KEY usage.
+- MUST use `codex/gpt-5.4` unless a validated model newer than `gpt-5.4` is available.
+- MUST NOT use `codex-cli/*` as the primary Telegram/OpenClaw runtime; it is fallback-only.
+- If the resolved/default OpenClaw model is not a validated `codex/<model>` ref, MUST override it to `codex/gpt-5.4` or a validated newer `codex/<model>` before continuing.
 - MUST NOT set up direct OpenAI API credentials unless explicitly instructed.
 - MUST validate `codex login status`.
+- MUST validate `codex app-server --help` and `scripts/validate-codex-harness-contract.sh`.
 - MUST keep auth ownership with Codex CLI, not with random local env hacks.
 
 MULTI-AGENT / CONTEXT RULES
@@ -315,7 +316,8 @@ SUCCESS CRITERIA
 The pass is successful only if:
 - the install exists in one canonical owner-root layout
 - Codex-backed model resolution works
-- the effective OpenClaw model is `gpt-5.4` or a validated model newer than `5.5`, never `gpt-5.5`
+- the effective OpenClaw model is `codex/gpt-5.4` or a validated `codex/<model>` newer than `gpt-5.4`
+- the bundled Codex app-server harness is enabled and `codex-cli/*` is not the primary runtime
 - config is valid
 - workspace is seeded correctly
 - gateway is reachable

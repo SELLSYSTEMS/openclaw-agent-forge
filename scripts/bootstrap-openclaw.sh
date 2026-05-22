@@ -8,11 +8,17 @@ WORKSPACE_DIR="${ROOT}/workspace"
 MEMORY_DIR="${ROOT}/memory"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 BASELINE_MODEL="gpt-5.4"
+BASELINE_MODEL_REF="codex/gpt-5.4"
 BASELINE_REASONING="xhigh"
 LONG_RUN_TIMEOUT_SECONDS=604800
 LONG_RUN_WATCHDOG_TIMEOUT_MS=604800000
+CODEX_APP_SERVER_TIMEOUT_MS=604800000
 EXPECTED_CONTEXT_INJECTION="continuation-skip"
 EXPECTED_SANDBOX_MODE="off"
+CODEX_HARNESS_RUNTIME="codex"
+CODEX_HARNESS_FALLBACK="none"
+CODEX_APP_SERVER_APPROVAL_POLICY="never"
+CODEX_APP_SERVER_SANDBOX="danger-full-access"
 CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
 CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
 CODEX_CLI_OUTPUT_MODE="jsonl"
@@ -37,7 +43,7 @@ model_is_newer_than_baseline() {
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
     local minor="${BASH_REMATCH[3]:-0}"
-    (( major > 5 || (major == 5 && minor > 5) ))
+    (( major > 5 || (major == 5 && minor > 4) ))
     return
   fi
   return 1
@@ -50,11 +56,11 @@ resolve_requested_model_ref() {
   fi
 
   if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}"; then
-    printf 'codex-cli/%s\n' "${shared_model}"
+    printf 'codex/%s\n' "${shared_model}"
     return
   fi
 
-  printf 'codex-cli/%s\n' "${BASELINE_MODEL}"
+  printf '%s\n' "${BASELINE_MODEL_REF}"
 }
 
 resolve_shared_reasoning() {
@@ -89,6 +95,12 @@ TARGET_PRIMARY_MODEL="$(resolve_requested_model_ref)"
 
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.workspace "${WORKSPACE_DIR}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" models set "${TARGET_PRIMARY_MODEL}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set plugins.entries.codex.enabled true
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set plugins.entries.codex.config.appServer.approvalPolicy "\"${CODEX_APP_SERVER_APPROVAL_POLICY}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set plugins.entries.codex.config.appServer.sandbox "\"${CODEX_APP_SERVER_SANDBOX}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set plugins.entries.codex.config.appServer.requestTimeoutMs "${CODEX_APP_SERVER_TIMEOUT_MS}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.embeddedHarness.runtime "\"${CODEX_HARNESS_RUNTIME}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.embeddedHarness.fallback "\"${CODEX_HARNESS_FALLBACK}\"" --strict-json
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.timeoutSeconds "${LONG_RUN_TIMEOUT_SECONDS}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.llm.idleTimeoutSeconds 0
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.contextInjection "${EXPECTED_CONTEXT_INJECTION}"
@@ -122,7 +134,8 @@ if [[ "$(resolve_shared_reasoning)" != "${BASELINE_REASONING}" ]]; then
   echo "Warning: shared Codex reasoning is not ${BASELINE_REASONING}. OpenClaw is expected to run with ${BASELINE_REASONING} reasoning on this host." >&2
 fi
 
-echo "Embedded Codex no-interruption policy: timeoutSeconds=${LONG_RUN_TIMEOUT_SECONDS}, llm.idleTimeoutSeconds=0, contextInjection=${EXPECTED_CONTEXT_INJECTION}, sandbox.mode=${EXPECTED_SANDBOX_MODE}, codex-cli watchdog=${LONG_RUN_WATCHDOG_TIMEOUT_MS}ms."
+echo "Embedded Codex primary runtime: model=${TARGET_PRIMARY_MODEL}, harness=${CODEX_HARNESS_RUNTIME}, fallback=${CODEX_HARNESS_FALLBACK}, app-server sandbox=${CODEX_APP_SERVER_SANDBOX}, app-server requestTimeoutMs=${CODEX_APP_SERVER_TIMEOUT_MS}."
+echo "Embedded Codex no-interruption policy: timeoutSeconds=${LONG_RUN_TIMEOUT_SECONDS}, llm.idleTimeoutSeconds=0, contextInjection=${EXPECTED_CONTEXT_INJECTION}, sandbox.mode=${EXPECTED_SANDBOX_MODE}, codex-cli fallback watchdog=${LONG_RUN_WATCHDOG_TIMEOUT_MS}ms."
 echo "Embedded Codex CLI args: ${CODEX_CLI_ARGS_JSON}"
 echo "Embedded Codex CLI resume args: ${CODEX_CLI_RESUME_ARGS_JSON}"
 echo "Embedded Codex CLI output mode: output=${CODEX_CLI_OUTPUT_MODE}, resumeOutput=${CODEX_CLI_OUTPUT_MODE}"

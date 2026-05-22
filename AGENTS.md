@@ -20,15 +20,16 @@ Canonical repository identity:
 4. Keep the default agent workspace at `<REPO_ROOT>/workspace`.
 5. Treat `<REPO_ROOT>/memory` as the local memory source of truth.
 6. Use Markdown files first. Do not introduce a vector database unless keyword search has clearly stopped being enough.
-7. Keep the primary model floor on `gpt-5.4` with Codex CLI as the intended backend path and `xhigh` reasoning as the minimum default. If the shared Codex user default moves to a numerically newer GPT model than 5.5 and is validated locally, OpenClaw should follow that newer model.
+7. Keep the primary model floor on `codex/gpt-5.4` with the bundled Codex app-server harness as the intended backend path and `xhigh` reasoning as the minimum default. If the shared Codex user default moves to a numerically newer GPT model than 5.4 and is validated locally, OpenClaw should follow that newer `codex/<model>` ref.
 8. Do not introduce `OPENAI_API_KEY` as the auth or execution path for normal OpenClaw installs on this host class. Reuse the installed Codex CLI login instead.
 9. Do not introduce cron-based automation or scheduled jobs unless the user explicitly asked for cron.
 10. For durable automations, scheduled flows, or bridges, prefer the local shared Node-RED under `/root/.node-red`, not cron.
 11. If OpenClaw needs Node-RED flows, put them in a dedicated new OpenClaw-specific tab/project scope. Do not mix them into unrelated user flows.
 12. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
 13. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.
-14. Keep the embedded Codex CLI no-interruption policy on this host class: `agents.defaults.timeoutSeconds >= 604800`, `agents.defaults.llm.idleTimeoutSeconds = 0`, `agents.defaults.contextInjection = continuation-skip`, `agents.defaults.sandbox.mode = off`, explicit no-sandbox `agents.defaults.cliBackends.codex-cli.args` / `resumeArgs`, explicit `agents.defaults.cliBackends.codex-cli.output=jsonl` / `resumeOutput=jsonl`, and day-scale `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
-15. Before sending, uploading, publishing, linking, or attaching any artifact through any system, perform a delivery preflight: destination limits, file size, file type, auth/exposure, fallback path, and final URL/result verification.
+14. Do not use `codex-cli/*` as the primary Telegram/OpenClaw runtime on this host class. OpenClaw's own docs describe CLI backends as fallback/safety-net runtime; primary embedded agent turns should use `codex/*` plus `agents.defaults.embeddedHarness.runtime=codex`.
+15. Keep the embedded Codex no-interruption policy on this host class: `agents.defaults.timeoutSeconds >= 604800`, `agents.defaults.llm.idleTimeoutSeconds = 0`, `agents.defaults.contextInjection = continuation-skip`, `agents.defaults.sandbox.mode = off`, `plugins.entries.codex.config.appServer.sandbox=danger-full-access`, `plugins.entries.codex.config.appServer.requestTimeoutMs >= 604800000`, explicit no-sandbox fallback `agents.defaults.cliBackends.codex-cli.args` / `resumeArgs`, explicit `agents.defaults.cliBackends.codex-cli.output=jsonl` / `resumeOutput=jsonl`, and day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+16. Before sending, uploading, publishing, linking, or attaching any artifact through any system, perform a delivery preflight: destination limits, file size, file type, auth/exposure, fallback path, and final URL/result verification.
 
 ## Required Flow
 
@@ -37,9 +38,10 @@ Canonical repository identity:
 3. Read [workspace/README.md](workspace/README.md) and [workspace/MEMORY.md](workspace/MEMORY.md) before changing workspace defaults or identity prompts.
 4. Read [docs/github-publish.md](docs/github-publish.md) before changing repository identity or publication flow.
 5. If OpenClaw is not installed yet, run `scripts/bootstrap-openclaw.sh`.
-6. Validate the Codex CLI backend contract with `scripts/validate-codex-cli-contract.sh`.
-7. Validate the setup with `scripts/validate-local-setup.sh`.
-8. If you change the operating model, update the docs in the same commit.
+6. Validate the Codex app-server harness contract with `scripts/validate-codex-harness-contract.sh`.
+7. Validate the Codex CLI fallback contract with `scripts/validate-codex-cli-contract.sh`.
+8. Validate the setup with `scripts/validate-local-setup.sh`.
+9. If you change the operating model, update the docs in the same commit.
 
 ## Pitfalls Already Seen
 
@@ -59,6 +61,8 @@ Canonical repository identity:
 - Browser webterminal access is part of the operating model on this host class, but the exact terminal URL is instance-specific and should stay in local-only notes, not public Git.
 - The Codex TUI is already built into `codex`; do not invent a separate server-side TUI install step for it. In browser terminals, prefer `codex --no-alt-screen`.
 - The embedded `codex-cli` main session also has a default no-output watchdog. Without an explicit repo override, long silent reasoning windows can be killed even when the gateway and Telegram transport stay healthy.
+- `codex-cli/*` was mistakenly used as the primary runtime. This is the architectural root cause behind repeated unrelated-looking failures: watchdog death, raw JSONL delivery, and Telegram media turns failing with `No prompt provided via stdin`. Keep `codex-cli` configured only as a validated fallback; primary runtime is `codex/*` through the bundled Codex app-server harness.
+- The bundled Codex app-server plugin must expose provider id `codex` and harness id `codex`; validate this with `scripts/validate-codex-harness-contract.sh`.
 - The bundled OpenClaw `codex-cli` backend also defaults to `--sandbox workspace-write`. On this host class, that can make every shell read fail with `bwrap: Failed to make / slave: Permission denied`, so project memory exists but cannot be read. Override both fresh and resume args with `--dangerously-bypass-approvals-and-sandbox`.
 - Reading only the first screenful of a long project dossier can miss the newest checkpoint at the tail. On resume, read the dossier header plus latest/current tail sections and search for the current date, project slug, blockers, and checkpoints.
 - Fresh and resume `codex-cli` args are different. `codex exec resume` does not accept `--color`; the expected resume vector is `["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]`.

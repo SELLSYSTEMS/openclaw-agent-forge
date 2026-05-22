@@ -94,3 +94,18 @@
 
 - Decision: document that the browser-terminal tabs on this host class share the same Unix user and therefore the same `~/.codex` login state
 - Why: future agents should not repeat pointless per-tab login instructions when the login already exists for the shared session user
+
+## 2026-05-22
+
+### Use the Codex app-server harness as the primary OpenClaw runtime
+
+- Decision: make `codex/gpt-5.4` the baseline primary model path, enable the bundled `codex` plugin, force `agents.defaults.embeddedHarness.runtime=codex`, and keep `agents.defaults.embeddedHarness.fallback=none`
+- Why: OpenClaw's CLI backend docs describe `codex-cli/*` as fallback/safety-net runtime, and this host repeatedly failed when that fallback layer was used as the primary Telegram/OpenClaw runtime
+- Evidence: live logs showed the old `codex-cli/gpt-5.4` primary path causing long silent turn failures, raw JSONL Telegram delivery, Telegram rate-limit floods, and a media turn that failed after successful media understanding with `No prompt provided via stdin`
+- Constraint: keep `OPENAI_API_KEY` out of the normal auth path; the Codex app-server harness should reuse the installed Codex CLI login state
+
+### Keep Codex CLI as a validated fallback contract only
+
+- Decision: retain explicit `codex-cli` fallback args, `output=jsonl`, `resumeOutput=jsonl`, and day-scale watchdog validation, but do not allow `codex-cli/*` as the primary model path
+- Why: the CLI backend can still be useful as a safety net, but it is too brittle for the main Telegram + media + long-coding operator workflow
+- Guardrails: `scripts/validate-codex-harness-contract.sh` validates the primary `codex/*` harness contract, while `scripts/validate-codex-cli-contract.sh` validates the fallback CLI contract

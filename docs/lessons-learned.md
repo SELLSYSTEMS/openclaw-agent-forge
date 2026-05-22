@@ -25,14 +25,17 @@
 
 ## Model And Auth
 
-- `gpt-5.4` is the current minimum model floor for this repo, with Codex CLI as the intended backend path, not a forever pin.
+- `codex/gpt-5.4` is the current minimum model floor for this repo, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path, not a forever pin.
 - Shared Codex reasoning should stay on `xhigh`.
-- If the shared Codex user default moves to a numerically newer GPT model than 5.5, OpenClaw should follow it after validation.
+- If the shared Codex user default moves to a numerically newer GPT model than `gpt-5.4`, OpenClaw should follow it after validation as `codex/<model>`.
 - This setup should prefer Codex CLI login reuse over `OPENAI_API_KEY`.
 - Do not switch normal OpenClaw install/runtime behavior to direct API-key auth when Codex CLI reuse is available.
 - On this host class, all webterminal tabs share the same Unix user, so Codex login is a shared user-level state rather than a per-tab concern.
 - A successful `codex login status` plus a successful `codex exec ...` smoke test proves the auth path is usable.
 - A healthy Codex login is not enough by itself. Embedded `codex-cli` turns can still die from OpenClaw's own no-output watchdog if the repo does not override it.
+- Do not make `codex-cli/*` the primary Telegram/OpenClaw model path on this host class. OpenClaw documents CLI backends as fallback/safety-net runtime, and this host has already hit multiple independent failure modes from using that fallback layer as the primary runtime.
+- The stable primary runtime pattern is `codex/<model>` with the bundled Codex app-server harness: `plugins.entries.codex.enabled=true`, `agents.defaults.embeddedHarness.runtime=codex`, and `agents.defaults.embeddedHarness.fallback=none`.
+- If a Telegram media/image turn fails after successful media understanding with `No prompt provided via stdin`, treat it as a `codex-cli` prompt/image delivery failure. The correct durable fix is the Codex app-server harness, not another one-off CLI arg patch.
 
 ## Gateway Operations
 
@@ -62,6 +65,7 @@
 - Do not place bot tokens or other secrets into tracked docs, scripts, or memory files when the GitHub repo is public.
 - Do not place owner-specific Telegram IDs into tracked docs when the GitHub repo is public.
 - Do not default to OpenClaw's built-in `coding-agent` / side `codex exec` worker path for long Telegram coding tasks. A silent PTY worker can be terminated after 180 seconds of no output and then surface to the human only as a generic bot failure.
+- Do not use `codex-cli/*` as the primary runtime just because it can reuse Codex login. Keep it as a fallback contract and validate primary `codex/*` with `scripts/validate-codex-harness-contract.sh`.
 - Do not leave the embedded `codex-cli` backend on stock no-output watchdog settings for this host class. Set a day-scale agent timeout, disable `agents.defaults.llm.idleTimeoutSeconds`, use `contextInjection=continuation-skip`, and override the `codex-cli` fresh/resume watchdogs to a day-scale value.
 - Do not leave the embedded `codex-cli` backend on the bundled `--sandbox workspace-write` args for this host class. Override both `args` and `resumeArgs` to use `--dangerously-bypass-approvals-and-sandbox`, and make validation fail if the bundled sandbox default returns.
 - Do not copy fresh `codex exec` args directly into `resumeArgs`. Current `codex exec resume` does not accept `--color`; the working resume vector is `["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]`. A bad resume vector fails before model start and Telegram only shows a generic failure.
