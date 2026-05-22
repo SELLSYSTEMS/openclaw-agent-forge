@@ -39,6 +39,12 @@ scripts/validate-codex-harness-contract.sh
 scripts/validate-local-setup.sh
 ```
 
+After any model/runtime change, also run:
+
+```bash
+scripts/probe-codex-harness-turn.sh
+```
+
 For service state:
 
 ```bash
@@ -60,18 +66,22 @@ The primary Telegram/OpenClaw runtime on this host class must be:
 agents.defaults.model.primary=codex/gpt-5.4
 plugins.entries.codex.enabled=true
 agents.defaults.embeddedHarness.runtime=codex
-agents.defaults.embeddedHarness.fallback=none
+agents.defaults.embeddedHarness.fallback=pi
+agents.defaults.thinkingDefault=xhigh
 plugins.entries.codex.config.appServer.sandbox=danger-full-access
 ```
 
-Use a locally validated `codex/<newer-model>` when the shared Codex CLI default is newer than `gpt-5.4`.
+Use a locally validated `codex/<newer-model>` only when OpenClaw startup and `scripts/probe-codex-harness-turn.sh` both pass for that model. Do not auto-promote just because `/root/.codex/config.toml` names a newer model.
 
 Do not use `codex-cli/*` as the primary model. The CLI backend remains useful as a fallback contract, but it is not the native Codex harness and has already failed on long silent turns, resume JSONL, and Telegram image/media prompts.
+
+Do not persist `agents.defaults.embeddedHarness.fallback=none` on OpenClaw 2026.4.12. It can break gateway/channel startup before the Codex plugin registers. Use `fallback=none` only as an explicit probe override.
 
 Validate:
 
 ```bash
 scripts/validate-codex-harness-contract.sh
+scripts/probe-codex-harness-turn.sh
 ```
 
 ## Codex CLI Fallback Contract

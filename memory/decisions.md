@@ -19,10 +19,10 @@
 
 ## 2026-04-17
 
-### Use Codex CLI as the default OpenClaw model path
+### Use Codex CLI auth as the default OpenClaw auth path
 
-- Decision: keep the primary model floor on `gpt-5.4`, treat Codex CLI as the intended backend path, inherit `xhigh` reasoning from the shared Codex user config, and move to a newer shared GPT model once it is numerically newer than 5.5 and validated locally
-- Why: this reuses the installed Codex CLI login, avoids making `OPENAI_API_KEY` the default auth path, and keeps OpenClaw aligned with the newest stable shared-user Codex model instead of freezing forever on 5.5
+- Decision: keep the primary model floor on `gpt-5.4`, treat Codex CLI login as the intended auth source, inherit `xhigh` reasoning, and move to a newer shared GPT model only after OpenClaw startup and smoke validation
+- Why: this reuses the installed Codex CLI login, avoids making `OPENAI_API_KEY` the default auth path, and prevents blindly promoting a model that direct Codex CLI can use but OpenClaw cannot yet start cleanly
 
 ### Keep repo knowledge public-safe and secrets local-only
 
@@ -99,13 +99,20 @@
 
 ### Use the Codex app-server harness as the primary OpenClaw runtime
 
-- Decision: make `codex/gpt-5.4` the baseline primary model path, enable the bundled `codex` plugin, force `agents.defaults.embeddedHarness.runtime=codex`, and keep `agents.defaults.embeddedHarness.fallback=none`
+- Decision: make `codex/gpt-5.4` the baseline primary model path, enable the bundled `codex` plugin, force `agents.defaults.embeddedHarness.runtime=codex`, keep boot-safe `agents.defaults.embeddedHarness.fallback=pi`, and set `agents.defaults.thinkingDefault=xhigh`
 - Why: OpenClaw's CLI backend docs describe `codex-cli/*` as fallback/safety-net runtime, and this host repeatedly failed when that fallback layer was used as the primary Telegram/OpenClaw runtime
 - Evidence: live logs showed the old `codex-cli/gpt-5.4` primary path causing long silent turn failures, raw JSONL Telegram delivery, Telegram rate-limit floods, and a media turn that failed after successful media understanding with `No prompt provided via stdin`
 - Constraint: keep `OPENAI_API_KEY` out of the normal auth path; the Codex app-server harness should reuse the installed Codex CLI login state
+- Boot-order constraint: on OpenClaw 2026.4.12, persisted `fallback=none` can break gateway/channel startup before the Codex plugin registers; use `fallback=none` only for explicit smoke commands
 
 ### Keep Codex CLI as a validated fallback contract only
 
 - Decision: retain explicit `codex-cli` fallback args, `output=jsonl`, `resumeOutput=jsonl`, and day-scale watchdog validation, but do not allow `codex-cli/*` as the primary model path
 - Why: the CLI backend can still be useful as a safety net, but it is too brittle for the main Telegram + media + long-coding operator workflow
-- Guardrails: `scripts/validate-codex-harness-contract.sh` validates the primary `codex/*` harness contract, while `scripts/validate-codex-cli-contract.sh` validates the fallback CLI contract
+- Guardrails: `scripts/validate-codex-harness-contract.sh` validates the primary `codex/*` harness contract, `scripts/probe-codex-harness-turn.sh` proves a real Codex response, and `scripts/validate-codex-cli-contract.sh` validates the fallback CLI contract
+
+### Allow a shared newer Codex model only after proof
+
+- Decision: the installer baseline remains `codex/gpt-5.4`, but a live host may use a shared newer model such as `codex/gpt-5.5` after Codex CLI auth, direct Codex smoke, OpenClaw validation, and Codex harness smoke pass
+- Why: the user wants the newest validated Codex model, but future installs must not blindly copy `/root/.codex/config.toml` into OpenClaw without proving the OpenClaw path
+- Evidence: on this host, `codex --version` is `0.130.0`, `codex login status` succeeds via ChatGPT, `/root/.codex/config.toml` uses `model=gpt-5.5` and `model_reasoning_effort=xhigh`, and live OpenClaw now uses `codex/gpt-5.5`

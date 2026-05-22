@@ -9,6 +9,7 @@ workspace/.openclaw/
 workspace/.playwright-cli/
 workspace/memory/
 workspace/deliverables/
+workspace/output/
 workspace/*.local.md
 workspace/*.local.env
 

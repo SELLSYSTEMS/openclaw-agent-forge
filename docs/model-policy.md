@@ -31,6 +31,14 @@ Accepted pattern:
 
 - `codex/<validated-newer-model>`
 
+Validation means more than `codex login status` or a shared `/root/.codex/config.toml` default. It must include:
+
+- reboot-safe OpenClaw gateway startup with no fatal channel startup failure
+- `scripts/validate-codex-harness-contract.sh`
+- `scripts/probe-codex-harness-turn.sh`
+
+On 2026-05-22, OpenClaw gateway startup logged `startup model warmup failed ... Unknown model` for `codex/*` before plugin discovery. Treat that as a known boot-order warning, not as a standalone reason to abandon the Codex harness. The hard failure to avoid is fatal channel startup or a failed Codex smoke/probe.
+
 Do not switch to a direct OpenAI API model path unless the user explicitly instructs it.
 
 ## Auth Ownership
@@ -43,5 +51,6 @@ Required checks:
 - `codex login status`
 - `codex app-server --help`
 - `scripts/validate-codex-harness-contract.sh`
+- `scripts/probe-codex-harness-turn.sh`
 
 Do not make `OPENAI_API_KEY` the default auth path for this repo.

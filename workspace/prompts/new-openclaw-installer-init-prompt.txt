@@ -185,9 +185,11 @@ AUTH AND MODEL RULES
 - MUST use `codex/gpt-5.4` unless a validated model newer than `gpt-5.4` is available.
 - MUST NOT use `codex-cli/*` as the primary Telegram/OpenClaw runtime; it is fallback-only.
 - If the resolved/default OpenClaw model is not a validated `codex/<model>` ref, MUST override it to `codex/gpt-5.4` or a validated newer `codex/<model>` before continuing.
+- MUST persist `agents.defaults.embeddedHarness.runtime=codex` and reboot-safe `agents.defaults.embeddedHarness.fallback=pi`.
+- MUST NOT persist `agents.defaults.embeddedHarness.fallback=none`; use it only in explicit probe/smoke commands.
 - MUST NOT set up direct OpenAI API credentials unless explicitly instructed.
 - MUST validate `codex login status`.
-- MUST validate `codex app-server --help` and `scripts/validate-codex-harness-contract.sh`.
+- MUST validate `codex app-server --help`, `scripts/validate-codex-harness-contract.sh`, and after runtime/model changes `scripts/probe-codex-harness-turn.sh`.
 - MUST keep auth ownership with Codex CLI, not with random local env hacks.
 
 MULTI-AGENT / CONTEXT RULES
@@ -318,6 +320,7 @@ The pass is successful only if:
 - Codex-backed model resolution works
 - the effective OpenClaw model is `codex/gpt-5.4` or a validated `codex/<model>` newer than `gpt-5.4`
 - the bundled Codex app-server harness is enabled and `codex-cli/*` is not the primary runtime
+- persisted embedded harness fallback is `pi`, with `fallback=none` reserved only for explicit smoke/probe validation
 - config is valid
 - workspace is seeded correctly
 - gateway is reachable

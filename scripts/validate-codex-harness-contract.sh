@@ -7,8 +7,9 @@ OPENCLAW_BIN="${ROOT}/.openclaw/bin/openclaw"
 BASELINE_MODEL="gpt-5.4"
 EXPECTED_PROVIDER="codex"
 EXPECTED_MODEL_PREFIX="codex/"
+EXPECTED_THINKING_DEFAULT="xhigh"
 EXPECTED_HARNESS_RUNTIME="codex"
-EXPECTED_HARNESS_FALLBACK="none"
+EXPECTED_HARNESS_FALLBACK="pi"
 EXPECTED_CODEX_APP_SERVER_APPROVAL_POLICY="never"
 EXPECTED_CODEX_APP_SERVER_SANDBOX="danger-full-access"
 EXPECTED_CODEX_APP_SERVER_TIMEOUT_MS=604800000
@@ -26,10 +27,12 @@ require_fixed_string "codex/${BASELINE_MODEL}" "${ROOT}/scripts/bootstrap-opencl
 require_fixed_string "plugins.entries.codex.enabled" "${ROOT}/scripts/bootstrap-openclaw.sh"
 require_fixed_string "agents.defaults.embeddedHarness.runtime" "${ROOT}/scripts/bootstrap-openclaw.sh"
 require_fixed_string "agents.defaults.embeddedHarness.fallback" "${ROOT}/scripts/bootstrap-openclaw.sh"
+require_fixed_string "agents.defaults.thinkingDefault" "${ROOT}/scripts/bootstrap-openclaw.sh"
 require_fixed_string "plugins.entries.codex.config.appServer.sandbox" "${ROOT}/scripts/bootstrap-openclaw.sh"
 require_fixed_string "plugins.entries.codex.config.appServer.requestTimeoutMs" "${ROOT}/scripts/bootstrap-openclaw.sh"
 require_fixed_string "codex/${BASELINE_MODEL}" "${ROOT}/scripts/validate-local-setup.sh"
 require_fixed_string "agents.defaults.embeddedHarness.runtime" "${ROOT}/scripts/validate-local-setup.sh"
+require_fixed_string "agents.defaults.thinkingDefault" "${ROOT}/scripts/validate-local-setup.sh"
 
 bad_primary_matches="$(
   git -C "${ROOT}" grep -n -E 'primary baseline model: codex-cli/|baseline model: `codex-cli/|primary model to `codex-cli/|MUST use `codex-cli/' -- \
@@ -92,6 +95,16 @@ if [[ -x "${OPENCLAW_BIN}" && -f "${OPENCLAW_HOME_DIR}/.openclaw/openclaw.json" 
 
   if [[ "${actual_harness_fallback}" != "${EXPECTED_HARNESS_FALLBACK}" ]]; then
     echo "Live OpenClaw embedded harness fallback mismatch: expected ${EXPECTED_HARNESS_FALLBACK}, got ${actual_harness_fallback:-<unset>}" >&2
+    exit 1
+  fi
+
+  actual_thinking_default="$(
+    env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" \
+      "${OPENCLAW_BIN}" config get agents.defaults.thinkingDefault 2>/dev/null || true
+  )"
+
+  if [[ "${actual_thinking_default}" != "${EXPECTED_THINKING_DEFAULT}" ]]; then
+    echo "Live OpenClaw thinking default mismatch: expected ${EXPECTED_THINKING_DEFAULT}, got ${actual_thinking_default:-<unset>}" >&2
     exit 1
   fi
 

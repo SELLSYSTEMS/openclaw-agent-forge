@@ -132,7 +132,7 @@ Operational rule:
 
 - Codex CLI TUI is one interactive surface used by other terminal agents on this host class
 - OpenClaw uses `codex/gpt-5.4` as its baseline model, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path
-- OpenClaw should follow the shared Codex user model once it becomes numerically newer than `gpt-5.4` and is validated locally as `codex/<model>`
+- OpenClaw should follow the shared Codex user model only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`
 - OpenClaw should not use `codex-cli/*` as its primary Telegram/OpenClaw runtime; that backend is fallback-only
 - OpenClaw should understand Codex CLI TUI behavior, but discover live agent-control paths dynamically instead of assuming one fixed TUI layout
 

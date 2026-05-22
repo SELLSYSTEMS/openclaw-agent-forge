@@ -10,13 +10,14 @@ SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 BASELINE_MODEL="gpt-5.4"
 BASELINE_MODEL_REF="codex/gpt-5.4"
 BASELINE_REASONING="xhigh"
+OPENCLAW_THINKING_DEFAULT="xhigh"
 LONG_RUN_TIMEOUT_SECONDS=604800
 LONG_RUN_WATCHDOG_TIMEOUT_MS=604800000
 CODEX_APP_SERVER_TIMEOUT_MS=604800000
 EXPECTED_CONTEXT_INJECTION="continuation-skip"
 EXPECTED_SANDBOX_MODE="off"
 CODEX_HARNESS_RUNTIME="codex"
-CODEX_HARNESS_FALLBACK="none"
+CODEX_HARNESS_FALLBACK="pi"
 CODEX_APP_SERVER_APPROVAL_POLICY="never"
 CODEX_APP_SERVER_SANDBOX="danger-full-access"
 CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
@@ -50,17 +51,35 @@ model_is_newer_than_baseline() {
 }
 
 resolve_requested_model_ref() {
+  local requested_model="${OPENCLAW_PRIMARY_MODEL:-${OPENCLAW_MODEL:-}}"
+  if [[ -n "${requested_model}" ]]; then
+    if [[ "${requested_model}" == codex/* ]]; then
+      printf '%s\n' "${requested_model}"
+      return
+    fi
+
+    if [[ "${requested_model}" == gpt-* ]]; then
+      printf 'codex/%s\n' "${requested_model}"
+      return
+    fi
+
+    echo "Unsupported OPENCLAW_PRIMARY_MODEL value: ${requested_model}" >&2
+    echo "Use codex/gpt-5.4, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
+    exit 1
+  fi
+
+  printf '%s\n' "${BASELINE_MODEL_REF}"
+}
+
+resolve_shared_model() {
   local shared_model=""
   if [[ -f "${SHARED_CODEX_CONFIG}" ]]; then
     shared_model="$(extract_toml_string model "${SHARED_CODEX_CONFIG}" || true)"
   fi
 
-  if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}"; then
-    printf 'codex/%s\n' "${shared_model}"
-    return
+  if [[ -n "${shared_model}" ]]; then
+    printf '%s\n' "${shared_model}"
   fi
-
-  printf '%s\n' "${BASELINE_MODEL_REF}"
 }
 
 resolve_shared_reasoning() {
@@ -101,6 +120,7 @@ env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set plu
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set plugins.entries.codex.config.appServer.requestTimeoutMs "${CODEX_APP_SERVER_TIMEOUT_MS}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.embeddedHarness.runtime "\"${CODEX_HARNESS_RUNTIME}\"" --strict-json
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.embeddedHarness.fallback "\"${CODEX_HARNESS_FALLBACK}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.thinkingDefault "\"${OPENCLAW_THINKING_DEFAULT}\"" --strict-json
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.timeoutSeconds "${LONG_RUN_TIMEOUT_SECONDS}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.llm.idleTimeoutSeconds 0
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.contextInjection "${EXPECTED_CONTEXT_INJECTION}"
@@ -130,11 +150,16 @@ else
 fi
 
 echo "Requested OpenClaw primary model: ${TARGET_PRIMARY_MODEL}"
+SHARED_MODEL="$(resolve_shared_model || true)"
+if [[ -n "${SHARED_MODEL}" ]] && model_is_newer_than_baseline "${SHARED_MODEL}" && [[ "${TARGET_PRIMARY_MODEL}" != "codex/${SHARED_MODEL}" ]]; then
+  echo "Note: shared Codex default is ${SHARED_MODEL}, but bootstrap keeps ${BASELINE_MODEL_REF} unless OPENCLAW_PRIMARY_MODEL is explicitly set after OpenClaw validation." >&2
+fi
 if [[ "$(resolve_shared_reasoning)" != "${BASELINE_REASONING}" ]]; then
   echo "Warning: shared Codex reasoning is not ${BASELINE_REASONING}. OpenClaw is expected to run with ${BASELINE_REASONING} reasoning on this host." >&2
 fi
 
-echo "Embedded Codex primary runtime: model=${TARGET_PRIMARY_MODEL}, harness=${CODEX_HARNESS_RUNTIME}, fallback=${CODEX_HARNESS_FALLBACK}, app-server sandbox=${CODEX_APP_SERVER_SANDBOX}, app-server requestTimeoutMs=${CODEX_APP_SERVER_TIMEOUT_MS}."
+echo "Embedded Codex primary runtime: model=${TARGET_PRIMARY_MODEL}, thinkingDefault=${OPENCLAW_THINKING_DEFAULT}, harness=${CODEX_HARNESS_RUNTIME}, fallback=${CODEX_HARNESS_FALLBACK}, app-server sandbox=${CODEX_APP_SERVER_SANDBOX}, app-server requestTimeoutMs=${CODEX_APP_SERVER_TIMEOUT_MS}."
+echo "Boot-safe fallback note: persisted embeddedHarness.fallback=${CODEX_HARNESS_FALLBACK} avoids gateway startup failure before the Codex plugin registers. Use fallback=none only in explicit smoke tests."
 echo "Embedded Codex no-interruption policy: timeoutSeconds=${LONG_RUN_TIMEOUT_SECONDS}, llm.idleTimeoutSeconds=0, contextInjection=${EXPECTED_CONTEXT_INJECTION}, sandbox.mode=${EXPECTED_SANDBOX_MODE}, codex-cli fallback watchdog=${LONG_RUN_WATCHDOG_TIMEOUT_MS}ms."
 echo "Embedded Codex CLI args: ${CODEX_CLI_ARGS_JSON}"
 echo "Embedded Codex CLI resume args: ${CODEX_CLI_RESUME_ARGS_JSON}"

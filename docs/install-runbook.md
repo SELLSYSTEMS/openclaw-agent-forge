@@ -101,22 +101,23 @@ What it does:
 2. Creates `<REPO_ROOT>/.openclaw-home`.
 3. Configures OpenClaw with `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `<REPO_ROOT>/workspace`.
-5. Sets the primary model to `codex/gpt-5.4`, or to the shared Codex user model if it is numerically newer than `gpt-5.4` and validated locally.
+5. Sets the primary model to `codex/gpt-5.4` by default. A newer model requires an explicit `OPENCLAW_PRIMARY_MODEL=codex/<validated-model>` override after OpenClaw startup and smoke validation.
 6. Enables `plugins.entries.codex.enabled=true`.
-7. Forces `agents.defaults.embeddedHarness.runtime=codex` and `agents.defaults.embeddedHarness.fallback=none`.
+7. Forces `agents.defaults.embeddedHarness.runtime=codex` and boot-safe `agents.defaults.embeddedHarness.fallback=pi`.
 8. Sets Codex app-server policy for this host class: `approvalPolicy=never`, `sandbox=danger-full-access`, and day-scale `requestTimeoutMs`.
-9. Sets `agents.defaults.timeoutSeconds=604800`.
-10. Sets `agents.defaults.llm.idleTimeoutSeconds=0`.
-11. Sets `agents.defaults.contextInjection=continuation-skip` so continuation turns do not keep reinjecting the full bootstrap payload.
-12. Sets `agents.defaults.sandbox.mode=off`.
-13. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.args` and `resumeArgs` that use `--dangerously-bypass-approvals-and-sandbox` instead of OpenClaw's bundled `--sandbox workspace-write` default.
-14. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.output=jsonl` and `resumeOutput=jsonl` because both fresh and resume Codex CLI vectors use `--json`.
-15. Sets day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
-16. Sets `gateway.mode=local`.
-17. Sets `gateway.bind=loopback`.
-18. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
-19. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
-20. Validates the resulting config.
+9. Sets `agents.defaults.thinkingDefault=xhigh`.
+10. Sets `agents.defaults.timeoutSeconds=604800`.
+11. Sets `agents.defaults.llm.idleTimeoutSeconds=0`.
+12. Sets `agents.defaults.contextInjection=continuation-skip` so continuation turns do not keep reinjecting the full bootstrap payload.
+13. Sets `agents.defaults.sandbox.mode=off`.
+14. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.args` and `resumeArgs` that use `--dangerously-bypass-approvals-and-sandbox` instead of OpenClaw's bundled `--sandbox workspace-write` default.
+15. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.output=jsonl` and `resumeOutput=jsonl` because both fresh and resume Codex CLI vectors use `--json`.
+16. Sets day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+17. Sets `gateway.mode=local`.
+18. Sets `gateway.bind=loopback`.
+19. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
+20. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
+21. Validates the resulting config.
 
 After bootstrap or any Codex/OpenClaw upgrade, run:
 
@@ -127,13 +128,14 @@ scripts/validate-local-setup.sh
 ```
 
 The first script exists specifically to catch fresh/resume Codex CLI argument drift before a Telegram turn fails generically.
+If you changed the primary model or runtime, also run `scripts/probe-codex-harness-turn.sh`; it proves OpenClaw can produce a real `provider=codex` turn, not just a valid-looking config.
 
 ## Authentication Model
 
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 - install and log in to the `codex` CLI
-- keep the OpenClaw model ref at `codex/gpt-5.4` or a locally validated newer shared Codex user model when one exists
+- keep the OpenClaw model ref at `codex/gpt-5.4` unless a newer `codex/<model>` has passed OpenClaw startup and smoke validation
 - let OpenClaw delegate embedded turns to the bundled Codex app-server harness, which reuses the installed Codex CLI auth
 - keep shared Codex reasoning at `xhigh`
 - do not re-route install/runtime execution through direct API-key auth when Codex CLI reuse is available
@@ -154,7 +156,8 @@ Required baseline:
 - `agents.defaults.sandbox.mode = off`
 - `plugins.entries.codex.enabled = true`
 - `agents.defaults.embeddedHarness.runtime = codex`
-- `agents.defaults.embeddedHarness.fallback = none`
+- `agents.defaults.embeddedHarness.fallback = pi`
+- `agents.defaults.thinkingDefault = xhigh`
 - `plugins.entries.codex.config.appServer.sandbox = danger-full-access`
 - `plugins.entries.codex.config.appServer.requestTimeoutMs` set at day scale
 - fallback `agents.defaults.cliBackends.codex-cli.args` uses `--dangerously-bypass-approvals-and-sandbox`, not `--sandbox workspace-write`
@@ -169,6 +172,7 @@ Why:
 - OpenClaw's `codex-cli` backend is documented as fallback/safety-net runtime, not full primary harness
 - the Codex app-server harness owns native Codex thread resume, compaction, model discovery, and app-server execution
 - the OpenClaw gateway can stay healthy while an embedded `codex-cli` turn dies internally
+- OpenClaw 2026.4.12 can evaluate the requested embedded harness before the Codex plugin registers during gateway startup; persisted `fallback=none` can therefore break channel startup on reboot
 - the stock fresh watchdog floor can kill a quiet turn after about 180 seconds
 - the bundled `codex-cli` backend defaults to `--sandbox workspace-write`, which can make every local memory/project-dossier read fail with `bwrap: Failed to make / slave: Permission denied`
 - `codex exec resume` does not accept the same flags as fresh `codex exec`; in particular, do not include `--color never` in `resumeArgs`, and keep resume options before `{sessionId}`
@@ -177,6 +181,7 @@ Why:
 - Telegram then only shows a generic failure even though the project itself did not fail
 
 Do not make `codex-cli/*` the default primary model on this host class.
+Do not persist `agents.defaults.embeddedHarness.fallback=none`; use it only via environment override for explicit smoke/probe commands.
 Do not revert this repo to the stock no-output watchdog behavior.
 Do not revert this repo to the bundled `codex-cli` sandbox args on this host class.
 Do not make fresh and resume `codex-cli` args identical without checking `codex exec resume --help`.
@@ -272,7 +277,8 @@ Expected outcomes:
 - the configured primary model resolves to `codex/<model>`
 - `plugins.entries.codex.enabled` is `true`
 - `agents.defaults.embeddedHarness.runtime` is `codex`
-- `agents.defaults.embeddedHarness.fallback` is `none`
+- `agents.defaults.embeddedHarness.fallback` is `pi`
+- `agents.defaults.thinkingDefault` is `xhigh`
 - `plugins.entries.codex.config.appServer.sandbox` is `danger-full-access`
 - `plugins.entries.codex.config.appServer.requestTimeoutMs` is set at day scale
 - the configured gateway mode resolves to `local`

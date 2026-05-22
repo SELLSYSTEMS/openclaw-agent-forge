@@ -13,10 +13,10 @@ This file is meant to be understood before the first external user conversation 
 - OpenClaw default workspace is repo-local under the canonical root
 - OpenClaw current model floor is `codex/gpt-5.4` with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path
 - OpenClaw should prefer `xhigh` reasoning through the shared Codex user config
-- If the shared Codex user model becomes numerically newer than `gpt-5.4`, OpenClaw should follow it after validation as `codex/<model>`
+- If the shared Codex user model becomes numerically newer than `gpt-5.4`, OpenClaw should follow it only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
 - OpenClaw should not use `codex-cli/*` as the primary Telegram/OpenClaw runtime; OpenClaw's CLI backend is fallback-only on this host class
-- OpenClaw should keep a no-interruption embedded Codex policy on this host class: `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, Codex app-server `danger-full-access`, day-scale Codex app-server request timeout, and day-scale fallback `codex-cli` watchdog overrides
+- OpenClaw should keep a no-interruption embedded Codex policy on this host class: `thinkingDefault=xhigh`, boot-safe `embeddedHarness.fallback=pi`, `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, Codex app-server `danger-full-access`, day-scale Codex app-server request timeout, and day-scale fallback `codex-cli` watchdog overrides
 - OpenClaw should run an artifact delivery preflight before sending, uploading, publishing, linking, or attaching generated files through any system
 - The initial user should not have to reteach the host basics that are already seeded here
 
@@ -60,7 +60,7 @@ Additional tabs or agents may appear later. Do not assume this list is complete 
 - For serious coding work arriving through Telegram, prefer direct main-session execution over the built-in `coding-agent` side-worker path
 - A side `codex exec --full-auto` PTY worker that produces no visible progress for about 180 seconds can be killed by the outer session watchdog and surface to the human only as a generic OpenClaw failure
 - The main embedded `codex-cli` run can also be killed by a default no-output watchdog if this repo's override is missing; keep the day-scale watchdog override in place
-- The durable primary runtime fix is not another `codex-cli` patch; use `codex/<model>` with `agents.defaults.embeddedHarness.runtime=codex` and `fallback=none`
+- The durable primary runtime fix is not another `codex-cli` patch; use `codex/<model>` with `agents.defaults.embeddedHarness.runtime=codex`, persisted `fallback=pi`, and explicit Codex smoke validation
 - Prefer Node-RED for durable automations, human-readable schemes, collaboration materials, and bridge flows
 - Prefer local repo docs, workspace files, and CLI overrides over mutating the global Codex CLI config under `/root/.codex`
 - Prefer the repo-managed systemd gateway service for reboot persistence; treat tmux as a fallback only
@@ -102,7 +102,7 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - If Telegram receives raw lines such as `{"type":"thread.started"}` / `{"type":"item.completed"}` instead of a human report, treat it as a Codex CLI output parser contract failure. Because both fresh and resume vectors use `--json`, keep `agents.defaults.cliBackends.codex-cli.output=jsonl` and `agents.defaults.cliBackends.codex-cli.resumeOutput=jsonl`; do not delete memory or start a new project to fix this.
 - If Telegram media/image turns fail after successful media understanding with `No prompt provided via stdin`, treat it as proof the `codex-cli` fallback layer is still being used as primary; migrate to the Codex app-server harness instead of asking the user to resend context.
 - If raw JSONL flood causes Telegram `429 Too Many Requests`, stop the gateway, quarantine stale durable-outbox files locally, fix the output modes, and restart. This is a delivery-layer cleanup, not a memory reset.
-- Permanent guardrails for that whole class of failures: run `/home/OpenClaw/scripts/validate-codex-harness-contract.sh` and `/home/OpenClaw/scripts/validate-codex-cli-contract.sh` after any install, repair, or Codex/OpenClaw upgrade
+- Permanent guardrails for that whole class of failures: run `/home/OpenClaw/scripts/validate-codex-harness-contract.sh`, `/home/OpenClaw/scripts/validate-codex-cli-contract.sh`, and after runtime/model changes `/home/OpenClaw/scripts/probe-codex-harness-turn.sh`
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`
 - On this host class, keep `channels.telegram.execApprovals.enabled=false` unless native exec approval UX is explicitly needed
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals and causes repeating `pairing required` connect loops

@@ -9,8 +9,9 @@ EXPECTED_GATEWAY_BIND="loopback"
 BASELINE_MODEL="gpt-5.4"
 BASELINE_MODEL_REF="codex/gpt-5.4"
 EXPECTED_REASONING="xhigh"
+EXPECTED_THINKING_DEFAULT="xhigh"
 EXPECTED_HARNESS_RUNTIME="codex"
-EXPECTED_HARNESS_FALLBACK="none"
+EXPECTED_HARNESS_FALLBACK="pi"
 EXPECTED_CODEX_APP_SERVER_APPROVAL_POLICY="never"
 EXPECTED_CODEX_APP_SERVER_SANDBOX="danger-full-access"
 EXPECTED_CODEX_APP_SERVER_TIMEOUT_MS=604800000
@@ -51,17 +52,58 @@ model_is_newer_than_baseline() {
 }
 
 resolve_expected_base_model_name() {
-  local shared_model=""
-  if [[ -f "${SHARED_CODEX_CONFIG}" ]]; then
-    shared_model="$(extract_toml_string model "${SHARED_CODEX_CONFIG}" || true)"
-  fi
+  local requested_model="${OPENCLAW_EXPECTED_PRIMARY_MODEL:-${OPENCLAW_PRIMARY_MODEL:-${OPENCLAW_MODEL:-}}}"
 
-  if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}"; then
-    printf '%s\n' "${shared_model}"
-    return
+  if [[ -n "${requested_model}" ]]; then
+    if [[ "${requested_model}" == codex/* ]]; then
+      printf '%s\n' "${requested_model#codex/}"
+      return
+    fi
+
+    if [[ "${requested_model}" == gpt-* ]]; then
+      printf '%s\n' "${requested_model}"
+      return
+    fi
+
+    echo "Unsupported OPENCLAW_EXPECTED_PRIMARY_MODEL value: ${requested_model}" >&2
+    echo "Use codex/gpt-5.4, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
+    exit 1
   fi
 
   printf '%s\n' "${BASELINE_MODEL}"
+}
+
+resolve_shared_model() {
+  if [[ ! -f "${SHARED_CODEX_CONFIG}" ]]; then
+    return 1
+  fi
+  extract_toml_string model "${SHARED_CODEX_CONFIG}"
+}
+
+emit_newer_model_note() {
+  local shared_model=""
+  shared_model="$(resolve_shared_model || true)"
+
+  if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}" && [[ "${EXPECTED_PRIMARY_MODEL}" != "codex/${shared_model}" ]]; then
+    echo "Note: shared Codex default is ${shared_model}; OpenClaw validation still expects ${EXPECTED_PRIMARY_MODEL} until a newer codex/<model> passes OpenClaw startup and smoke validation." >&2
+    return
+  fi
+}
+
+primary_model_is_allowed() {
+  local actual_model="$1"
+  local shared_model=""
+
+  if [[ "${actual_model}" == "${EXPECTED_PRIMARY_MODEL}" ]]; then
+    return 0
+  fi
+
+  shared_model="$(resolve_shared_model || true)"
+  if [[ -n "${shared_model}" ]] && model_is_newer_than_baseline "${shared_model}" && [[ "${actual_model}" == "codex/${shared_model}" ]]; then
+    return 0
+  fi
+
+  return 1
 }
 
 resolve_shared_reasoning() {
@@ -88,6 +130,9 @@ EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_RESU
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
 "${ROOT}/scripts/validate-codex-harness-contract.sh"
 "${ROOT}/scripts/validate-codex-cli-contract.sh"
+if [[ "${OPENCLAW_RUN_CODEX_SMOKE:-0}" == "1" ]]; then
+  "${ROOT}/scripts/probe-codex-harness-turn.sh"
+fi
 
 for required_file in "${REQUIRED_WORKSPACE_CONTEXT[@]}"; do
   if [[ ! -f "${required_file}" ]]; then
@@ -111,9 +156,10 @@ actual_model="$(
     "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.model.primary
 )"
 
-if [[ "${actual_model}" != "${EXPECTED_PRIMARY_MODEL}" ]]; then
-  echo "Model/runtime mismatch: expected primary ${EXPECTED_PRIMARY_MODEL} through the bundled Codex app-server harness, got ${actual_model}" >&2
+if ! primary_model_is_allowed "${actual_model}"; then
+  echo "Model/runtime mismatch: expected primary ${EXPECTED_PRIMARY_MODEL} or a shared newer codex/<model> through the bundled Codex app-server harness, got ${actual_model}" >&2
   echo "Do not use codex-cli/* as the primary Telegram/OpenClaw runtime on this host class; it is a fallback backend only." >&2
+  emit_newer_model_note
   exit 1
 fi
 
@@ -144,6 +190,16 @@ actual_harness_fallback="$(
 
 if [[ "${actual_harness_fallback}" != "${EXPECTED_HARNESS_FALLBACK}" ]]; then
   echo "Embedded harness fallback mismatch: expected ${EXPECTED_HARNESS_FALLBACK}, got ${actual_harness_fallback:-<unset>}" >&2
+  exit 1
+fi
+
+actual_thinking_default="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.thinkingDefault 2>/dev/null || true
+)"
+
+if [[ "${actual_thinking_default}" != "${EXPECTED_THINKING_DEFAULT}" ]]; then
+  echo "OpenClaw thinking default mismatch: expected ${EXPECTED_THINKING_DEFAULT}, got ${actual_thinking_default:-<unset>}" >&2
   exit 1
 fi
 

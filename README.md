@@ -105,16 +105,20 @@ Required primary settings:
 plugins.entries.codex.enabled=true
 agents.defaults.model.primary=codex/gpt-5.4
 agents.defaults.embeddedHarness.runtime=codex
-agents.defaults.embeddedHarness.fallback=none
+agents.defaults.embeddedHarness.fallback=pi
+agents.defaults.thinkingDefault=xhigh
 plugins.entries.codex.config.appServer.sandbox=danger-full-access
 ```
 
 This matters because OpenClaw's own docs describe CLI backends as fallback/safety-net runtime. Using `codex-cli/*` as the primary path caused repeated live failures here: long silent turn kills, raw JSONL delivery, Telegram rate-limit floods, and media turns failing before reply with `No prompt provided via stdin`.
 
+`fallback=pi` is intentional for reboot-safe gateway startup on OpenClaw 2026.4.12. Use `fallback=none` only in explicit smoke/probe commands, not as persisted config.
+
 Use the dedicated guardrail after install, repair, or upgrades:
 
 ```bash
 scripts/validate-codex-harness-contract.sh
+scripts/probe-codex-harness-turn.sh
 ```
 
 ## Codex CLI Fallback Contract
@@ -180,7 +184,7 @@ This setup uses `codex/gpt-5.4` as the baseline OpenClaw model, with Codex CLI a
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
 - Fallback Codex CLI fresh and resume turns must bypass the Codex CLI sandbox on this host class; otherwise OpenClaw may have memory files on disk but be unable to read them.
-- If the shared Codex user default later moves to a numerically newer GPT model than `gpt-5.4`, OpenClaw should be updated to follow that newer `codex/<model>` after a local validation pass.
+- If the shared Codex user default later moves to a numerically newer GPT model than `gpt-5.4`, OpenClaw should follow that newer `codex/<model>` only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation.
 
 ## Positioning
 

@@ -21,9 +21,9 @@
 - Keep agent notes in Markdown
 - Promote durable facts into `decisions.md` or `references/`
 - Keep ad hoc captures in `inbox/`
-- Keep the primary model floor on `gpt-5.4` with Codex CLI as the intended backend path
+- Keep the primary model floor on `codex/gpt-5.4` with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path
 - Prefer `xhigh` reasoning through the shared Codex user config
-- If the shared Codex user model becomes numerically newer than 5.5, OpenClaw should follow it after validation
+- If the shared Codex user model becomes numerically newer than `gpt-5.4`, OpenClaw should follow it only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation
 - Keep secrets only in ignored local paths, not tracked repo files
 - Treat OpenClaw as the main orchestrator for this repo
 - Prefer Node-RED for durable automations and cross-system flows when possible
@@ -34,6 +34,9 @@
 ## Current Live State
 
 - The local gateway is running on loopback and passes `gateway probe`
+- Current live primary model is `codex/gpt-5.5` because the shared Codex CLI default is `gpt-5.5` and the live Codex harness smoke passed; installer baseline remains `codex/gpt-5.4`
+- Current live OpenClaw thinking default is `xhigh`
+- Current live embedded harness fallback is `pi` for reboot-safe startup; `fallback=none` is probe-only
 - The preferred reboot-persistent gateway path on this host class is the repo-managed systemd service, not tmux
 - The repo-managed `openclaw-gateway.service` is installed, enabled, and currently active on this server
 - Telegram bot connectivity is configured locally via `channels.telegram.tokenFile`
