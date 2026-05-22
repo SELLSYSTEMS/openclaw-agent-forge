@@ -15,6 +15,7 @@ EXPECTED_CONTEXT_INJECTION="continuation-skip"
 EXPECTED_SANDBOX_MODE="off"
 CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
 CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
+CODEX_CLI_OUTPUT_MODE="jsonl"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
   "${ROOT}/workspace/MEMORY.md"
@@ -95,6 +96,8 @@ env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set age
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.command codex
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.args "${CODEX_CLI_ARGS_JSON}" --strict-json
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.resumeArgs "${CODEX_CLI_RESUME_ARGS_JSON}" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.output "\"${CODEX_CLI_OUTPUT_MODE}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.resumeOutput "\"${CODEX_CLI_OUTPUT_MODE}\"" --strict-json
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.reliability.watchdog.fresh.noOutputTimeoutMs "${LONG_RUN_WATCHDOG_TIMEOUT_MS}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.reliability.watchdog.resume.noOutputTimeoutMs "${LONG_RUN_WATCHDOG_TIMEOUT_MS}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set gateway.mode local
@@ -122,6 +125,7 @@ fi
 echo "Embedded Codex no-interruption policy: timeoutSeconds=${LONG_RUN_TIMEOUT_SECONDS}, llm.idleTimeoutSeconds=0, contextInjection=${EXPECTED_CONTEXT_INJECTION}, sandbox.mode=${EXPECTED_SANDBOX_MODE}, codex-cli watchdog=${LONG_RUN_WATCHDOG_TIMEOUT_MS}ms."
 echo "Embedded Codex CLI args: ${CODEX_CLI_ARGS_JSON}"
 echo "Embedded Codex CLI resume args: ${CODEX_CLI_RESUME_ARGS_JSON}"
+echo "Embedded Codex CLI output mode: output=${CODEX_CLI_OUTPUT_MODE}, resumeOutput=${CODEX_CLI_OUTPUT_MODE}"
 echo "If Telegram is enabled later on this host, set channels.telegram.execApprovals.enabled=false unless you intentionally configure Telegram as a native exec-approval client."
 
 echo "Bootstrap complete."

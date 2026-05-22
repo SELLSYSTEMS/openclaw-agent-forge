@@ -16,6 +16,7 @@ EXPECTED_SANDBOX_MODE="off"
 EXPECTED_CLI_WATCHDOG_TIMEOUT_MS=604800000
 EXPECTED_CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
 EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
+EXPECTED_CODEX_CLI_OUTPUT_MODE="jsonl"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -199,6 +200,30 @@ if [[ "$(printf '%s' "${actual_codex_cli_resume_args}" | compact_json)" != "${EX
   echo "Codex CLI resume args mismatch. Resume runs must bypass the Codex CLI sandbox and must not include fresh-only flags such as --color." >&2
   echo "Expected: ${EXPECTED_CODEX_CLI_RESUME_ARGS_JSON}" >&2
   echo "Got: ${actual_codex_cli_resume_args:-<unset>}" >&2
+  exit 1
+fi
+
+actual_codex_cli_output="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.cliBackends.codex-cli.output 2>/dev/null || true
+)"
+
+if [[ "${actual_codex_cli_output}" != "${EXPECTED_CODEX_CLI_OUTPUT_MODE}" ]]; then
+  echo "Codex CLI output mode mismatch. Fresh codex exec uses --json, so OpenClaw must parse it as jsonl." >&2
+  echo "Expected: ${EXPECTED_CODEX_CLI_OUTPUT_MODE}" >&2
+  echo "Got: ${actual_codex_cli_output:-<unset>}" >&2
+  exit 1
+fi
+
+actual_codex_cli_resume_output="$(
+  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.cliBackends.codex-cli.resumeOutput 2>/dev/null || true
+)"
+
+if [[ "${actual_codex_cli_resume_output}" != "${EXPECTED_CODEX_CLI_OUTPUT_MODE}" ]]; then
+  echo "Codex CLI resume output mode mismatch. Resume codex exec uses --json, so resumeOutput must be jsonl or Telegram may receive raw JSONL/tool output." >&2
+  echo "Expected: ${EXPECTED_CODEX_CLI_OUTPUT_MODE}" >&2
+  echo "Got: ${actual_codex_cli_resume_output:-<unset>}" >&2
   exit 1
 fi
 

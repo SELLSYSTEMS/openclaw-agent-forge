@@ -21,6 +21,7 @@ Do not close a recurring incident with documentation only when a script can dete
 - `unexpected argument '--color' found`: fresh and resume Codex CLI args were incorrectly mirrored. `codex exec` accepts `--color`; `codex exec resume` currently does not.
 - Generic Telegram failure after long work: can be transport delivery failure, artifact upload limit, or embedded CLI failure. Check logs and local repo state before restarting.
 - Long silent tasks killed internally: keep day-scale OpenClaw agent timeout and day-scale `codex-cli` watchdog overrides.
+- Raw JSONL/tool/code flood in Telegram after a completed Codex turn: check `agents.defaults.cliBackends.codex-cli.output` and `resumeOutput`. If Codex CLI args include `--json`, both output modes must be `jsonl`; otherwise OpenClaw can treat the whole Codex JSONL stream as a chat reply and hit Telegram `429 Too Many Requests`.
 - Oversized artifacts: Telegram direct upload can fail for APKs. Run delivery preflight and provide a safe link/path instead of forcing direct attachment.
 - `pairing required` on admin-style RPCs: separate gateway authorization issue. Do not confuse it with Telegram health, model auth, or memory loss.
 - Parallel OpenClaw config writes: can clobber each other. Apply config writes sequentially.
@@ -65,6 +66,13 @@ Do not copy fresh args into `resumeArgs`. Before changing this contract, check:
 ```bash
 codex exec --help
 codex exec resume --help
+```
+
+Because both vectors use `--json`, the required parser modes are also part of the contract:
+
+```text
+agents.defaults.cliBackends.codex-cli.output=jsonl
+agents.defaults.cliBackends.codex-cli.resumeOutput=jsonl
 ```
 
 Then update `scripts/bootstrap-openclaw.sh`, `scripts/validate-local-setup.sh`, `scripts/validate-codex-cli-contract.sh`, and this playbook in the same commit.
