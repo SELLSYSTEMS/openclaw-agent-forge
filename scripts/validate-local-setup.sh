@@ -23,6 +23,7 @@ EXPECTED_CLI_WATCHDOG_TIMEOUT_MS=604800000
 EXPECTED_CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
 EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
 EXPECTED_CODEX_CLI_OUTPUT_MODE="jsonl"
+CODEX_APP_SERVER_RECOVERY_MARKER="codex-app-server-recovery"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -130,6 +131,20 @@ EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_RESU
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
 "${ROOT}/scripts/validate-codex-harness-contract.sh"
 "${ROOT}/scripts/validate-codex-cli-contract.sh"
+
+codex_runner_file="$(find "${ROOT}/.openclaw/lib/node_modules/openclaw/dist" -maxdepth 1 -name 'pi-embedded-runner-*.js' -print -quit)"
+if [[ -z "${codex_runner_file}" || ! -f "${codex_runner_file}" ]]; then
+  echo "Unable to find OpenClaw pi embedded runner for Codex app-server recovery validation." >&2
+  exit 1
+fi
+
+if ! grep -q "${CODEX_APP_SERVER_RECOVERY_MARKER}" "${codex_runner_file}"; then
+  echo "Missing Codex app-server recovery patch. Run scripts/apply-openclaw-runtime-patches.sh and restart openclaw-gateway.service." >&2
+  exit 1
+fi
+
+node --check "${codex_runner_file}" >/dev/null
+
 if [[ "${OPENCLAW_RUN_CODEX_SMOKE:-0}" == "1" ]]; then
   "${ROOT}/scripts/probe-codex-harness-turn.sh"
 fi

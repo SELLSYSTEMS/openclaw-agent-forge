@@ -110,6 +110,8 @@ if [[ ! -x "${PREFIX}/bin/openclaw" ]]; then
   curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --prefix "${PREFIX}" --no-onboard
 fi
 
+"${ROOT}/scripts/apply-openclaw-runtime-patches.sh"
+
 TARGET_PRIMARY_MODEL="$(resolve_requested_model_ref)"
 
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.workspace "${WORKSPACE_DIR}"

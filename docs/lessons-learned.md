@@ -55,6 +55,7 @@
 - If raw JSONL flood created queued Telegram messages, stop the gateway first, move stale durable-outbox files to a local quarantine directory, fix the output modes, then restart. Do not delete memory or session state to solve a delivery-layer issue.
 - Telegram `MEDIA:` delivery can fail after the agent already produced a useful final answer. A 77.8 MB Android APK triggered `sendDocument` `413: Request Entity Too Large`, and Telegram showed a generic failure. Check artifact size before `MEDIA:` and avoid direct Telegram attachment for oversized APKs.
 - Artifact delivery needs a destination-specific preflight across all systems, not only Telegram. Check live limits, file size, file type, auth/exposure, fallback path, and final URL/result before claiming delivery succeeded.
+- OpenClaw 2026.4.12 can drop a completed Codex app-server answer if the app-server emits a normal assistant message and then a generic prompt-level `codex app-server error`. The symptom is Telegram showing `Something went wrong` while the session transcript contains a useful assistant message with `stopReason=error`. Keep `scripts/apply-openclaw-runtime-patches.sh` applied and validated so post-answer app-server errors preserve the generated reply instead of replacing it with a generic Telegram failure.
 
 ## Tooling Mistakes To Avoid
 
