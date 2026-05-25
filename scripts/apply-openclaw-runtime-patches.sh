@@ -3,7 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${ROOT}/.openclaw/lib/node_modules/openclaw/dist"
-MARKER="codex-app-server-recovery"
+MARKER_V1="codex-app-server-recovery"
+MARKER_V2="codex-app-server-recovery-v2"
 
 if [[ ! -d "${DIST_DIR}" ]]; then
   echo "OpenClaw dist directory not found: ${DIST_DIR}" >&2
@@ -17,7 +18,7 @@ if [[ -z "${RUNNER_FILE}" || ! -f "${RUNNER_FILE}" ]]; then
   exit 1
 fi
 
-if grep -q "${MARKER}" "${RUNNER_FILE}"; then
+if grep -q "${MARKER_V1}" "${RUNNER_FILE}" && grep -q "${MARKER_V2}" "${RUNNER_FILE}"; then
   node --check "${RUNNER_FILE}" >/dev/null
   echo "OpenClaw runtime patch already present: ${RUNNER_FILE}"
   exit 0
@@ -27,20 +28,17 @@ node - "${RUNNER_FILE}" <<'NODE'
 const fs = require("fs");
 
 const file = process.argv[2];
-const source = fs.readFileSync(file, "utf8");
-const marker = "codex-app-server-recovery";
+let source = fs.readFileSync(file, "utf8");
+const markerV1 = "codex-app-server-recovery";
+const markerV2 = "codex-app-server-recovery-v2";
 
-if (source.includes(marker)) {
-  process.exit(0);
-}
-
-const needle = `				currentAttemptAssistant = findCurrentAttemptAssistantMessage({
+const needleV1 = `				currentAttemptAssistant = findCurrentAttemptAssistantMessage({
 					messagesSnapshot,
 					prePromptMessageCount
 				});
 				attemptUsage = getUsageTotals();`;
 
-const replacement = `				currentAttemptAssistant = findCurrentAttemptAssistantMessage({
+const replacementV1 = `				currentAttemptAssistant = findCurrentAttemptAssistantMessage({
 					messagesSnapshot,
 					prePromptMessageCount
 				});
@@ -60,13 +58,51 @@ const replacement = `				currentAttemptAssistant = findCurrentAttemptAssistantMe
 				}
 				attemptUsage = getUsageTotals();`;
 
-if (!source.includes(needle)) {
-  console.error("OpenClaw runner shape changed; cannot apply Codex app-server recovery patch safely.");
-  console.error(`File: ${file}`);
-  process.exit(1);
+if (!source.includes(markerV1)) {
+  if (!source.includes(needleV1)) {
+    console.error("OpenClaw runner shape changed; cannot apply Codex app-server recovery patch v1 safely.");
+    console.error(`File: ${file}`);
+    process.exit(1);
+  }
+  source = source.replace(needleV1, replacementV1);
 }
 
-fs.writeFileSync(file, source.replace(needle, replacement));
+const needleV2 = `					const activeErrorContext = resolveActiveErrorContext({
+						provider,
+						model: modelId,
+						assistant: currentAttemptAssistant ?? sessionLastAssistant
+					});
+					const resolveReplayInvalidForAttempt = (incompleteTurnText) => accumulatedReplayState.replayInvalid || resolveReplayInvalidFlag({`;
+
+const replacementV2 = `					const activeErrorContext = resolveActiveErrorContext({
+						provider,
+						model: modelId,
+						assistant: currentAttemptAssistant ?? sessionLastAssistant
+					});
+					const recoveredPostAnswerCodexAppServerError = Boolean(promptError && promptErrorSource !== "compaction" && resolveFinalAssistantVisibleText(currentAttemptAssistant ?? sessionLastAssistant) && /codex app-server (?:error|turn failed|attempt timed out)/i.test(formatErrorMessage(promptError)));
+					if (recoveredPostAnswerCodexAppServerError) {
+						log$3.warn(\`[codex-app-server-recovery-v2] preserving assistant reply after outer post-answer app-server error: runId=\${params.runId} sessionId=\${params.sessionId} error=\${sanitizeForLog(formatErrorMessage(promptError))}\`);
+						for (const assistant of [currentAttemptAssistant, sessionLastAssistant]) if (assistant && assistant.stopReason === "error") {
+							assistant.stopReason = "stop";
+							delete assistant.errorMessage;
+						}
+					}
+					const resolveReplayInvalidForAttempt = (incompleteTurnText) => accumulatedReplayState.replayInvalid || resolveReplayInvalidFlag({`;
+
+const needleV2Guard = `					if (promptError && !aborted && promptErrorSource !== "compaction") {`;
+const replacementV2Guard = `					if (promptError && !recoveredPostAnswerCodexAppServerError && !aborted && promptErrorSource !== "compaction") {`;
+
+if (!source.includes(markerV2)) {
+  if (!source.includes(needleV2) || !source.includes(needleV2Guard)) {
+    console.error("OpenClaw runner shape changed; cannot apply Codex app-server recovery patch v2 safely.");
+    console.error(`File: ${file}`);
+    process.exit(1);
+  }
+  source = source.replace(needleV2, replacementV2);
+  source = source.replace(needleV2Guard, replacementV2Guard);
+}
+
+fs.writeFileSync(file, source);
 NODE
 
 node --check "${RUNNER_FILE}" >/dev/null

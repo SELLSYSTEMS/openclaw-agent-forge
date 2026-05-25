@@ -76,7 +76,7 @@ Canonical repository identity:
 - If the user wants a message or command to appear in an already-running neighboring webterminal tab, use one canonical path only: resolve the target tab from `terminal-state.json`, resolve the live `/dev/pts/N` from `/proc`, and write directly to that PTY. Do not invent alternate control planes.
 - The built-in `openclaw gateway install` path expects systemd user services on Linux. On this host class, prefer the repo-managed system service under `systemd/openclaw-gateway.service` for reboot persistence.
 - On this host class, install/operator work should start in no-sandbox / danger-full-access execution by default. If local shell/JS commands fail with `bwrap: Failed to make / slave: Permission denied`, that only confirms the rule was violated: stop immediately and move the session to the correct no-sandbox runtime before continuing.
-- On OpenClaw 2026.4.12, `codex app-server error` can arrive after a valid assistant answer and make Telegram show only a generic failure. Validate that `scripts/apply-openclaw-runtime-patches.sh` has applied the `codex-app-server-recovery` patch before trusting long Telegram delivery.
+- On OpenClaw 2026.4.12, `codex app-server error` can arrive after a valid assistant answer and make Telegram show only a generic failure. Validate that `scripts/apply-openclaw-runtime-patches.sh` has applied both `codex-app-server-recovery` and `codex-app-server-recovery-v2` before trusting long Telegram delivery.
 
 ## Shared Host Rules
 

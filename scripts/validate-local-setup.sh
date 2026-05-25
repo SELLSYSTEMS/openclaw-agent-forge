@@ -24,6 +24,7 @@ EXPECTED_CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-
 EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
 EXPECTED_CODEX_CLI_OUTPUT_MODE="jsonl"
 CODEX_APP_SERVER_RECOVERY_MARKER="codex-app-server-recovery"
+CODEX_APP_SERVER_RECOVERY_MARKER_V2="codex-app-server-recovery-v2"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -140,6 +141,11 @@ fi
 
 if ! grep -q "${CODEX_APP_SERVER_RECOVERY_MARKER}" "${codex_runner_file}"; then
   echo "Missing Codex app-server recovery patch. Run scripts/apply-openclaw-runtime-patches.sh and restart openclaw-gateway.service." >&2
+  exit 1
+fi
+
+if ! grep -q "${CODEX_APP_SERVER_RECOVERY_MARKER_V2}" "${codex_runner_file}"; then
+  echo "Missing Codex app-server recovery patch v2. Run scripts/apply-openclaw-runtime-patches.sh and restart openclaw-gateway.service." >&2
   exit 1
 fi
 

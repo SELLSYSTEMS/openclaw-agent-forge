@@ -103,6 +103,7 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - If Telegram media/image turns fail after successful media understanding with `No prompt provided via stdin`, treat it as proof the `codex-cli` fallback layer is still being used as primary; migrate to the Codex app-server harness instead of asking the user to resend context.
 - If raw JSONL flood causes Telegram `429 Too Many Requests`, stop the gateway, quarantine stale durable-outbox files locally, fix the output modes, and restart. This is a delivery-layer cleanup, not a memory reset.
 - Permanent guardrails for that whole class of failures: run `/home/OpenClaw/scripts/validate-codex-harness-contract.sh`, `/home/OpenClaw/scripts/validate-codex-cli-contract.sh`, and after runtime/model changes `/home/OpenClaw/scripts/probe-codex-harness-turn.sh`
+- Iurii wants explicit continuation updates: before meaningful actions, write what I will do next, especially in long Telegram coding sessions.
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`
 - On this host class, keep `channels.telegram.execApprovals.enabled=false` unless native exec approval UX is explicitly needed
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals and causes repeating `pairing required` connect loops
