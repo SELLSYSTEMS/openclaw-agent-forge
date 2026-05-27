@@ -19,6 +19,12 @@ EXPECTED_AGENT_TIMEOUT_SECONDS=604800
 EXPECTED_LLM_IDLE_TIMEOUT_SECONDS=0
 EXPECTED_CONTEXT_INJECTION="continuation-skip"
 EXPECTED_SANDBOX_MODE="off"
+EXPECTED_CONTEXT_PRUNING_MODE="cache-ttl"
+EXPECTED_CONTEXT_PRUNING_TTL="5m"
+EXPECTED_SESSION_RESET_MODE="daily"
+EXPECTED_SESSION_RESET_HOUR=4
+EXPECTED_DIRECT_RESET_MODE="idle"
+EXPECTED_DIRECT_RESET_IDLE_MINUTES=240
 EXPECTED_CLI_WATCHDOG_TIMEOUT_MS=604800000
 EXPECTED_CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
 EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
@@ -26,6 +32,7 @@ EXPECTED_CODEX_CLI_OUTPUT_MODE="jsonl"
 EXPECTED_SYSTEMD_OOM_POLICY="continue"
 CODEX_APP_SERVER_RECOVERY_MARKER="codex-app-server-recovery"
 CODEX_APP_SERVER_RECOVERY_MARKER_V2="codex-app-server-recovery-v2"
+TELEGRAM_OUTBOX_GENERIC_FAILURE_MARKER="telegram-durable-outbox-skip-generic-failures"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -151,6 +158,24 @@ if ! grep -q "${CODEX_APP_SERVER_RECOVERY_MARKER_V2}" "${codex_runner_file}"; th
 fi
 
 node --check "${codex_runner_file}" >/dev/null
+
+telegram_bot_file="$(grep -l 'TELEGRAM_DURABLE_OUTBOX_RECOVERY_PREFIX' "${ROOT}/.openclaw/lib/node_modules/openclaw/dist"/bot-*.js 2>/dev/null | head -n 1 || true)"
+if [[ -z "${telegram_bot_file}" || ! -f "${telegram_bot_file}" ]]; then
+  echo "Unable to find OpenClaw Telegram bot runtime for durable outbox validation." >&2
+  exit 1
+fi
+
+if ! grep -q "${TELEGRAM_OUTBOX_GENERIC_FAILURE_MARKER}" "${telegram_bot_file}"; then
+  echo "Missing Telegram durable outbox generic-failure skip patch. Run scripts/apply-openclaw-runtime-patches.sh and restart openclaw-gateway.service." >&2
+  exit 1
+fi
+
+if ! grep -q "shouldSkipTelegramDurableOutboxEntry" "${telegram_bot_file}"; then
+  echo "Telegram durable outbox patch is incomplete: missing shouldSkipTelegramDurableOutboxEntry." >&2
+  exit 1
+fi
+
+node --check "${telegram_bot_file}" >/dev/null
 
 if [[ "${OPENCLAW_RUN_CODEX_SMOKE:-0}" == "1" ]]; then
   "${ROOT}/scripts/probe-codex-harness-turn.sh"
@@ -307,18 +332,78 @@ if [[ "${actual_llm_idle_timeout_seconds}" != "${EXPECTED_LLM_IDLE_TIMEOUT_SECON
   exit 1
 fi
 
-actual_context_injection="$(
-  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
-    "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.contextInjection 2>/dev/null || true
-)"
+  actual_context_injection="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.contextInjection 2>/dev/null || true
+  )"
 
 if [[ "${actual_context_injection}" != "${EXPECTED_CONTEXT_INJECTION}" ]]; then
   echo "Context injection mismatch: expected ${EXPECTED_CONTEXT_INJECTION}, got ${actual_context_injection:-<unset>}" >&2
-  exit 1
-fi
+    exit 1
+  fi
 
-actual_sandbox_mode="$(
-  env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+  actual_context_pruning_mode="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.contextPruning.mode 2>/dev/null || true
+  )"
+
+  if [[ "${actual_context_pruning_mode}" != "${EXPECTED_CONTEXT_PRUNING_MODE}" ]]; then
+    echo "Context pruning mode mismatch: expected ${EXPECTED_CONTEXT_PRUNING_MODE}, got ${actual_context_pruning_mode:-<unset>}" >&2
+    exit 1
+  fi
+
+  actual_context_pruning_ttl="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.contextPruning.ttl 2>/dev/null || true
+  )"
+
+  if [[ "${actual_context_pruning_ttl}" != "${EXPECTED_CONTEXT_PRUNING_TTL}" ]]; then
+    echo "Context pruning ttl mismatch: expected ${EXPECTED_CONTEXT_PRUNING_TTL}, got ${actual_context_pruning_ttl:-<unset>}" >&2
+    exit 1
+  fi
+
+  actual_session_reset_mode="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get session.reset.mode 2>/dev/null || true
+  )"
+
+  if [[ "${actual_session_reset_mode}" != "${EXPECTED_SESSION_RESET_MODE}" ]]; then
+    echo "Session reset mode mismatch: expected ${EXPECTED_SESSION_RESET_MODE}, got ${actual_session_reset_mode:-<unset>}" >&2
+    exit 1
+  fi
+
+  actual_session_reset_hour="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get session.reset.atHour 2>/dev/null || true
+  )"
+
+  if [[ "${actual_session_reset_hour}" != "${EXPECTED_SESSION_RESET_HOUR}" ]]; then
+    echo "Session reset hour mismatch: expected ${EXPECTED_SESSION_RESET_HOUR}, got ${actual_session_reset_hour:-<unset>}" >&2
+    exit 1
+  fi
+
+  actual_direct_reset_mode="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get session.resetByType.direct.mode 2>/dev/null || true
+  )"
+
+  if [[ "${actual_direct_reset_mode}" != "${EXPECTED_DIRECT_RESET_MODE}" ]]; then
+    echo "Direct session reset mode mismatch: expected ${EXPECTED_DIRECT_RESET_MODE}, got ${actual_direct_reset_mode:-<unset>}" >&2
+    exit 1
+  fi
+
+  actual_direct_reset_idle_minutes="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
+      "${ROOT}/.openclaw/bin/openclaw" config get session.resetByType.direct.idleMinutes 2>/dev/null || true
+  )"
+
+  if [[ "${actual_direct_reset_idle_minutes}" != "${EXPECTED_DIRECT_RESET_IDLE_MINUTES}" ]]; then
+    echo "Direct session reset idle mismatch: expected ${EXPECTED_DIRECT_RESET_IDLE_MINUTES}, got ${actual_direct_reset_idle_minutes:-<unset>}" >&2
+    exit 1
+  fi
+
+  actual_sandbox_mode="$(
+    env OPENCLAW_HOME="${ROOT}/.openclaw-home" \
     "${ROOT}/.openclaw/bin/openclaw" config get agents.defaults.sandbox.mode 2>/dev/null || true
 )"
 

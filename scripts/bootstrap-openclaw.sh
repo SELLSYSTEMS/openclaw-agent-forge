@@ -16,6 +16,12 @@ LONG_RUN_WATCHDOG_TIMEOUT_MS=604800000
 CODEX_APP_SERVER_TIMEOUT_MS=604800000
 EXPECTED_CONTEXT_INJECTION="continuation-skip"
 EXPECTED_SANDBOX_MODE="off"
+EXPECTED_CONTEXT_PRUNING_MODE="cache-ttl"
+EXPECTED_CONTEXT_PRUNING_TTL="5m"
+EXPECTED_SESSION_RESET_MODE="daily"
+EXPECTED_SESSION_RESET_HOUR=4
+EXPECTED_DIRECT_RESET_MODE="idle"
+EXPECTED_DIRECT_RESET_IDLE_MINUTES=240
 CODEX_HARNESS_RUNTIME="codex"
 CODEX_HARNESS_FALLBACK="pi"
 CODEX_APP_SERVER_APPROVAL_POLICY="never"
@@ -126,7 +132,13 @@ env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set age
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.timeoutSeconds "${LONG_RUN_TIMEOUT_SECONDS}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.llm.idleTimeoutSeconds 0
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.contextInjection "${EXPECTED_CONTEXT_INJECTION}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.contextPruning.mode "\"${EXPECTED_CONTEXT_PRUNING_MODE}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.contextPruning.ttl "\"${EXPECTED_CONTEXT_PRUNING_TTL}\"" --strict-json
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.sandbox.mode "\"${EXPECTED_SANDBOX_MODE}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set session.reset.mode "\"${EXPECTED_SESSION_RESET_MODE}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set session.reset.atHour "${EXPECTED_SESSION_RESET_HOUR}"
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set session.resetByType.direct.mode "\"${EXPECTED_DIRECT_RESET_MODE}\"" --strict-json
+env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set session.resetByType.direct.idleMinutes "${EXPECTED_DIRECT_RESET_IDLE_MINUTES}"
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.command codex
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.args "${CODEX_CLI_ARGS_JSON}" --strict-json
 env OPENCLAW_HOME="${OPENCLAW_HOME_DIR}" "${PREFIX}/bin/openclaw" config set agents.defaults.cliBackends.codex-cli.resumeArgs "${CODEX_CLI_RESUME_ARGS_JSON}" --strict-json
@@ -162,7 +174,7 @@ fi
 
 echo "Embedded Codex primary runtime: model=${TARGET_PRIMARY_MODEL}, thinkingDefault=${OPENCLAW_THINKING_DEFAULT}, harness=${CODEX_HARNESS_RUNTIME}, fallback=${CODEX_HARNESS_FALLBACK}, app-server sandbox=${CODEX_APP_SERVER_SANDBOX}, app-server requestTimeoutMs=${CODEX_APP_SERVER_TIMEOUT_MS}."
 echo "Boot-safe fallback note: persisted embeddedHarness.fallback=${CODEX_HARNESS_FALLBACK} avoids gateway startup failure before the Codex plugin registers. Use fallback=none only in explicit smoke tests."
-echo "Embedded Codex no-interruption policy: timeoutSeconds=${LONG_RUN_TIMEOUT_SECONDS}, llm.idleTimeoutSeconds=0, contextInjection=${EXPECTED_CONTEXT_INJECTION}, sandbox.mode=${EXPECTED_SANDBOX_MODE}, codex-cli fallback watchdog=${LONG_RUN_WATCHDOG_TIMEOUT_MS}ms."
+echo "Embedded Codex no-interruption policy: timeoutSeconds=${LONG_RUN_TIMEOUT_SECONDS}, llm.idleTimeoutSeconds=0, contextInjection=${EXPECTED_CONTEXT_INJECTION}, contextPruning=${EXPECTED_CONTEXT_PRUNING_MODE}/${EXPECTED_CONTEXT_PRUNING_TTL}, sandbox.mode=${EXPECTED_SANDBOX_MODE}, codex-cli fallback watchdog=${LONG_RUN_WATCHDOG_TIMEOUT_MS}ms."
 echo "Embedded Codex CLI args: ${CODEX_CLI_ARGS_JSON}"
 echo "Embedded Codex CLI resume args: ${CODEX_CLI_RESUME_ARGS_JSON}"
 echo "Embedded Codex CLI output mode: output=${CODEX_CLI_OUTPUT_MODE}, resumeOutput=${CODEX_CLI_OUTPUT_MODE}"

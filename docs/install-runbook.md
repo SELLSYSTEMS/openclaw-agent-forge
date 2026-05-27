@@ -109,10 +109,12 @@ What it does:
 10. Sets `agents.defaults.timeoutSeconds=604800`.
 11. Sets `agents.defaults.llm.idleTimeoutSeconds=0`.
 12. Sets `agents.defaults.contextInjection=continuation-skip` so continuation turns do not keep reinjecting the full bootstrap payload.
-13. Sets `agents.defaults.sandbox.mode=off`.
-14. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.args` and `resumeArgs` that use `--dangerously-bypass-approvals-and-sandbox` instead of OpenClaw's bundled `--sandbox workspace-write` default.
-15. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.output=jsonl` and `resumeOutput=jsonl` because both fresh and resume Codex CLI vectors use `--json`.
-16. Sets day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+13. Enables `agents.defaults.contextPruning.mode=cache-ttl` with `ttl=5m` to trim old tool results in-memory without deleting transcript history.
+14. Sets an explicit session reset policy: daily reset at 04:00 and direct-chat idle reset after 240 minutes, so durable memory/dossiers carry long work instead of one endless Telegram transcript.
+15. Sets `agents.defaults.sandbox.mode=off`.
+16. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.args` and `resumeArgs` that use `--dangerously-bypass-approvals-and-sandbox` instead of OpenClaw's bundled `--sandbox workspace-write` default.
+17. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.output=jsonl` and `resumeOutput=jsonl` because both fresh and resume Codex CLI vectors use `--json`.
+18. Sets day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
 17. Sets `gateway.mode=local`.
 18. Sets `gateway.bind=loopback`.
 19. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
@@ -153,6 +155,12 @@ Required baseline:
 - `agents.defaults.timeoutSeconds >= 604800`
 - `agents.defaults.llm.idleTimeoutSeconds = 0`
 - `agents.defaults.contextInjection = continuation-skip`
+- `agents.defaults.contextPruning.mode = cache-ttl`
+- `agents.defaults.contextPruning.ttl = 5m`
+- `session.reset.mode = daily`
+- `session.reset.atHour = 4`
+- `session.resetByType.direct.mode = idle`
+- `session.resetByType.direct.idleMinutes = 240`
 - `agents.defaults.sandbox.mode = off`
 - `plugins.entries.codex.enabled = true`
 - `agents.defaults.embeddedHarness.runtime = codex`
@@ -286,6 +294,12 @@ Expected outcomes:
 - `agents.defaults.timeoutSeconds` is at least `604800`
 - `agents.defaults.llm.idleTimeoutSeconds` equals `0`
 - `agents.defaults.contextInjection` equals `continuation-skip`
+- `agents.defaults.contextPruning.mode` equals `cache-ttl`
+- `agents.defaults.contextPruning.ttl` equals `5m`
+- `session.reset.mode` equals `daily`
+- `session.reset.atHour` equals `4`
+- `session.resetByType.direct.mode` equals `idle`
+- `session.resetByType.direct.idleMinutes` equals `240`
 - `agents.defaults.sandbox.mode` equals `off`
 - the configured fallback `codex-cli` fresh args bypass the Codex CLI sandbox
 - the configured fallback `codex-cli` resume args use the resume-specific vector without `--color`

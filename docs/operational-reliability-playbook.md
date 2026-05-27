@@ -128,3 +128,15 @@ If the user reports `Something went wrong`, `No response generated`, or silence 
 - Tell the user the precise layer that failed.
 
 The correct answer must distinguish local work completion, model/runtime failure, and channel delivery failure.
+
+## Context Exhaustion
+
+If Telegram keeps returning generic failures while `openclaw-gateway` is healthy, run `openclaw status --json` and inspect the recent main session. `remainingTokens=0`, extreme `percentUsed`, or `status=failed` means the active chat session is no longer a safe working context.
+
+Do not delete memory to fix this. Confirm the latest project state is in `workspace/memory/YYYY-MM-DD.md` and the project dossier, then start a new chat session with `/new`. Keep `agents.defaults.contextPruning.mode=cache-ttl`, `agents.defaults.contextPruning.ttl=5m`, `session.reset.mode=daily`, `session.reset.atHour=4`, and `session.resetByType.direct.idleMinutes=240` validated so future long-running DM sessions do not accumulate indefinitely.
+
+## Telegram Durable Outbox
+
+If Telegram shows `Recovered after an earlier Telegram delivery failure` followed only by generic `Something went wrong` text, treat it as stale transport recovery, not proof that the current model turn failed. Check `/tmp/openclaw/openclaw-YYYY-MM-DD.log` for `durable outbox queued`, `durable outbox delivered`, and the original `sendMessage failed` timestamp.
+
+Durable outbox should be used for real final assistant replies that failed to deliver. It must not preserve generic processor-failure fallback text, because that stale error can be delivered later and look like the response to a new prompt. Validate the `telegram-durable-outbox-skip-generic-failures` runtime patch with `scripts/validate-local-setup.sh`.
