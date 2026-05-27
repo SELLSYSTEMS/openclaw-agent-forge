@@ -11,5 +11,11 @@ echo "[active]"
 systemctl is-active "${UNIT_NAME}" 2>/dev/null || true
 echo
 
+echo "[resilience]"
+systemctl show "${UNIT_NAME}" \
+  --property=OOMPolicy,KillMode,Restart,NRestarts,MemoryCurrent,MemoryPeak \
+  --no-pager 2>/dev/null || true
+echo
+
 echo "[status]"
 systemctl --no-pager --full status "${UNIT_NAME}" | sed -n '1,80p'

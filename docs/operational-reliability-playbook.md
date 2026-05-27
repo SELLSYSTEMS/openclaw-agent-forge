@@ -23,6 +23,7 @@ Do not close a recurring incident with documentation only when a script can dete
 - Long silent tasks killed internally: keep day-scale OpenClaw agent timeout and day-scale `codex-cli` watchdog overrides.
 - Raw JSONL/tool/code flood in Telegram after a completed Codex turn: check `agents.defaults.cliBackends.codex-cli.output` and `resumeOutput`. If Codex CLI args include `--json`, both output modes must be `jsonl`; otherwise OpenClaw can treat the whole Codex JSONL stream as a chat reply and hit Telegram `429 Too Many Requests`.
 - Repeated unrelated-looking Codex failures while the service remains healthy: check whether the primary model is still `codex-cli/*`. On this host class that is the architectural root cause, because OpenClaw documents CLI backends as fallback/safety-net runtime. Primary runtime must be `codex/*` through the bundled Codex app-server harness.
+- Gateway restart during long work at an exact-looking time is not always cron or manual restart. On 2026-05-26 at 04:00 UTC, `openclaw-gateway.service` failed with `result 'oom-kill'` after a child JVM/Gradle/tool process inside the gateway cgroup hit the OOM killer; systemd's default `OOMPolicy=stop` then stopped the whole gateway and silently lost the active Telegram turn. The repo-managed unit must set `OOMPolicy=continue` so a child OOM does not kill the gateway process.
 - Telegram media turn fails with `No prompt provided via stdin` after media understanding succeeds: this is a `codex-cli` backend prompt/image delivery failure, not memory loss. Stop patching individual CLI symptoms and migrate the primary runtime to `codex/*` with `agents.defaults.embeddedHarness.runtime=codex`.
 - Oversized artifacts: Telegram direct upload can fail for APKs. Run delivery preflight and provide a safe link/path instead of forcing direct attachment.
 - `pairing required` on admin-style RPCs: separate gateway authorization issue. Do not confuse it with Telegram health, model auth, or memory loss.
@@ -49,6 +50,7 @@ For service state:
 
 ```bash
 systemctl status openclaw-gateway.service --no-pager
+systemctl show openclaw-gateway.service --property=OOMPolicy,KillMode,NRestarts,MemoryCurrent,MemoryPeak --no-pager
 bin/openclaw-local health
 ```
 

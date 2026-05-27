@@ -15,6 +15,7 @@ TimeoutStopSec=30
 TimeoutStartSec=90
 SuccessExitStatus=0 143
 KillMode=control-group
+OOMPolicy=continue
 
 [Install]
 WantedBy=multi-user.target

@@ -23,6 +23,7 @@ EXPECTED_CLI_WATCHDOG_TIMEOUT_MS=604800000
 EXPECTED_CODEX_CLI_ARGS_JSON='["exec","--json","--color","never","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check"]'
 EXPECTED_CODEX_CLI_RESUME_ARGS_JSON='["exec","resume","--json","--dangerously-bypass-approvals-and-sandbox","--skip-git-repo-check","{sessionId}"]'
 EXPECTED_CODEX_CLI_OUTPUT_MODE="jsonl"
+EXPECTED_SYSTEMD_OOM_POLICY="continue"
 CODEX_APP_SERVER_RECOVERY_MARKER="codex-app-server-recovery"
 CODEX_APP_SERVER_RECOVERY_MARKER_V2="codex-app-server-recovery-v2"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
@@ -153,6 +154,18 @@ node --check "${codex_runner_file}" >/dev/null
 
 if [[ "${OPENCLAW_RUN_CODEX_SMOKE:-0}" == "1" ]]; then
   "${ROOT}/scripts/probe-codex-harness-turn.sh"
+fi
+
+if command -v systemctl >/dev/null 2>&1 && systemctl cat openclaw-gateway.service >/dev/null 2>&1; then
+  actual_systemd_oom_policy="$(
+    systemctl show openclaw-gateway.service --property=OOMPolicy --value 2>/dev/null || true
+  )"
+
+  if [[ "${actual_systemd_oom_policy}" != "${EXPECTED_SYSTEMD_OOM_POLICY}" ]]; then
+    echo "OpenClaw gateway systemd OOMPolicy mismatch: expected ${EXPECTED_SYSTEMD_OOM_POLICY}, got ${actual_systemd_oom_policy:-<unset>}." >&2
+    echo "A child process OOM must not stop/restart the whole gateway. Reinstall the unit with scripts/install-gateway-systemd.sh." >&2
+    exit 1
+  fi
 fi
 
 for required_file in "${REQUIRED_WORKSPACE_CONTEXT[@]}"; do
