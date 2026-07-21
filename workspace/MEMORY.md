@@ -11,12 +11,12 @@ This file is meant to be understood before the first external user conversation 
 - OpenClaw owns the canonical repo-local root on this host; on the tracked reference host that root is `/home/OpenClaw`
 - OpenClaw runtime home is repo-local under the canonical root
 - OpenClaw default workspace is repo-local under the canonical root
-- OpenClaw current model floor is `codex/gpt-5.4` with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path
-- OpenClaw should prefer `xhigh` reasoning through the shared Codex user config
-- If the shared Codex user model becomes numerically newer than `gpt-5.4`, OpenClaw should follow it only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`
+- OpenClaw current model floor is the explicit `codex/gpt-5.6-sol` slug with Codex CLI auth and the bundled Codex app-server harness
+- OpenClaw should use `max` reasoning for GPT-5.6 Sol
+- If the shared Codex user model becomes numerically newer than `gpt-5.6-sol`, OpenClaw should follow it only after reboot-safe OpenClaw startup, no fatal channel startup failure, advertised reasoning-effort validation, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`
 - OpenClaw should reuse the installed Codex CLI login rather than defaulting to `OPENAI_API_KEY`
 - OpenClaw should not use `codex-cli/*` as the primary Telegram/OpenClaw runtime; OpenClaw's CLI backend is fallback-only on this host class
-- OpenClaw should keep a no-interruption embedded Codex policy on this host class: `thinkingDefault=xhigh`, boot-safe `embeddedHarness.fallback=pi`, `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, Codex app-server `danger-full-access`, day-scale Codex app-server request timeout, and day-scale fallback `codex-cli` watchdog overrides
+- OpenClaw should keep a no-interruption embedded Codex policy on this host class: `thinkingDefault=max`, boot-safe `embeddedHarness.fallback=pi`, `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, Codex app-server `danger-full-access`, day-scale Codex app-server request timeout, and day-scale fallback `codex-cli` watchdog overrides
 - OpenClaw should run an artifact delivery preflight before sending, uploading, publishing, linking, or attaching generated files through any system
 - The initial user should not have to reteach the host basics that are already seeded here
 

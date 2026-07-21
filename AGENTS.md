@@ -20,7 +20,7 @@ Canonical repository identity:
 4. Keep the default agent workspace at `<REPO_ROOT>/workspace`.
 5. Treat `<REPO_ROOT>/memory` as the local memory source of truth.
 6. Use Markdown files first. Do not introduce a vector database unless keyword search has clearly stopped being enough.
-7. Keep the primary model floor on `codex/gpt-5.4` with the bundled Codex app-server harness as the intended backend path and `xhigh` reasoning as the minimum default. Do not auto-promote from `/root/.codex` alone; a newer `codex/<model>` is allowed only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation.
+7. Keep the primary model floor on the explicit `codex/gpt-5.6-sol` slug with the bundled Codex app-server harness and `max` reasoning. Do not substitute the `gpt-5.6` alias or auto-promote from `/root/.codex` alone; a newer `codex/<model>` is allowed only after reboot-safe OpenClaw startup, no fatal channel startup failure, advertised reasoning-effort validation, and `scripts/probe-codex-harness-turn.sh` validation.
 8. Do not introduce `OPENAI_API_KEY` as the auth or execution path for normal OpenClaw installs on this host class. Reuse the installed Codex CLI login instead.
 9. Do not introduce cron-based automation or scheduled jobs unless the user explicitly asked for cron.
 10. For durable automations, scheduled flows, or bridges, prefer the local shared Node-RED under `/root/.node-red`, not cron.
@@ -28,7 +28,7 @@ Canonical repository identity:
 12. Treat this repository as public. Never commit bot tokens, API keys, gateway tokens, or private chat data.
 13. Keep machine-local secrets under ignored paths such as `<REPO_ROOT>/.openclaw-home/secrets/`.
 14. Do not use `codex-cli/*` as the primary Telegram/OpenClaw runtime on this host class. OpenClaw's own docs describe CLI backends as fallback/safety-net runtime; primary embedded agent turns should use `codex/*` plus `agents.defaults.embeddedHarness.runtime=codex`.
-15. Keep the embedded Codex no-interruption policy on this host class: `agents.defaults.thinkingDefault=xhigh`, `agents.defaults.embeddedHarness.fallback=pi` for reboot-safe gateway startup, `agents.defaults.timeoutSeconds >= 604800`, `agents.defaults.llm.idleTimeoutSeconds = 0`, `agents.defaults.contextInjection = continuation-skip`, `agents.defaults.contextPruning.mode=cache-ttl`, `agents.defaults.contextPruning.ttl=5m`, `agents.defaults.sandbox.mode = off`, `plugins.entries.codex.config.appServer.sandbox=danger-full-access`, `plugins.entries.codex.config.appServer.requestTimeoutMs >= 604800000`, explicit no-sandbox fallback `agents.defaults.cliBackends.codex-cli.args` / `resumeArgs`, explicit `agents.defaults.cliBackends.codex-cli.output=jsonl` / `resumeOutput=jsonl`, and day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+15. Keep the embedded Codex no-interruption policy on this host class: `agents.defaults.thinkingDefault=max`, `agents.defaults.embeddedHarness.fallback=pi` for reboot-safe gateway startup, `agents.defaults.timeoutSeconds >= 604800`, `agents.defaults.llm.idleTimeoutSeconds = 0`, `agents.defaults.contextInjection = continuation-skip`, `agents.defaults.contextPruning.mode=cache-ttl`, `agents.defaults.contextPruning.ttl=5m`, `agents.defaults.sandbox.mode = off`, `plugins.entries.codex.config.appServer.sandbox=danger-full-access`, `plugins.entries.codex.config.appServer.requestTimeoutMs >= 604800000`, explicit no-sandbox fallback `agents.defaults.cliBackends.codex-cli.args` / `resumeArgs`, explicit `agents.defaults.cliBackends.codex-cli.output=jsonl` / `resumeOutput=jsonl`, and day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
 16. Before sending, uploading, publishing, linking, or attaching any artifact through any system, perform a delivery preflight: destination limits, file size, file type, auth/exposure, fallback path, and final URL/result verification.
 
 ## Required Flow
@@ -43,6 +43,7 @@ Canonical repository identity:
 8. If you changed the model/runtime, run `scripts/probe-codex-harness-turn.sh` before claiming that OpenClaw is actually using Codex.
 9. Validate the setup with `scripts/validate-local-setup.sh`.
 10. If you change the operating model, update the docs in the same commit.
+11. Before changing the live model/runtime or restarting for such a migration, run `scripts/backup-openclaw-continuity-state.sh`; do not delete or reset the active session, transcript, or Codex app-server sidecar.
 
 ## Pitfalls Already Seen
 
@@ -51,6 +52,7 @@ Canonical repository identity:
 - Local Markdown memory is the lower-risk default. Obsidian is optional as a UI on top of it.
 - Helper scripts should be smoke-tested after creation. One early `printf` bug created a partial note file.
 - OpenClaw config writes should be applied sequentially, not in parallel, or later writes can clobber earlier ones.
+- A live model migration must preserve session continuity. Back up config, session store, transcript, and Codex app-server sidecar; keep the existing `sessionId` and thread binding, and update a stale per-session `thinkingLevel` override explicitly when the new default alone would not apply.
 - A healthy gateway probe does not guarantee full operator scope; `pairing required` on admin-style RPCs is a separate gateway authorization issue.
 - Telegram native exec approvals auto-enable in `auto` mode when approvers can be inferred from `allowFrom` or `defaultTo`. On this host class, keep `channels.telegram.execApprovals.enabled=false` unless the user explicitly wants native approvals and you intentionally pair an operator client with `operator.approvals`.
 - A read-only local device token such as `gateway:health` is not enough for Telegram native approvals. That mismatch causes repeating `pairing required` connect loops and noisy logs.
@@ -78,6 +80,8 @@ Canonical repository identity:
 - Keep the repo-managed `openclaw-gateway.service` on `OOMPolicy=continue`. A child JVM/Gradle/Android tool OOM inside the gateway cgroup must not stop or restart the whole gateway and lose an active Telegram turn.
 - On this host class, install/operator work should start in no-sandbox / danger-full-access execution by default. If local shell/JS commands fail with `bwrap: Failed to make / slave: Permission denied`, that only confirms the rule was violated: stop immediately and move the session to the correct no-sandbox runtime before continuing.
 - On OpenClaw 2026.4.12, `codex app-server error` can arrive after a valid assistant answer and make Telegram show only a generic failure. Validate that `scripts/apply-openclaw-runtime-patches.sh` has applied both `codex-app-server-recovery` and `codex-app-server-recovery-v2` before trusting long Telegram delivery.
+- OpenClaw 2026.4.12 predates native `max` thinking support: its schema rejects `max`, normalization collapses it to `high`, and the Codex bridge does not forward it. Keep this known-good OpenClaw version pinned and let `scripts/apply-openclaw-runtime-patches.sh` apply the version-guarded `gpt-5.6-sol-max-compat` patch; validate with both harness scripts before starting channels.
+- Harness smoke tests must not append synthetic messages to the live Telegram transcript. `scripts/probe-codex-harness-turn.sh` copies config into a temporary `OPENCLAW_HOME`; preserve that isolation in future edits.
 - Do not let Telegram durable outbox preserve generic failure text such as `Something went wrong while processing your request. Please try again.` A transient Telegram `sendMessage` failure can otherwise queue that stale generic error and deliver it later as if it were the answer to a new user request. Keep the `telegram-durable-outbox-skip-generic-failures` runtime patch applied and validated.
 - Do not let one direct Telegram session run for days until `remainingTokens=0`. Keep explicit reset policy in config: daily reset at 04:00 plus direct-chat idle reset after 240 minutes. Important state belongs in `workspace/memory`, project dossiers, and repo docs, not only in the active chat transcript.
 

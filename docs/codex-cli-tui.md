@@ -114,8 +114,8 @@ The shared global Codex config at `/root/.codex/config.toml` currently shows:
 
 - `approval_policy = "on-request"`
 - `sandbox_mode = "danger-full-access"`
-- `model = "gpt-5.4"`
-- `model_reasoning_effort = "xhigh"`
+- `model = "gpt-5.6-sol"`
+- `model_reasoning_effort = "max"`
 
 Project roots are dynamic and must be rediscovered from the live host when needed. Prefer:
 
@@ -131,7 +131,7 @@ Operational rule:
 ## Relationship To OpenClaw
 
 - Codex CLI TUI is one interactive surface used by other terminal agents on this host class
-- OpenClaw uses `codex/gpt-5.4` as its baseline model, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path
+- OpenClaw uses the explicit `codex/gpt-5.6-sol` slug as its baseline model with `max` reasoning, Codex CLI auth, and the bundled Codex app-server harness
 - OpenClaw should follow the shared Codex user model only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`
 - OpenClaw should not use `codex-cli/*` as its primary Telegram/OpenClaw runtime; that backend is fallback-only
 - OpenClaw should understand Codex CLI TUI behavior, but discover live agent-control paths dynamically instead of assuming one fixed TUI layout

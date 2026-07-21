@@ -6,11 +6,13 @@ OpenClaw on this host class should use Codex CLI auth with the bundled Codex app
 
 The supported baseline model is:
 
-- `codex/gpt-5.4`
+- `codex/gpt-5.6-sol`
 
 The preferred reasoning floor is:
 
-- `xhigh`
+- `max`
+
+Use the explicit `gpt-5.6-sol` slug rather than the `gpt-5.6` alias. OpenAI's model guidance identifies GPT-5.6 Sol as the routed model and advertises `max` for the hardest quality-first work.
 
 ## Runtime Split
 
@@ -25,7 +27,7 @@ Use:
 
 ## Newer Models
 
-A model newer than `gpt-5.4` may be used only after local validation.
+A model newer than `gpt-5.6-sol` may be used only after local validation.
 
 Accepted pattern:
 
@@ -38,6 +40,8 @@ Validation means more than `codex login status` or a shared `/root/.codex/config
 - `scripts/probe-codex-harness-turn.sh`
 
 On 2026-05-22, OpenClaw gateway startup logged `startup model warmup failed ... Unknown model` for `codex/*` before plugin discovery. Treat that as a known boot-order warning, not as a standalone reason to abandon the Codex harness. The hard failure to avoid is fatal channel startup or a failed Codex smoke/probe.
+
+The known-good repo profile pins OpenClaw `2026.4.12`. That release predates native `max` support in its config schema and Codex bridge, so `scripts/apply-openclaw-runtime-patches.sh` must apply its version-guarded `gpt-5.6-sol-max-compat` patch. Unknown runtime shapes fail closed; do not blindly patch or upgrade them.
 
 Do not switch to a direct OpenAI API model path unless the user explicitly instructs it.
 
@@ -54,3 +58,5 @@ Required checks:
 - `scripts/probe-codex-harness-turn.sh`
 
 Do not make `OPENAI_API_KEY` the default auth path for this repo.
+
+Official model reference: `https://developers.openai.com/api/docs/guides/latest-model`

@@ -25,9 +25,9 @@
 
 ## Model And Auth
 
-- `codex/gpt-5.4` is the current minimum model floor for this repo, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path, not a forever pin.
-- Shared Codex reasoning should stay on `xhigh`.
-- If the shared Codex user default moves to a numerically newer GPT model than `gpt-5.4`, OpenClaw may follow it only after OpenClaw startup and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`.
+- The explicit `codex/gpt-5.6-sol` slug is the current minimum model floor for this repo, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path, not a forever pin.
+- Shared Codex reasoning should stay on `max`.
+- If the shared Codex user default moves to a numerically newer GPT model than `gpt-5.6-sol`, OpenClaw may follow it only after OpenClaw startup, advertised reasoning-effort validation, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`.
 - This setup should prefer Codex CLI login reuse over `OPENAI_API_KEY`.
 - Do not switch normal OpenClaw install/runtime behavior to direct API-key auth when Codex CLI reuse is available.
 - On this host class, all webterminal tabs share the same Unix user, so Codex login is a shared user-level state rather than a per-tab concern.
@@ -37,6 +37,7 @@
 - The stable primary runtime pattern is `codex/<model>` with the bundled Codex app-server harness: `plugins.entries.codex.enabled=true`, `agents.defaults.embeddedHarness.runtime=codex`, boot-safe `agents.defaults.embeddedHarness.fallback=pi`, and explicit Codex smoke validation.
 - Do not persist `agents.defaults.embeddedHarness.fallback=none` on OpenClaw 2026.4.12. During gateway startup, harness resolution can run before the Codex plugin has registered; persisted `fallback=none` can break Telegram/channel startup after reboot.
 - On 2026-05-22, OpenClaw gateway warmup logged `Unknown model` for `codex/*` before Codex plugin discovery. Treat that as a known boot-order warning; do not confuse it with the fatal `fallback=none` channel-startup failure.
+- On 2026-07-21, GPT-5.6 Sol model discovery and direct Codex execution succeeded with `max`, but OpenClaw `2026.4.12` still rejected or downgraded `max` in three internal layers. Pin that known-good OpenClaw profile and keep the version-guarded `gpt-5.6-sol-max-compat` patch plus harness smoke as permanent regression gates.
 - If a Telegram media/image turn fails after successful media understanding with `No prompt provided via stdin`, treat it as a `codex-cli` prompt/image delivery failure. The correct durable fix is the Codex app-server harness, not another one-off CLI arg patch.
 
 ## Gateway Operations

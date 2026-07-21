@@ -65,11 +65,11 @@ scripts/agent-landscape.sh
 The primary Telegram/OpenClaw runtime on this host class must be:
 
 ```text
-agents.defaults.model.primary=codex/gpt-5.4
+agents.defaults.model.primary=codex/gpt-5.6-sol
 plugins.entries.codex.enabled=true
 agents.defaults.embeddedHarness.runtime=codex
 agents.defaults.embeddedHarness.fallback=pi
-agents.defaults.thinkingDefault=xhigh
+agents.defaults.thinkingDefault=max
 plugins.entries.codex.config.appServer.sandbox=danger-full-access
 ```
 

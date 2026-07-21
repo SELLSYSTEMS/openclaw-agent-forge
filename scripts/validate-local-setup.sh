@@ -6,10 +6,12 @@ LAUNCHER="${ROOT}/bin/openclaw-local"
 EXPECTED_WORKSPACE="${ROOT}/workspace"
 EXPECTED_GATEWAY_MODE="local"
 EXPECTED_GATEWAY_BIND="loopback"
-BASELINE_MODEL="gpt-5.4"
-BASELINE_MODEL_REF="codex/gpt-5.4"
-EXPECTED_REASONING="xhigh"
-EXPECTED_THINKING_DEFAULT="xhigh"
+BASELINE_MODEL="gpt-5.6-sol"
+BASELINE_MODEL_REF="codex/gpt-5.6-sol"
+BASELINE_MODEL_MAJOR=5
+BASELINE_MODEL_MINOR=6
+EXPECTED_REASONING="max"
+EXPECTED_THINKING_DEFAULT="max"
 EXPECTED_HARNESS_RUNTIME="codex"
 EXPECTED_HARNESS_FALLBACK="pi"
 EXPECTED_CODEX_APP_SERVER_APPROVAL_POLICY="never"
@@ -33,6 +35,7 @@ EXPECTED_SYSTEMD_OOM_POLICY="continue"
 CODEX_APP_SERVER_RECOVERY_MARKER="codex-app-server-recovery"
 CODEX_APP_SERVER_RECOVERY_MARKER_V2="codex-app-server-recovery-v2"
 TELEGRAM_OUTBOX_GENERIC_FAILURE_MARKER="telegram-durable-outbox-skip-generic-failures"
+GPT56_MAX_COMPAT_MARKER="gpt-5.6-sol-max-compat"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 REQUIRED_WORKSPACE_CONTEXT=(
   "${ROOT}/workspace/AGENTS.md"
@@ -55,7 +58,7 @@ model_is_newer_than_baseline() {
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
     local minor="${BASH_REMATCH[3]:-0}"
-    (( major > 5 || (major == 5 && minor > 4) ))
+    (( major > BASELINE_MODEL_MAJOR || (major == BASELINE_MODEL_MAJOR && minor > BASELINE_MODEL_MINOR) ))
     return
   fi
   return 1
@@ -76,7 +79,7 @@ resolve_expected_base_model_name() {
     fi
 
     echo "Unsupported OPENCLAW_EXPECTED_PRIMARY_MODEL value: ${requested_model}" >&2
-    echo "Use codex/gpt-5.4, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
+    echo "Use codex/gpt-5.6-sol, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
     exit 1
   fi
 
@@ -176,6 +179,48 @@ if ! grep -q "shouldSkipTelegramDurableOutboxEntry" "${telegram_bot_file}"; then
 fi
 
 node --check "${telegram_bot_file}" >/dev/null
+
+max_compat_harness_file="$(grep -l 'function resolveReasoningEffort(thinkLevel)' "${ROOT}/.openclaw/lib/node_modules/openclaw/dist"/harness-*.js 2>/dev/null | head -n 1 || true)"
+max_compat_thinking_file="$(grep -l 'function normalizeThinkLevel(raw)' "${ROOT}/.openclaw/lib/node_modules/openclaw/dist"/thinking.shared-*.js 2>/dev/null | head -n 1 || true)"
+max_compat_runtime_schema_file="$(grep -l 'const AgentEntrySchema' "${ROOT}/.openclaw/lib/node_modules/openclaw/dist"/zod-schema.agent-runtime-*.js 2>/dev/null | head -n 1 || true)"
+max_compat_defaults_schema_file="$(grep -l 'const AgentDefaultsSchema' "${ROOT}/.openclaw/lib/node_modules/openclaw/dist"/zod-schema-*.js 2>/dev/null | head -n 1 || true)"
+max_compat_runtime_files=(
+  "${max_compat_harness_file}"
+  "${max_compat_thinking_file}"
+  "${max_compat_runtime_schema_file}"
+  "${max_compat_defaults_schema_file}"
+)
+
+for max_compat_runtime_file in "${max_compat_runtime_files[@]}"; do
+  if [[ -z "${max_compat_runtime_file}" || ! -f "${max_compat_runtime_file}" ]]; then
+    echo "Unable to find every OpenClaw runtime file required for GPT-5.6 Sol max validation." >&2
+    exit 1
+  fi
+
+  node --check "${max_compat_runtime_file}" >/dev/null
+done
+
+if ! grep -q 'thinkLevel === "max"' "${max_compat_harness_file}" \
+  || ! grep -q 'collapsed === "max"' "${max_compat_thinking_file}" \
+  || ! grep -q $'\t\t"max",' "${max_compat_runtime_schema_file}" \
+  || ! grep -q 'z.literal("max")' "${max_compat_defaults_schema_file}"; then
+  echo "OpenClaw runtime does not expose the complete GPT-5.6 Sol max reasoning path." >&2
+  echo "Run scripts/apply-openclaw-runtime-patches.sh before validation." >&2
+  exit 1
+fi
+
+openclaw_runtime_version="$(
+  node -p 'require(process.argv[1]).version' "${ROOT}/.openclaw/lib/node_modules/openclaw/package.json"
+)"
+
+if [[ "${openclaw_runtime_version}" == "2026.4.12" ]]; then
+  for max_compat_runtime_file in "${max_compat_runtime_files[@]}"; do
+    if ! grep -q "${GPT56_MAX_COMPAT_MARKER}" "${max_compat_runtime_file}"; then
+      echo "Missing GPT-5.6 Sol max compatibility patch marker: ${max_compat_runtime_file}" >&2
+      exit 1
+    fi
+  done
+fi
 
 if [[ "${OPENCLAW_RUN_CODEX_SMOKE:-0}" == "1" ]]; then
   "${ROOT}/scripts/probe-codex-harness-turn.sh"

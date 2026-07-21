@@ -116,3 +116,14 @@
 - Decision: the installer baseline remains `codex/gpt-5.4`, but a live host may use a shared newer model such as `codex/gpt-5.5` after Codex CLI auth, direct Codex smoke, OpenClaw validation, and Codex harness smoke pass
 - Why: the user wants the newest validated Codex model, but future installs must not blindly copy `/root/.codex/config.toml` into OpenClaw without proving the OpenClaw path
 - Evidence: on this host, `codex --version` is `0.130.0`, `codex login status` succeeds via ChatGPT, `/root/.codex/config.toml` uses `model=gpt-5.5` and `model_reasoning_effort=xhigh`, and live OpenClaw now uses `codex/gpt-5.5`
+
+## 2026-07-21
+
+### Promote the validated baseline to GPT-5.6 Sol at max reasoning
+
+- Decision: make the explicit `codex/gpt-5.6-sol` slug with `agents.defaults.thinkingDefault=max` the installer and live baseline; do not use the `gpt-5.6` alias
+- Runtime decision: retain the known-good OpenClaw `2026.4.12` profile instead of combining this model migration with a major OpenClaw runtime migration
+- Compatibility: keep the version-guarded `gpt-5.6-sol-max-compat` runtime patch because OpenClaw `2026.4.12` otherwise rejects `max`, normalizes it to `high`, and omits it from the Codex app-server request
+- Continuity: before restart, back up config, session store, transcript, Codex thread sidecar, and checksums; preserve the existing `sessionId`, transcript, and thread binding while changing only model defaults and the existing session's thinking override
+- Evidence: Codex app-server discovery advertised `gpt-5.6-sol` with `max`; direct Codex smoke, isolated OpenClaw harness smoke, reboot-safe gateway startup, gateway RPC probe, and live OpenClaw harness smoke all passed
+- Regression gates: run `scripts/apply-openclaw-runtime-patches.sh`, `scripts/validate-codex-harness-contract.sh`, `scripts/probe-codex-harness-turn.sh`, and `scripts/validate-local-setup.sh` after install, upgrade, or model/runtime recovery

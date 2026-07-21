@@ -73,8 +73,9 @@ Rules:
 - launcher: `<REPO_ROOT>/bin/openclaw-local`
 - workspace: `<REPO_ROOT>/workspace`
 - memory vault: `<REPO_ROOT>/memory`
-- baseline model: `codex/gpt-5.4`
-- preferred reasoning floor: `xhigh`
+- baseline model: `codex/gpt-5.6-sol`
+- preferred reasoning level: `max`
+- known-good OpenClaw runtime profile: `2026.4.12` plus the version-guarded GPT-5.6 Sol `max` compatibility patch
 - gateway: `local` mode on loopback
 - embedded Codex runs: bundled Codex app-server harness with no-interruption policy
 - embedded Codex app-server sandbox: `danger-full-access` on this host class
@@ -97,29 +98,30 @@ Run:
 
 What it does:
 
-1. Installs OpenClaw into `<REPO_ROOT>/.openclaw` via the official installer.
+1. Installs the known-good OpenClaw `2026.4.12` profile into `<REPO_ROOT>/.openclaw` via the official installer.
 2. Creates `<REPO_ROOT>/.openclaw-home`.
 3. Configures OpenClaw with `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `<REPO_ROOT>/workspace`.
-5. Sets the primary model to `codex/gpt-5.4` by default. A newer model requires an explicit `OPENCLAW_PRIMARY_MODEL=codex/<validated-model>` override after OpenClaw startup and smoke validation.
-6. Enables `plugins.entries.codex.enabled=true`.
-7. Forces `agents.defaults.embeddedHarness.runtime=codex` and boot-safe `agents.defaults.embeddedHarness.fallback=pi`.
-8. Sets Codex app-server policy for this host class: `approvalPolicy=never`, `sandbox=danger-full-access`, and day-scale `requestTimeoutMs`.
-9. Sets `agents.defaults.thinkingDefault=xhigh`.
-10. Sets `agents.defaults.timeoutSeconds=604800`.
-11. Sets `agents.defaults.llm.idleTimeoutSeconds=0`.
-12. Sets `agents.defaults.contextInjection=continuation-skip` so continuation turns do not keep reinjecting the full bootstrap payload.
-13. Enables `agents.defaults.contextPruning.mode=cache-ttl` with `ttl=5m` to trim old tool results in-memory without deleting transcript history.
-14. Sets an explicit session reset policy: daily reset at 04:00 and direct-chat idle reset after 240 minutes, so durable memory/dossiers carry long work instead of one endless Telegram transcript.
-15. Sets `agents.defaults.sandbox.mode=off`.
-16. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.args` and `resumeArgs` that use `--dangerously-bypass-approvals-and-sandbox` instead of OpenClaw's bundled `--sandbox workspace-write` default.
-17. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.output=jsonl` and `resumeOutput=jsonl` because both fresh and resume Codex CLI vectors use `--json`.
-18. Sets day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
-17. Sets `gateway.mode=local`.
-18. Sets `gateway.bind=loopback`.
-19. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
-20. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
-21. Validates the resulting config.
+5. Applies the version-guarded runtime patches, including GPT-5.6 Sol `max` compatibility for OpenClaw `2026.4.12`, before writing config.
+6. Sets the primary model to the explicit `codex/gpt-5.6-sol` slug by default. A newer model requires an explicit `OPENCLAW_PRIMARY_MODEL=codex/<validated-model>` override after OpenClaw startup, reasoning-effort discovery, and smoke validation.
+7. Enables `plugins.entries.codex.enabled=true`.
+8. Forces `agents.defaults.embeddedHarness.runtime=codex` and boot-safe `agents.defaults.embeddedHarness.fallback=pi`.
+9. Sets Codex app-server policy for this host class: `approvalPolicy=never`, `sandbox=danger-full-access`, and day-scale `requestTimeoutMs`.
+10. Sets `agents.defaults.thinkingDefault=max`.
+11. Sets `agents.defaults.timeoutSeconds=604800`.
+12. Sets `agents.defaults.llm.idleTimeoutSeconds=0`.
+13. Sets `agents.defaults.contextInjection=continuation-skip` so continuation turns do not keep reinjecting the full bootstrap payload.
+14. Enables `agents.defaults.contextPruning.mode=cache-ttl` with `ttl=5m` to trim old tool results in-memory without deleting transcript history.
+15. Sets an explicit session reset policy: daily reset at 04:00 and direct-chat idle reset after 240 minutes, so durable memory/dossiers carry long work instead of one endless Telegram transcript.
+16. Sets `agents.defaults.sandbox.mode=off`.
+17. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.args` and `resumeArgs` that use `--dangerously-bypass-approvals-and-sandbox` instead of OpenClaw's bundled `--sandbox workspace-write` default.
+18. Keeps explicit fallback `agents.defaults.cliBackends.codex-cli.output=jsonl` and `resumeOutput=jsonl` because both fresh and resume Codex CLI vectors use `--json`.
+19. Sets day-scale fallback `agents.defaults.cliBackends.codex-cli.reliability.watchdog` overrides for both fresh and resume runs.
+20. Sets `gateway.mode=local`.
+21. Sets `gateway.bind=loopback`.
+22. Provisions the repo-local offline STT path via `scripts/setup-local-stt.sh`.
+23. Validates the STT path on a real speech sample via `scripts/validate-local-stt.sh`.
+24. Validates the resulting config.
 
 After bootstrap or any Codex/OpenClaw upgrade, run:
 
@@ -130,16 +132,29 @@ scripts/validate-local-setup.sh
 ```
 
 The first script exists specifically to catch fresh/resume Codex CLI argument drift before a Telegram turn fails generically.
-If you changed the primary model or runtime, also run `scripts/probe-codex-harness-turn.sh`; it proves OpenClaw can produce a real `provider=codex` turn, not just a valid-looking config.
+If you changed the primary model or runtime, also run `scripts/probe-codex-harness-turn.sh`; it proves OpenClaw can produce a real `provider=codex` turn, not just a valid-looking config. The probe copies config into a temporary `OPENCLAW_HOME`, so it must not append its synthetic prompt to the live Telegram transcript.
+
+## Live Model Migration Without Context Loss
+
+Do not combine a model change with session reset or transcript cleanup.
+
+1. Confirm `tasks.active=0` and inspect recent gateway errors.
+2. Run `scripts/backup-openclaw-continuity-state.sh` while the service is still healthy.
+3. Stop `openclaw-gateway.service` before editing live session metadata.
+4. Apply model and thinking config writes sequentially, then run `openclaw config validate`.
+5. If the existing direct session has its own stale `thinkingLevel`, update only that field; preserve its `sessionId`, transcript JSONL, and `.codex-app-server.json` sidecar.
+6. Restart the service and verify gateway RPC, channel startup, configured model/thinking, unchanged continuity files, and a real `scripts/probe-codex-harness-turn.sh` result.
+
+The sidecar's model value is last-used metadata. Do not delete or rewrite the sidecar to force a model change: the Codex harness resumes its existing `threadId` and supplies the newly selected model in `thread/resume`, then refreshes the metadata after the next real turn.
 
 ## Authentication Model
 
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 - install and log in to the `codex` CLI
-- keep the OpenClaw model ref at `codex/gpt-5.4` unless a newer `codex/<model>` has passed OpenClaw startup and smoke validation
+- keep the OpenClaw model ref at the explicit `codex/gpt-5.6-sol` slug unless a newer `codex/<model>` has passed OpenClaw startup, reasoning-effort discovery, and smoke validation
 - let OpenClaw delegate embedded turns to the bundled Codex app-server harness, which reuses the installed Codex CLI auth
-- keep shared Codex reasoning at `xhigh`
+- keep shared Codex reasoning at `max`
 - do not re-route install/runtime execution through direct API-key auth when Codex CLI reuse is available
 
 This keeps auth ownership with Codex CLI instead of storing OpenAI API credentials inside the OpenClaw repo or config flow.
@@ -165,7 +180,7 @@ Required baseline:
 - `plugins.entries.codex.enabled = true`
 - `agents.defaults.embeddedHarness.runtime = codex`
 - `agents.defaults.embeddedHarness.fallback = pi`
-- `agents.defaults.thinkingDefault = xhigh`
+- `agents.defaults.thinkingDefault = max`
 - `plugins.entries.codex.config.appServer.sandbox = danger-full-access`
 - `plugins.entries.codex.config.appServer.requestTimeoutMs` set at day scale
 - fallback `agents.defaults.cliBackends.codex-cli.args` uses `--dangerously-bypass-approvals-and-sandbox`, not `--sandbox workspace-write`
@@ -286,7 +301,7 @@ Expected outcomes:
 - `plugins.entries.codex.enabled` is `true`
 - `agents.defaults.embeddedHarness.runtime` is `codex`
 - `agents.defaults.embeddedHarness.fallback` is `pi`
-- `agents.defaults.thinkingDefault` is `xhigh`
+- `agents.defaults.thinkingDefault` is `max`
 - `plugins.entries.codex.config.appServer.sandbox` is `danger-full-access`
 - `plugins.entries.codex.config.appServer.requestTimeoutMs` is set at day scale
 - the configured gateway mode resolves to `local`
@@ -305,7 +320,7 @@ Expected outcomes:
 - the configured fallback `codex-cli` resume args use the resume-specific vector without `--color`
 - the configured fallback `codex-cli` fresh and resume no-output watchdog overrides are set at day scale
 - `codex login status` succeeds
-- the shared Codex reasoning default resolves to `xhigh`
+- the shared Codex reasoning default resolves to `max`
 - the repo-local STT venv exists at `<REPO_ROOT>/.venv-stt`
 - `faster-whisper` imports successfully from that venv
 - `scripts/validate-local-stt.sh` succeeds on a real speech sample

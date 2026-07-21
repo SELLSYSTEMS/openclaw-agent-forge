@@ -5,7 +5,7 @@ This is the shortest safe path to wire a test Telegram bot into the local OpenCl
 ## Current Local Status
 
 - OpenClaw runtime is isolated under `<REPO_ROOT>/.openclaw-home`
-- primary model floor is `codex/gpt-5.4` with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path
+- primary model floor is the explicit `codex/gpt-5.6-sol` slug with `max` reasoning, Codex CLI auth, and the bundled Codex app-server harness
 - gateway target is local loopback
 - Codex CLI auth is the intended path, not `OPENAI_API_KEY`
 - Telegram bot credentials should live only in `<REPO_ROOT>/.openclaw-home/secrets/`

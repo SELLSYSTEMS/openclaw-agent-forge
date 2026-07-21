@@ -6,6 +6,8 @@ DIST_DIR="${ROOT}/.openclaw/lib/node_modules/openclaw/dist"
 MARKER_V1="codex-app-server-recovery"
 MARKER_V2="codex-app-server-recovery-v2"
 MARKER_TG_OUTBOX_V1="telegram-durable-outbox-skip-generic-failures"
+MARKER_GPT56_MAX_V1="gpt-5.6-sol-max-compat"
+LEGACY_MAX_COMPAT_VERSION="2026.4.12"
 
 if [[ ! -d "${DIST_DIR}" ]]; then
   echo "OpenClaw dist directory not found: ${DIST_DIR}" >&2
@@ -181,5 +183,135 @@ function shouldSkipTelegramDurableOutboxEntry(params) {
 NODE
 
 node --check "${BOT_FILE}" >/dev/null
+
+PACKAGE_JSON="${ROOT}/.openclaw/lib/node_modules/openclaw/package.json"
+OPENCLAW_VERSION="$(node -p "require(process.argv[1]).version" "${PACKAGE_JSON}")"
+HARNESS_FILE="$(grep -l 'function resolveReasoningEffort(thinkLevel)' "${DIST_DIR}"/harness-*.js 2>/dev/null | head -n 1 || true)"
+THINKING_FILE="$(grep -l 'function normalizeThinkLevel(raw)' "${DIST_DIR}"/thinking.shared-*.js 2>/dev/null | head -n 1 || true)"
+AGENT_RUNTIME_SCHEMA_FILE="$(grep -l 'const AgentEntrySchema' "${DIST_DIR}"/zod-schema.agent-runtime-*.js 2>/dev/null | head -n 1 || true)"
+AGENT_DEFAULTS_SCHEMA_FILE="$(grep -l 'const AgentDefaultsSchema' "${DIST_DIR}"/zod-schema-*.js 2>/dev/null | head -n 1 || true)"
+
+for required_runtime_file in \
+  "${HARNESS_FILE}" \
+  "${THINKING_FILE}" \
+  "${AGENT_RUNTIME_SCHEMA_FILE}" \
+  "${AGENT_DEFAULTS_SCHEMA_FILE}"; do
+  if [[ -z "${required_runtime_file}" || ! -f "${required_runtime_file}" ]]; then
+    echo "Unable to locate all OpenClaw runtime files required for GPT-5.6 Sol max compatibility." >&2
+    exit 1
+  fi
+done
+
+if [[ "${OPENCLAW_VERSION}" != "${LEGACY_MAX_COMPAT_VERSION}" ]]; then
+  if grep -q 'thinkLevel === "max"' "${HARNESS_FILE}" \
+    && grep -q 'collapsed === "max"' "${THINKING_FILE}" \
+    && grep -q '"max"' "${AGENT_RUNTIME_SCHEMA_FILE}" \
+    && grep -q 'z.literal("max")' "${AGENT_DEFAULTS_SCHEMA_FILE}"; then
+    echo "OpenClaw ${OPENCLAW_VERSION} has native GPT-5.6 max reasoning support; compatibility patch not needed."
+  else
+    echo "OpenClaw ${OPENCLAW_VERSION} does not match the validated ${LEGACY_MAX_COMPAT_VERSION} patch profile and lacks native max support." >&2
+    echo "Do not patch an unknown runtime shape. Pin ${LEGACY_MAX_COMPAT_VERSION} or validate a deliberate OpenClaw migration first." >&2
+    exit 1
+  fi
+else
+  node - \
+    "${HARNESS_FILE}" \
+    "${THINKING_FILE}" \
+    "${AGENT_RUNTIME_SCHEMA_FILE}" \
+    "${AGENT_DEFAULTS_SCHEMA_FILE}" \
+    "${MARKER_GPT56_MAX_V1}" <<'NODE'
+const fs = require("fs");
+
+const [harnessFile, thinkingFile, runtimeSchemaFile, defaultsSchemaFile, marker] = process.argv.slice(2);
+
+function patchFile(file, markerText, edits) {
+  let source = fs.readFileSync(file, "utf8");
+  if (source.includes(markerText)) return;
+
+  for (const [needle, replacement, label] of edits) {
+    if (!source.includes(needle)) {
+      console.error(`OpenClaw runtime shape changed; cannot apply ${label} safely.`);
+      console.error(`File: ${file}`);
+      process.exit(1);
+    }
+    source = source.replace(needle, replacement);
+  }
+
+  fs.writeFileSync(file, source);
+}
+
+patchFile(harnessFile, marker, [[
+  `function resolveReasoningEffort(thinkLevel) {
+\tif (thinkLevel === "minimal" || thinkLevel === "low" || thinkLevel === "medium" || thinkLevel === "high" || thinkLevel === "xhigh") return thinkLevel;
+\treturn null;
+}`,
+  `// ${marker}: Codex 0.145+ and GPT-5.6 accept max reasoning effort.
+function resolveReasoningEffort(thinkLevel) {
+\tif (thinkLevel === "minimal" || thinkLevel === "low" || thinkLevel === "medium" || thinkLevel === "high" || thinkLevel === "xhigh" || thinkLevel === "max") return thinkLevel;
+\treturn null;
+}`,
+  "Codex app-server max reasoning bridge",
+]]);
+
+patchFile(thinkingFile, marker, [[
+  `\t"high",
+\t"adaptive"
+]];`,
+  `\t"high",
+\t"max",
+\t"adaptive"
+]];
+// ${marker}: preserve max instead of collapsing it to high.`,
+  "thinking-level catalog",
+], [
+  `\tif (collapsed === "xhigh" || collapsed === "extrahigh") return "xhigh";`,
+  `\tif (collapsed === "xhigh" || collapsed === "extrahigh") return "xhigh";
+\tif (collapsed === "max") return "max";`,
+  "max thinking normalization",
+], [
+  `\t\t"thinkhardest",
+\t\t"highest",
+\t\t"max"
+\t].includes(key)) return "high";`,
+  `\t\t"thinkhardest",
+\t\t"highest"
+\t].includes(key)) return "high";`,
+  "legacy max-to-high collapse removal",
+]]);
+
+patchFile(runtimeSchemaFile, marker, [[
+  `\t\t"high",
+\t\t"xhigh",
+\t\t"adaptive"
+\t]).optional(),`,
+  `\t\t"high",
+\t\t"xhigh",
+\t\t"max",
+\t\t"adaptive"
+\t]).optional(), // ${marker}`,
+  "per-agent max config schema",
+]]);
+
+patchFile(defaultsSchemaFile, marker, [[
+  `\t\tz.literal("high"),
+\t\tz.literal("xhigh"),
+\t\tz.literal("adaptive")
+\t]).optional(),`,
+  `\t\tz.literal("high"),
+\t\tz.literal("xhigh"),
+\t\tz.literal("max"),
+\t\tz.literal("adaptive")
+\t]).optional(), // ${marker}`,
+  "default max config schema",
+]]);
+NODE
+
+  node --check "${HARNESS_FILE}" >/dev/null
+  node --check "${THINKING_FILE}" >/dev/null
+  node --check "${AGENT_RUNTIME_SCHEMA_FILE}" >/dev/null
+  node --check "${AGENT_DEFAULTS_SCHEMA_FILE}" >/dev/null
+fi
+
 echo "OpenClaw runtime patches present: ${RUNNER_FILE}"
 echo "OpenClaw Telegram durable outbox patch present: ${BOT_FILE}"
+echo "OpenClaw GPT-5.6 Sol max reasoning contract present: ${HARNESS_FILE}"

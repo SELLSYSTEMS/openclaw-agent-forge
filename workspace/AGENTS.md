@@ -242,7 +242,7 @@ For serious repo work, prefer doing the implementation directly in the main sess
 Rules:
 
 - do not remove or relax the repo-level no-interruption policy for embedded Codex runs; on this host class the main OpenClaw session must be allowed to run for hours or days when the work genuinely requires it
-- the baseline runtime policy is: primary `codex/<model>` through `embeddedHarness.runtime=codex`, boot-safe `embeddedHarness.fallback=pi`, `thinkingDefault=xhigh`, `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, Codex app-server `danger-full-access`, and day-scale fallback `codex-cli` watchdog overrides for fresh and resume runs
+- the baseline runtime policy is: primary `codex/gpt-5.6-sol` through `embeddedHarness.runtime=codex`, boot-safe `embeddedHarness.fallback=pi`, `thinkingDefault=max`, `timeoutSeconds >= 604800`, `llm.idleTimeoutSeconds = 0`, `contextInjection = continuation-skip`, Codex app-server `danger-full-access`, and day-scale fallback `codex-cli` watchdog overrides for fresh and resume runs
 - `codex-cli/*` must not be the primary Telegram/OpenClaw runtime on this host class; it is fallback-only
 - fresh and resume embedded `codex-cli` args must use `--dangerously-bypass-approvals-and-sandbox`; the bundled `--sandbox workspace-write` default is not acceptable on this host class
 - resume embedded `codex-cli` args must not include `--color`; validate against `codex exec resume --help` after any Codex CLI upgrade

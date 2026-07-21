@@ -28,7 +28,8 @@ Treat that as the default install mode on this host class, not as a fallback aft
 This bootstrap sets:
 
 - workspace: `<REPO_ROOT>/workspace`
-- primary model floor: `gpt-5.4` with Codex CLI as the intended backend path
+- primary model floor: `codex/gpt-5.6-sol` through the Codex app-server harness
+- reasoning: `max`
 - gateway mode: `local`
 - gateway bind: `loopback`
 
@@ -72,7 +73,7 @@ Minimal live checks:
 
 ```bash
 ./bin/openclaw-local health
-codex exec --model gpt-5.4 --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --color never --json "reply with exactly: codex-ok"
+codex exec --model gpt-5.6-sol -c 'model_reasoning_effort="max"' --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --color never --json "reply with exactly: codex-ok"
 ```
 
 ## 4. Memory

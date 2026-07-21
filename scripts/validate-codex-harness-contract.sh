@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OPENCLAW_HOME_DIR="${OPENCLAW_HOME:-${ROOT}/.openclaw-home}"
 OPENCLAW_BIN="${ROOT}/.openclaw/bin/openclaw"
-BASELINE_MODEL="gpt-5.4"
+BASELINE_MODEL="gpt-5.6-sol"
 EXPECTED_PROVIDER="codex"
 EXPECTED_MODEL_PREFIX="codex/"
-EXPECTED_THINKING_DEFAULT="xhigh"
+EXPECTED_THINKING_DEFAULT="max"
 EXPECTED_HARNESS_RUNTIME="codex"
 EXPECTED_HARNESS_FALLBACK="pi"
 EXPECTED_CODEX_APP_SERVER_APPROVAL_POLICY="never"
@@ -53,6 +53,33 @@ fi
 app_server_help="$(codex app-server --help)"
 if [[ "${app_server_help}" != *"--listen"* || "${app_server_help}" != *"stdio://"* ]]; then
   echo "Current Codex CLI app-server help does not advertise the expected stdio listener." >&2
+  exit 1
+fi
+
+discovered_models="$({
+  node --input-type=module - "${ROOT}" <<'NODE'
+import { pathToFileURL } from "node:url";
+import path from "node:path";
+
+const root = process.argv[2];
+const harnessUrl = pathToFileURL(path.join(
+  root,
+  ".openclaw/lib/node_modules/openclaw/dist/extensions/codex/harness.js",
+));
+const { listCodexAppServerModels } = await import(harnessUrl.href);
+const result = await listCodexAppServerModels({
+  limit: 100,
+  sharedClient: false,
+  timeoutMs: 15000,
+});
+process.stdout.write(JSON.stringify(result));
+NODE
+} 2>/dev/null || true)"
+
+if ! jq -e --arg model "${BASELINE_MODEL}" \
+  '.models[] | select(.id == $model) | .supportedReasoningEfforts | index("max")' \
+  >/dev/null <<<"${discovered_models}"; then
+  echo "Codex app-server did not advertise ${BASELINE_MODEL} with max reasoning for the current login." >&2
   exit 1
 fi
 

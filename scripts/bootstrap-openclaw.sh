@@ -7,10 +7,13 @@ OPENCLAW_HOME_DIR="${ROOT}/.openclaw-home"
 WORKSPACE_DIR="${ROOT}/workspace"
 MEMORY_DIR="${ROOT}/memory"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
-BASELINE_MODEL="gpt-5.4"
-BASELINE_MODEL_REF="codex/gpt-5.4"
-BASELINE_REASONING="xhigh"
-OPENCLAW_THINKING_DEFAULT="xhigh"
+KNOWN_GOOD_OPENCLAW_VERSION="${OPENCLAW_VERSION:-2026.4.12}"
+BASELINE_MODEL="gpt-5.6-sol"
+BASELINE_MODEL_REF="codex/gpt-5.6-sol"
+BASELINE_MODEL_MAJOR=5
+BASELINE_MODEL_MINOR=6
+BASELINE_REASONING="max"
+OPENCLAW_THINKING_DEFAULT="max"
 LONG_RUN_TIMEOUT_SECONDS=604800
 LONG_RUN_WATCHDOG_TIMEOUT_MS=604800000
 CODEX_APP_SERVER_TIMEOUT_MS=604800000
@@ -50,7 +53,7 @@ model_is_newer_than_baseline() {
   if [[ "${model}" =~ ^gpt-([0-9]+)(\.([0-9]+))?([.-].*)?$ ]]; then
     local major="${BASH_REMATCH[1]}"
     local minor="${BASH_REMATCH[3]:-0}"
-    (( major > 5 || (major == 5 && minor > 4) ))
+    (( major > BASELINE_MODEL_MAJOR || (major == BASELINE_MODEL_MAJOR && minor > BASELINE_MODEL_MINOR) ))
     return
   fi
   return 1
@@ -70,7 +73,7 @@ resolve_requested_model_ref() {
     fi
 
     echo "Unsupported OPENCLAW_PRIMARY_MODEL value: ${requested_model}" >&2
-    echo "Use codex/gpt-5.4, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
+    echo "Use codex/gpt-5.6-sol, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
     exit 1
   fi
 
@@ -113,7 +116,10 @@ for required_file in "${REQUIRED_WORKSPACE_CONTEXT[@]}"; do
 done
 
 if [[ ! -x "${PREFIX}/bin/openclaw" ]]; then
-  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --prefix "${PREFIX}" --no-onboard
+  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- \
+    --prefix "${PREFIX}" \
+    --version "${KNOWN_GOOD_OPENCLAW_VERSION}" \
+    --no-onboard
 fi
 
 "${ROOT}/scripts/apply-openclaw-runtime-patches.sh"
@@ -164,6 +170,7 @@ else
 fi
 
 echo "Requested OpenClaw primary model: ${TARGET_PRIMARY_MODEL}"
+echo "Known-good OpenClaw runtime profile: ${KNOWN_GOOD_OPENCLAW_VERSION}"
 SHARED_MODEL="$(resolve_shared_model || true)"
 if [[ -n "${SHARED_MODEL}" ]] && model_is_newer_than_baseline "${SHARED_MODEL}" && [[ "${TARGET_PRIMARY_MODEL}" != "codex/${SHARED_MODEL}" ]]; then
   echo "Note: shared Codex default is ${SHARED_MODEL}, but bootstrap keeps ${BASELINE_MODEL_REF} unless OPENCLAW_PRIMARY_MODEL is explicitly set after OpenClaw validation." >&2

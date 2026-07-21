@@ -103,10 +103,10 @@ Required primary settings:
 
 ```text
 plugins.entries.codex.enabled=true
-agents.defaults.model.primary=codex/gpt-5.4
+agents.defaults.model.primary=codex/gpt-5.6-sol
 agents.defaults.embeddedHarness.runtime=codex
 agents.defaults.embeddedHarness.fallback=pi
-agents.defaults.thinkingDefault=xhigh
+agents.defaults.thinkingDefault=max
 plugins.entries.codex.config.appServer.sandbox=danger-full-access
 ```
 
@@ -174,7 +174,7 @@ For installs that enable Telegram, treat the setup as incomplete until Telegram 
 
 ## Model Path
 
-This setup uses `codex/gpt-5.4` as the baseline OpenClaw model, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path. `xhigh` reasoning is inherited from the shared Codex user config.
+This setup uses the explicit `codex/gpt-5.6-sol` model slug as the baseline OpenClaw model, with `max` reasoning, Codex CLI auth, and the bundled Codex app-server harness as the intended runtime path.
 
 - OpenClaw delegates primary embedded turns to the bundled Codex app-server harness, which reuses the installed `codex` CLI login.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
@@ -184,7 +184,8 @@ This setup uses `codex/gpt-5.4` as the baseline OpenClaw model, with Codex CLI a
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
 - Fallback Codex CLI fresh and resume turns must bypass the Codex CLI sandbox on this host class; otherwise OpenClaw may have memory files on disk but be unable to read them.
-- If the shared Codex user default later moves to a numerically newer GPT model than `gpt-5.4`, OpenClaw should follow that newer `codex/<model>` only after reboot-safe OpenClaw startup, no fatal channel startup failure, and `scripts/probe-codex-harness-turn.sh` validation.
+- Fresh installs pin the validated OpenClaw `2026.4.12` runtime profile and apply the version-guarded GPT-5.6 Sol `max` compatibility patch before config writes.
+- If the shared Codex user default later moves to a numerically newer GPT model than `gpt-5.6-sol`, OpenClaw should follow that newer `codex/<model>` only after reboot-safe OpenClaw startup, no fatal channel startup failure, reasoning-effort discovery, and `scripts/probe-codex-harness-turn.sh` validation.
 
 ## Positioning
 

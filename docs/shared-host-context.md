@@ -43,8 +43,8 @@ OpenClaw-owned paths under the canonical repo-local root are:
 
 OpenClaw defaults in this repo:
 
-- primary model floor: `codex/gpt-5.4` through the bundled Codex app-server harness
-- preferred reasoning floor: `xhigh`
+- primary model floor: explicit `codex/gpt-5.6-sol` through the bundled Codex app-server harness
+- preferred reasoning level: `max`
 - gateway mode: `local`
 - gateway bind: `loopback`
 - Telegram is configured via a local `tokenFile`, not tracked secrets
