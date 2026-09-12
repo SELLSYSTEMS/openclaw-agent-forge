@@ -7,6 +7,7 @@ MARKER_V1="codex-app-server-recovery"
 MARKER_V2="codex-app-server-recovery-v2"
 MARKER_TG_OUTBOX_V1="telegram-durable-outbox-skip-generic-failures"
 MARKER_GPT56_MAX_V1="gpt-5.6-sol-max-compat"
+MARKER_ASTRA_V1="gpt-6-astra-provider-compat"
 LEGACY_MAX_COMPAT_VERSION="2026.4.12"
 
 if [[ ! -d "${DIST_DIR}" ]]; then
@@ -197,7 +198,7 @@ for required_runtime_file in \
   "${AGENT_RUNTIME_SCHEMA_FILE}" \
   "${AGENT_DEFAULTS_SCHEMA_FILE}"; do
   if [[ -z "${required_runtime_file}" || ! -f "${required_runtime_file}" ]]; then
-    echo "Unable to locate all OpenClaw runtime files required for GPT-5.6 Sol max compatibility." >&2
+    echo "Unable to locate all OpenClaw runtime files required for max reasoning compatibility." >&2
     exit 1
   fi
 done
@@ -207,7 +208,7 @@ if [[ "${OPENCLAW_VERSION}" != "${LEGACY_MAX_COMPAT_VERSION}" ]]; then
     && grep -q 'collapsed === "max"' "${THINKING_FILE}" \
     && grep -q '"max"' "${AGENT_RUNTIME_SCHEMA_FILE}" \
     && grep -q 'z.literal("max")' "${AGENT_DEFAULTS_SCHEMA_FILE}"; then
-    echo "OpenClaw ${OPENCLAW_VERSION} has native GPT-5.6 max reasoning support; compatibility patch not needed."
+    echo "OpenClaw ${OPENCLAW_VERSION} has native max reasoning support; compatibility patch not needed."
   else
     echo "OpenClaw ${OPENCLAW_VERSION} does not match the validated ${LEGACY_MAX_COMPAT_VERSION} patch profile and lacks native max support." >&2
     echo "Do not patch an unknown runtime shape. Pin ${LEGACY_MAX_COMPAT_VERSION} or validate a deliberate OpenClaw migration first." >&2
@@ -312,6 +313,41 @@ NODE
   node --check "${AGENT_DEFAULTS_SCHEMA_FILE}" >/dev/null
 fi
 
+PROVIDER_FILE="$(grep -l 'function resolveCodexDynamicModel(modelId)' "${DIST_DIR}"/provider-*.js 2>/dev/null | head -n 1 || true)"
+if [[ -z "${PROVIDER_FILE}" || ! -f "${PROVIDER_FILE}" ]]; then
+  echo "Unable to locate the Codex provider for GPT-6 Astra compatibility." >&2
+  exit 1
+fi
+
+if [[ "${OPENCLAW_VERSION}" == "${LEGACY_MAX_COMPAT_VERSION}" ]]; then
+  node - "${PROVIDER_FILE}" "${MARKER_ASTRA_V1}" <<'NODE'
+const fs = require("fs");
+const [file, marker] = process.argv.slice(2);
+let source = fs.readFileSync(file, "utf8");
+if (!source.includes(marker)) {
+  const edits = [
+    ['return lower.startsWith("gpt-5") || lower.startsWith("o1")',
+     'return lower === "gpt-6-astra" || lower.startsWith("gpt-5") || lower.startsWith("o1")'],
+    ['return lower.startsWith("gpt-5") || lower.startsWith("o3")',
+     'return lower === "gpt-6-astra" || lower.startsWith("gpt-5") || lower.startsWith("o3")'],
+    ['return lower === "gpt-5.4" || lower === "gpt-5.4-mini"',
+     'return lower === "gpt-6-astra" || lower === "gpt-5.4" || lower === "gpt-5.4-mini"'],
+  ];
+  for (const [needle] of edits) {
+    if (source.split(needle).length !== 2) {
+      throw new Error(`Codex provider shape changed; refusing Astra patch: ${file}`);
+    }
+  }
+  for (const [needle, replacement] of edits) source = source.replace(needle, replacement);
+  fs.writeFileSync(file, `// ${marker}: retain Astra reasoning metadata without live discovery.\n${source}`);
+}
+NODE
+fi
+
+node --check "${PROVIDER_FILE}" >/dev/null
+node "${ROOT}/scripts/validate-codex-model-compat.mjs"
+
 echo "OpenClaw runtime patches present: ${RUNNER_FILE}"
 echo "OpenClaw Telegram durable outbox patch present: ${BOT_FILE}"
-echo "OpenClaw GPT-5.6 Sol max reasoning contract present: ${HARNESS_FILE}"
+echo "OpenClaw max reasoning contract present: ${HARNESS_FILE}"
+echo "OpenClaw GPT-6 Astra provider contract present: ${PROVIDER_FILE}"

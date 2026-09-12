@@ -43,7 +43,7 @@ OpenClaw-owned paths under the canonical repo-local root are:
 
 OpenClaw defaults in this repo:
 
-- primary model floor: explicit `codex/gpt-5.6-sol` through the bundled Codex app-server harness
+- primary model floor: explicit `codex/gpt-6-astra` through the bundled Codex app-server harness
 - preferred reasoning level: `max`
 - gateway mode: `local`
 - gateway bind: `loopback`

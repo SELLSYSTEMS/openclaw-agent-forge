@@ -25,9 +25,9 @@
 
 ## Model And Auth
 
-- The explicit `codex/gpt-5.6-sol` slug is the current minimum model floor for this repo, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path, not a forever pin.
+- The explicit `codex/gpt-6-astra` slug is the current minimum model floor for this repo, with Codex CLI auth and the bundled Codex app-server harness as the intended runtime path, not a forever pin.
 - Shared Codex reasoning should stay on `max`.
-- If the shared Codex user default moves to a numerically newer GPT model than `gpt-5.6-sol`, OpenClaw may follow it only after OpenClaw startup, advertised reasoning-effort validation, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`.
+- If the shared Codex user default moves to a numerically newer GPT model than `gpt-6-astra`, OpenClaw may follow it only after OpenClaw startup, advertised reasoning-effort validation, and `scripts/probe-codex-harness-turn.sh` validation as `codex/<model>`.
 - This setup should prefer Codex CLI login reuse over `OPENAI_API_KEY`.
 - Do not switch normal OpenClaw install/runtime behavior to direct API-key auth when Codex CLI reuse is available.
 - On this host class, all webterminal tabs share the same Unix user, so Codex login is a shared user-level state rather than a per-tab concern.
@@ -41,6 +41,11 @@
 - If a Telegram media/image turn fails after successful media understanding with `No prompt provided via stdin`, treat it as a `codex-cli` prompt/image delivery failure. The correct durable fix is the Codex app-server harness, not another one-off CLI arg patch.
 
 ## Gateway Operations
+
+- On 2026-09-09 a long Codex turn ended with a provider usage-limit error while the gateway and Telegram remained healthy. Removing local timeouts or restarting cannot replenish account quotas. Inspect both the OpenClaw transcript and native Codex terminal event before calling a task active.
+- On 2026-09-12 `gpt-6-astra` with `max` worked through the installed Codex login, but OpenClaw 2026.4.12's offline provider fallback did not recognize GPT-6 as reasoning-capable. Keep the exact-model compatibility patch and behavioral validation; a live model-list check alone misses this defect.
+- A candidate model probe initially failed because the copied live allowlist contained only older models. Explicit candidate smoke now adjusts only its temporary config. The normal post-migration smoke does not relax the live allowlist.
+- Back up the native Codex rollout, not just the OpenClaw thread sidecar. Preserve local project checkpoints too: a session that expired during a multi-day quota stop may otherwise roll over on the next message even after a lossless service restart.
 
 - `openclaw-local health` and `openclaw-local gateway probe` are the fastest live checks.
 - In this environment, running the gateway in tmux was more reliable than backgrounding it with `nohup`.

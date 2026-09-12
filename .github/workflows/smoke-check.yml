@@ -73,6 +73,17 @@ jobs:
         run: |
           scripts/validate-codex-cli-contract.sh
 
+      - name: Validate migration helpers
+        run: |
+          bash -n scripts/apply-openclaw-runtime-patches.sh
+          bash -n scripts/backup-openclaw-continuity-state.sh
+          bash -n scripts/probe-codex-harness-turn.sh
+          bash -n scripts/validate-codex-harness-contract.sh
+          node --check scripts/validate-codex-model-compat.mjs
+          node --test scripts/inspect-last-turn.test.mjs
+          node --test scripts/backup-openclaw-continuity-state.test.mjs
+          test -f docs/model-migration-runbook.md
+
       - name: Validate docs links target files
         run: |
           test -d docs

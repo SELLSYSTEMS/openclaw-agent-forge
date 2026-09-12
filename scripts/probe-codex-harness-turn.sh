@@ -49,6 +49,20 @@ trap 'rm -f "${TMP_OUTPUT}"; rm -rf "${SMOKE_OPENCLAW_HOME}"' EXIT
 mkdir -p "${SMOKE_OPENCLAW_HOME}/.openclaw"
 cp --preserve=mode,timestamps "${SOURCE_CONFIG_FILE}" "${SMOKE_OPENCLAW_HOME}/.openclaw/openclaw.json"
 
+# An explicit candidate must be testable before adding it to the live allowlist.
+# A normal post-migration probe keeps the live model/allowlist contract unchanged.
+if [[ -n "${OPENCLAW_SMOKE_MODEL:-}" ]]; then
+  node - "${SMOKE_OPENCLAW_HOME}/.openclaw/openclaw.json" "${MODEL_REF}" <<'NODE'
+const fs = require("fs");
+const [file, model] = process.argv.slice(2);
+const config = JSON.parse(fs.readFileSync(file, "utf8"));
+const defaults = config.agents.defaults;
+defaults.model = { ...defaults.model, primary: model };
+defaults.models = { ...defaults.models, [model]: defaults.models?.[model] ?? {} };
+fs.writeFileSync(file, JSON.stringify(config, null, 2) + "\n", { mode: 0o600 });
+NODE
+fi
+
 set +e
 {
   timeout --kill-after=5s "${SMOKE_TIMEOUT_SECONDS}" \

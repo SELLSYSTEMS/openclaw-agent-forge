@@ -32,6 +32,8 @@ Do not close a recurring incident with documentation only when a script can dete
 
 ## Required Gates
 
+For a usage-limit stop or a requested model migration, follow [model-migration-runbook.md](model-migration-runbook.md). Gateway health, channel health, and task completion are separate checks. Do not restart an active embedded turn because a generic task counter is zero.
+
 Run these after install, repair, or Codex/OpenClaw upgrade:
 
 ```bash
@@ -65,7 +67,7 @@ scripts/agent-landscape.sh
 The primary Telegram/OpenClaw runtime on this host class must be:
 
 ```text
-agents.defaults.model.primary=codex/gpt-5.6-sol
+agents.defaults.model.primary=codex/gpt-6-astra
 plugins.entries.codex.enabled=true
 agents.defaults.embeddedHarness.runtime=codex
 agents.defaults.embeddedHarness.fallback=pi

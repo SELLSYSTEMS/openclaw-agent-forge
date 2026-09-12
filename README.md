@@ -31,6 +31,7 @@ It must also stay free of secrets because the repository is public.
 - [docs/data-sources.md](docs/data-sources.md) - source-of-truth map for future agents
 - [docs/memory-architecture.md](docs/memory-architecture.md) - portable Level-1 memory layout and topology rules
 - [docs/model-policy.md](docs/model-policy.md) - allowed OpenClaw model selection rules
+- [docs/model-migration-runbook.md](docs/model-migration-runbook.md) - idle-only migration, full continuity backups, and quota diagnosis
 - [docs/installer-capability-contract.md](docs/installer-capability-contract.md) - install-time capability requirements
 - [docs/stt-path.md](docs/stt-path.md) - repo-local speech-to-text path and validation
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
@@ -52,6 +53,7 @@ It must also stay free of secrets because the repository is public.
 - [scripts/bootstrap-openclaw.sh](scripts/bootstrap-openclaw.sh) - fresh setup bootstrap
 - [scripts/install-gateway-systemd.sh](scripts/install-gateway-systemd.sh) - install the boot-persistent systemd gateway service
 - [scripts/gateway-systemd-status.sh](scripts/gateway-systemd-status.sh) - inspect the systemd-managed gateway
+- [scripts/inspect-last-turn.mjs](scripts/inspect-last-turn.mjs) - inspect the last transcript outcome without exposing chat text
 - [scripts/validate-local-setup.sh](scripts/validate-local-setup.sh) - smoke-test and validation
 - [scripts/setup-local-stt.sh](scripts/setup-local-stt.sh) - provision the repo-local offline STT path
 - [scripts/transcribe-local.sh](scripts/transcribe-local.sh) - use the repo-local offline STT path
@@ -103,7 +105,7 @@ Required primary settings:
 
 ```text
 plugins.entries.codex.enabled=true
-agents.defaults.model.primary=codex/gpt-5.6-sol
+agents.defaults.model.primary=codex/gpt-6-astra
 agents.defaults.embeddedHarness.runtime=codex
 agents.defaults.embeddedHarness.fallback=pi
 agents.defaults.thinkingDefault=max
@@ -174,7 +176,7 @@ For installs that enable Telegram, treat the setup as incomplete until Telegram 
 
 ## Model Path
 
-This setup uses the explicit `codex/gpt-5.6-sol` model slug as the baseline OpenClaw model, with `max` reasoning, Codex CLI auth, and the bundled Codex app-server harness as the intended runtime path.
+This setup uses the explicit `codex/gpt-6-astra` model slug as the baseline OpenClaw model, with `max` reasoning, Codex CLI auth, and the bundled Codex app-server harness as the intended runtime path.
 
 - OpenClaw delegates primary embedded turns to the bundled Codex app-server harness, which reuses the installed `codex` CLI login.
 - Auth stays under the Codex CLI login state instead of this repo managing `OPENAI_API_KEY`.
@@ -184,8 +186,9 @@ This setup uses the explicit `codex/gpt-5.6-sol` model slug as the baseline Open
 - The gateway is configured for `local` mode on loopback and should be kept alive through the repo-managed systemd service on always-on servers.
 - The tmux launcher remains a fallback when systemd is unavailable.
 - Fallback Codex CLI fresh and resume turns must bypass the Codex CLI sandbox on this host class; otherwise OpenClaw may have memory files on disk but be unable to read them.
-- Fresh installs pin the validated OpenClaw `2026.4.12` runtime profile and apply the version-guarded GPT-5.6 Sol `max` compatibility patch before config writes.
-- If the shared Codex user default later moves to a numerically newer GPT model than `gpt-5.6-sol`, OpenClaw should follow that newer `codex/<model>` only after reboot-safe OpenClaw startup, no fatal channel startup failure, reasoning-effort discovery, and `scripts/probe-codex-harness-turn.sh` validation.
+- Fresh installs pin the validated OpenClaw `2026.4.12` runtime profile and apply the version-guarded `max` bridge and GPT-6 Astra provider compatibility patches before config writes.
+- If the shared Codex user default later moves to a numerically newer GPT model than `gpt-6-astra`, OpenClaw should follow that newer `codex/<model>` only after reboot-safe OpenClaw startup, no fatal channel startup failure, reasoning-effort discovery, and `scripts/probe-codex-harness-turn.sh` validation.
+- Provider usage quotas still apply. A healthy service is not proof of an active or successful agent turn; diagnose the latest task result before restarting.
 
 ## Positioning
 

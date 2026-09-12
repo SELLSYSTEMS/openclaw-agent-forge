@@ -1,6 +1,10 @@
 .openclaw/
 .openclaw-home/
 .openclaw-stt/
+.codex/
+.env*
+!.env.example
+!.env.sample
 .DS_Store
 
 workspace/.scratch/

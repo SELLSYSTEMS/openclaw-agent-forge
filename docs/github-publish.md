@@ -40,10 +40,11 @@ GITHUB_TOKEN=... /home/OpenClaw/scripts/publish-github.sh SELLSYSTEMS openclaw-a
 
 - `.openclaw/`
 - `.openclaw-home/`
+- `.codex/` and any other local agent state
 - transient inbox captures unless curated
 - machine-local scratch files
 
 ## Notes
 
 - This repository is already published at `https://github.com/SELLSYSTEMS/openclaw-agent-forge`.
-- If `git push` fails, inspect `gh auth status -t` and verify the token or browser auth actually grants write access for the target organization repository.
+- If `git push` fails, inspect `gh auth status` without `-t` and verify access to the target organization repository. Never print the token; use the established HTTPS credential helper instead of switching to SSH.

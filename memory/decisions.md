@@ -127,3 +127,16 @@
 - Continuity: before restart, back up config, session store, transcript, Codex thread sidecar, and checksums; preserve the existing `sessionId`, transcript, and thread binding while changing only model defaults and the existing session's thinking override
 - Evidence: Codex app-server discovery advertised `gpt-5.6-sol` with `max`; direct Codex smoke, isolated OpenClaw harness smoke, reboot-safe gateway startup, gateway RPC probe, and live OpenClaw harness smoke all passed
 - Regression gates: run `scripts/apply-openclaw-runtime-patches.sh`, `scripts/validate-codex-harness-contract.sh`, `scripts/probe-codex-harness-turn.sh`, and `scripts/validate-local-setup.sh` after install, upgrade, or model/runtime recovery
+
+## 2026-09-12
+
+### Promote The Validated Baseline To GPT-6 Astra At Max Reasoning
+
+- Decision: use the exact `codex/gpt-6-astra` slug with `thinkingDefault=max`, retaining installed Codex CLI login and the embedded Codex app-server harness. No global config or API-key route change.
+- Trigger: the previous task had ended with a Codex provider usage-limit error while gateway and Telegram remained healthy. The user authorized migration only when no active work would be interrupted; quota failure is not an OOM or transport failure.
+- Compatibility: retain OpenClaw `2026.4.12` and all prior recovery/max patches. Add the exact-model `gpt-6-astra-provider-compat` patch because offline dynamic resolution otherwise labels Astra non-reasoning. The new behavioral validator reproduced the defect before patching and passed afterward; repeated patch application leaves the provider unchanged.
+- Evidence: official model documentation and live Codex discovery advertised the exact target with `max`; direct Codex and pre/post-switch isolated OpenClaw inference succeeded. Native probe records confirmed `model=gpt-6-astra` and `effort=max`. Gateway startup selected Astra and the Telegram channel probe succeeded.
+- Continuity: preserve the existing session id, transcript, native Codex history, and binding; extend private checksummed backups to native rollouts and both memory trees. Record a local project checkpoint and explicitly audit any one-session idle-freshness touch. Do not publish local transcripts or reset sessions for smoke tests.
+- Startup caveats: the pinned runtime still has its known pre-plugin model warmup warning; the optional ACP side-worker probe is separate from the validated primary Codex harness. A service restart was tested, not a server reboot.
+- Guardrails: add transcript-only quota diagnosis with privacy-safe output, fixture-based backup tests, candidate-only temporary allowlist handling, and the model-migration runbook. Provider quota still applies; do not promise unlimited execution or automatic quota bypass.
+- Validation: full local setup, Codex harness and CLI fallback contracts passed; all 10 transcript/backup regression tests passed. The service remains enabled with `OOMPolicy=continue`. Public defaults were updated without rewriting dated historical model decisions.

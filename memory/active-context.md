@@ -21,9 +21,9 @@
 - Keep agent notes in Markdown
 - Promote durable facts into `decisions.md` or `references/`
 - Keep ad hoc captures in `inbox/`
-- Keep the primary model floor on the explicit `codex/gpt-5.6-sol` slug with Codex CLI auth and the bundled Codex app-server harness
-- Use `max` reasoning for GPT-5.6 Sol
-- If the shared Codex user model becomes numerically newer than `gpt-5.6-sol`, OpenClaw should follow it only after reboot-safe OpenClaw startup, no fatal channel startup failure, advertised reasoning-effort validation, and `scripts/probe-codex-harness-turn.sh` validation
+- Keep the primary model floor on the explicit `codex/gpt-6-astra` slug with Codex CLI auth and the bundled Codex app-server harness
+- Use `max` reasoning for GPT-6 Astra
+- If the shared Codex user model becomes numerically newer than `gpt-6-astra`, OpenClaw should follow it only after reboot-safe OpenClaw startup, no fatal channel startup failure, advertised reasoning-effort validation, and `scripts/probe-codex-harness-turn.sh` validation
 - Keep secrets only in ignored local paths, not tracked repo files
 - Treat OpenClaw as the main orchestrator for this repo
 - Prefer Node-RED for durable automations and cross-system flows when possible
@@ -34,9 +34,9 @@
 ## Current Live State
 
 - The local gateway is running on loopback and passes `gateway probe`
-- Current live primary model and installer baseline are `codex/gpt-5.6-sol`; direct Codex, isolated OpenClaw, reboot-safe startup, and live OpenClaw harness smoke checks passed on 2026-07-21
+- Installer baseline is `codex/gpt-6-astra`; verify the live model and latest task result rather than treating this file as a status endpoint
 - Current live OpenClaw thinking default and the existing main Telegram session override are `max`
-- OpenClaw remains pinned to the known-good `2026.4.12` profile; `scripts/apply-openclaw-runtime-patches.sh` supplies its version-guarded GPT-5.6 Sol `max` compatibility layer
+- OpenClaw remains pinned to the known-good `2026.4.12` profile; runtime patches supply the existing `max` compatibility layer and exact GPT-6 Astra provider metadata
 - Current live embedded harness fallback is `pi` for reboot-safe startup; `fallback=none` is probe-only
 - The preferred reboot-persistent gateway path on this host class is the repo-managed systemd service, not tmux
 - The repo-managed `openclaw-gateway.service` is installed, enabled, and currently active on this server

@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OPENCLAW_HOME_DIR="${OPENCLAW_HOME:-${ROOT}/.openclaw-home}"
 OPENCLAW_BIN="${ROOT}/.openclaw/bin/openclaw"
-BASELINE_MODEL="gpt-5.6-sol"
+BASELINE_MODEL="gpt-6-astra"
 EXPECTED_PROVIDER="codex"
 EXPECTED_MODEL_PREFIX="codex/"
 EXPECTED_THINKING_DEFAULT="max"
@@ -33,6 +33,8 @@ require_fixed_string "plugins.entries.codex.config.appServer.requestTimeoutMs" "
 require_fixed_string "codex/${BASELINE_MODEL}" "${ROOT}/scripts/validate-local-setup.sh"
 require_fixed_string "agents.defaults.embeddedHarness.runtime" "${ROOT}/scripts/validate-local-setup.sh"
 require_fixed_string "agents.defaults.thinkingDefault" "${ROOT}/scripts/validate-local-setup.sh"
+
+node "${ROOT}/scripts/validate-codex-model-compat.mjs"
 
 bad_primary_matches="$(
   git -C "${ROOT}" grep -n -E 'primary baseline model: codex-cli/|baseline model: `codex-cli/|primary model to `codex-cli/|MUST use `codex-cli/' -- \

@@ -6,10 +6,10 @@ LAUNCHER="${ROOT}/bin/openclaw-local"
 EXPECTED_WORKSPACE="${ROOT}/workspace"
 EXPECTED_GATEWAY_MODE="local"
 EXPECTED_GATEWAY_BIND="loopback"
-BASELINE_MODEL="gpt-5.6-sol"
-BASELINE_MODEL_REF="codex/gpt-5.6-sol"
-BASELINE_MODEL_MAJOR=5
-BASELINE_MODEL_MINOR=6
+BASELINE_MODEL="gpt-6-astra"
+BASELINE_MODEL_REF="codex/gpt-6-astra"
+BASELINE_MODEL_MAJOR=6
+BASELINE_MODEL_MINOR=0
 EXPECTED_REASONING="max"
 EXPECTED_THINKING_DEFAULT="max"
 EXPECTED_HARNESS_RUNTIME="codex"
@@ -79,7 +79,7 @@ resolve_expected_base_model_name() {
     fi
 
     echo "Unsupported OPENCLAW_EXPECTED_PRIMARY_MODEL value: ${requested_model}" >&2
-    echo "Use codex/gpt-5.6-sol, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
+    echo "Use codex/gpt-6-astra, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
     exit 1
   fi
 
@@ -193,7 +193,7 @@ max_compat_runtime_files=(
 
 for max_compat_runtime_file in "${max_compat_runtime_files[@]}"; do
   if [[ -z "${max_compat_runtime_file}" || ! -f "${max_compat_runtime_file}" ]]; then
-    echo "Unable to find every OpenClaw runtime file required for GPT-5.6 Sol max validation." >&2
+    echo "Unable to find every OpenClaw runtime file required for max reasoning validation." >&2
     exit 1
   fi
 
@@ -204,7 +204,7 @@ if ! grep -q 'thinkLevel === "max"' "${max_compat_harness_file}" \
   || ! grep -q 'collapsed === "max"' "${max_compat_thinking_file}" \
   || ! grep -q $'\t\t"max",' "${max_compat_runtime_schema_file}" \
   || ! grep -q 'z.literal("max")' "${max_compat_defaults_schema_file}"; then
-  echo "OpenClaw runtime does not expose the complete GPT-5.6 Sol max reasoning path." >&2
+  echo "OpenClaw runtime does not expose the complete max reasoning path." >&2
   echo "Run scripts/apply-openclaw-runtime-patches.sh before validation." >&2
   exit 1
 fi

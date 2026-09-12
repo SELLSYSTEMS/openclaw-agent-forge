@@ -38,7 +38,7 @@ This file is the safe machine-context cheat sheet for this workspace.
 - Repo-local runtime home lives under the canonical repo root
 - Repo-local workspace lives under the canonical repo root
 - Repo-local memory lives under the canonical repo root
-- Default model floor: explicit `codex/gpt-5.6-sol` with `max` reasoning, Codex CLI auth, and the bundled Codex app-server harness
+- Default model floor: explicit `codex/gpt-6-astra` with `max` reasoning, Codex CLI auth, and the bundled Codex app-server harness
 
 ## Discovery
 

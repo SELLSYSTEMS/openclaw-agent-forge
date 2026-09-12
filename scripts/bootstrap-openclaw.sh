@@ -8,10 +8,10 @@ WORKSPACE_DIR="${ROOT}/workspace"
 MEMORY_DIR="${ROOT}/memory"
 SHARED_CODEX_CONFIG="${CODEX_CONFIG:-${HOME}/.codex/config.toml}"
 KNOWN_GOOD_OPENCLAW_VERSION="${OPENCLAW_VERSION:-2026.4.12}"
-BASELINE_MODEL="gpt-5.6-sol"
-BASELINE_MODEL_REF="codex/gpt-5.6-sol"
-BASELINE_MODEL_MAJOR=5
-BASELINE_MODEL_MINOR=6
+BASELINE_MODEL="gpt-6-astra"
+BASELINE_MODEL_REF="codex/gpt-6-astra"
+BASELINE_MODEL_MAJOR=6
+BASELINE_MODEL_MINOR=0
 BASELINE_REASONING="max"
 OPENCLAW_THINKING_DEFAULT="max"
 LONG_RUN_TIMEOUT_SECONDS=604800
@@ -73,7 +73,7 @@ resolve_requested_model_ref() {
     fi
 
     echo "Unsupported OPENCLAW_PRIMARY_MODEL value: ${requested_model}" >&2
-    echo "Use codex/gpt-5.6-sol, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
+    echo "Use codex/gpt-6-astra, codex/<validated-newer-model>, or a bare gpt-* model name." >&2
     exit 1
   fi
 

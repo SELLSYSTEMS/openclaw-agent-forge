@@ -73,9 +73,9 @@ Rules:
 - launcher: `<REPO_ROOT>/bin/openclaw-local`
 - workspace: `<REPO_ROOT>/workspace`
 - memory vault: `<REPO_ROOT>/memory`
-- baseline model: `codex/gpt-5.6-sol`
+- baseline model: `codex/gpt-6-astra`
 - preferred reasoning level: `max`
-- known-good OpenClaw runtime profile: `2026.4.12` plus the version-guarded GPT-5.6 Sol `max` compatibility patch
+- known-good OpenClaw runtime profile: `2026.4.12` plus the version-guarded `max` bridge and GPT-6 Astra provider compatibility patches
 - gateway: `local` mode on loopback
 - embedded Codex runs: bundled Codex app-server harness with no-interruption policy
 - embedded Codex app-server sandbox: `danger-full-access` on this host class
@@ -102,8 +102,8 @@ What it does:
 2. Creates `<REPO_ROOT>/.openclaw-home`.
 3. Configures OpenClaw with `OPENCLAW_HOME=<REPO_ROOT>/.openclaw-home`.
 4. Sets `agents.defaults.workspace` to `<REPO_ROOT>/workspace`.
-5. Applies the version-guarded runtime patches, including GPT-5.6 Sol `max` compatibility for OpenClaw `2026.4.12`, before writing config.
-6. Sets the primary model to the explicit `codex/gpt-5.6-sol` slug by default. A newer model requires an explicit `OPENCLAW_PRIMARY_MODEL=codex/<validated-model>` override after OpenClaw startup, reasoning-effort discovery, and smoke validation.
+5. Applies the version-guarded runtime patches, including `max` forwarding and GPT-6 Astra provider compatibility for OpenClaw `2026.4.12`, before writing config.
+6. Sets the primary model to the explicit `codex/gpt-6-astra` slug by default. A newer model requires an explicit `OPENCLAW_PRIMARY_MODEL=codex/<validated-model>` override after OpenClaw startup, reasoning-effort discovery, and smoke validation.
 7. Enables `plugins.entries.codex.enabled=true`.
 8. Forces `agents.defaults.embeddedHarness.runtime=codex` and boot-safe `agents.defaults.embeddedHarness.fallback=pi`.
 9. Sets Codex app-server policy for this host class: `approvalPolicy=never`, `sandbox=danger-full-access`, and day-scale `requestTimeoutMs`.
@@ -152,7 +152,7 @@ The sidecar's model value is last-used metadata. Do not delete or rewrite the si
 This repository prefers Codex CLI reuse over `OPENAI_API_KEY`.
 
 - install and log in to the `codex` CLI
-- keep the OpenClaw model ref at the explicit `codex/gpt-5.6-sol` slug unless a newer `codex/<model>` has passed OpenClaw startup, reasoning-effort discovery, and smoke validation
+- keep the OpenClaw model ref at the explicit `codex/gpt-6-astra` slug unless a newer `codex/<model>` has passed OpenClaw startup, reasoning-effort discovery, and smoke validation
 - let OpenClaw delegate embedded turns to the bundled Codex app-server harness, which reuses the installed Codex CLI auth
 - keep shared Codex reasoning at `max`
 - do not re-route install/runtime execution through direct API-key auth when Codex CLI reuse is available

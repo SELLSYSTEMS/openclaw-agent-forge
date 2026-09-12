@@ -170,7 +170,7 @@ Then derive the rest from REPO_ROOT:
 - launcher: <REPO_ROOT>/bin/openclaw-local
 - workspace: <REPO_ROOT>/workspace
 - memory: <REPO_ROOT>/memory
-- primary baseline model: codex/gpt-5.6-sol
+- primary baseline model: codex/gpt-6-astra
 - preferred reasoning level: max
 - gateway.mode = local
 - gateway.bind = loopback
@@ -182,11 +182,12 @@ AUTH AND MODEL RULES
 
 - MUST reuse Codex CLI login if available.
 - MUST prefer `codex/*` model refs through the bundled Codex app-server harness over direct OPENAI_API_KEY usage.
-- MUST use the explicit `codex/gpt-5.6-sol` slug unless a validated model newer than `gpt-5.6-sol` is available.
+- MUST use the explicit `codex/gpt-6-astra` slug unless a validated model newer than `gpt-6-astra` is available.
 - MUST NOT use `codex-cli/*` as the primary Telegram/OpenClaw runtime; it is fallback-only.
-- If the resolved/default OpenClaw model is not a validated `codex/<model>` ref, MUST override it to `codex/gpt-5.6-sol` or a validated newer `codex/<model>` before continuing.
-- MUST keep `agents.defaults.thinkingDefault=max` for GPT-5.6 Sol and prove that the Codex app-server advertises `max`.
-- MUST apply `scripts/apply-openclaw-runtime-patches.sh`; the pinned OpenClaw `2026.4.12` profile requires its version-guarded GPT-5.6 Sol `max` compatibility patch.
+- If the resolved/default OpenClaw model is not a validated `codex/<model>` ref, MUST override it to `codex/gpt-6-astra` or a validated newer `codex/<model>` before continuing.
+- MUST keep `agents.defaults.thinkingDefault=max` for GPT-6 Astra and prove that the Codex app-server advertises `max`.
+- MUST apply `scripts/apply-openclaw-runtime-patches.sh`; the pinned OpenClaw `2026.4.12` profile requires the existing `max` bridge patch plus GPT-6 Astra offline provider compatibility.
+- MUST follow docs/model-migration-runbook.md for existing instances: leave active work alone, preserve the native Codex rollout and local checkpoints, and do not confuse provider usage limits with gateway failure.
 - MUST persist `agents.defaults.embeddedHarness.runtime=codex` and reboot-safe `agents.defaults.embeddedHarness.fallback=pi`.
 - MUST NOT persist `agents.defaults.embeddedHarness.fallback=none`; use it only in explicit probe/smoke commands.
 - MUST NOT set up direct OpenAI API credentials unless explicitly instructed.
@@ -320,7 +321,7 @@ SUCCESS CRITERIA
 The pass is successful only if:
 - the install exists in one canonical owner-root layout
 - Codex-backed model resolution works
-- the effective OpenClaw model is `codex/gpt-5.6-sol` or a validated `codex/<model>` newer than `gpt-5.6-sol`
+- the effective OpenClaw model is `codex/gpt-6-astra` or a validated `codex/<model>` newer than `gpt-6-astra`
 - effective OpenClaw reasoning is `max`, verified through a real Codex harness turn
 - the bundled Codex app-server harness is enabled and `codex-cli/*` is not the primary runtime
 - persisted embedded harness fallback is `pi`, with `fallback=none` reserved only for explicit smoke/probe validation
