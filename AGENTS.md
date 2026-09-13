@@ -44,6 +44,7 @@ Canonical repository identity:
 9. Validate the setup with `scripts/validate-local-setup.sh`.
 10. If you change the operating model, update the docs in the same commit.
 11. Before changing the live model/runtime or restarting for such a migration, run `scripts/backup-openclaw-continuity-state.sh`; do not delete or reset the active session, transcript, or Codex app-server sidecar.
+12. For missing final replies, follow `docs/codex-telegram-final-delivery.md`. Run `node --test scripts/codex-delivery.test.mjs`; service health and a model-only inference probe do not prove delivery.
 
 ## Pitfalls Already Seen
 
@@ -79,7 +80,10 @@ Canonical repository identity:
 - The built-in `openclaw gateway install` path expects systemd user services on Linux. On this host class, prefer the repo-managed system service under `systemd/openclaw-gateway.service` for reboot persistence.
 - Keep the repo-managed `openclaw-gateway.service` on `OOMPolicy=continue`. A child JVM/Gradle/Android tool OOM inside the gateway cgroup must not stop or restart the whole gateway and lose an active Telegram turn.
 - On this host class, install/operator work should start in no-sandbox / danger-full-access execution by default. If local shell/JS commands fail with `bwrap: Failed to make / slave: Permission denied`, that only confirms the rule was violated: stop immediately and move the session to the correct no-sandbox runtime before continuing.
-- On OpenClaw 2026.4.12, `codex app-server error` can arrive after a valid assistant answer and make Telegram show only a generic failure. Validate that `scripts/apply-openclaw-runtime-patches.sh` has applied both `codex-app-server-recovery` and `codex-app-server-recovery-v2` before trusting long Telegram delivery.
+- On OpenClaw 2026.4.12, retriable nested app-server errors can poison a successful turn. Historical `codex-app-server-recovery`/`codex-app-server-recovery-v2` markers are not enough: require `codex-app-server-terminal-status-v3`, `codex-terminal-recovery-guard`, and behavioral tests. Only current-attempt terminal success permits recovery; partial or previous-turn text cannot hide a real failure.
+- After a same-chat message-tool progress report, the old reply selector can silently discard a distinct final before Telegram or its outbox sees it. Keep `codex-telegram-distinct-final` validated. Check generated, prepared and delivered stages separately; an empty outbox is not a receipt.
+- The default harness probe runs a real embedded agent in an isolated temporary home/workspace with channels disabled and checks its projected terminal status. Keep model-only `OPENCLAW_CODEX_SMOKE_MODE=infer` explicitly separate from this stronger test.
+- Local Langfuse does not require a domain to start. A nested-LXC OCI `/proc` mount denial needs host/container investigation, not a gateway restart or DNS change. Follow `docs/local-langfuse-host-readiness.md`; do not relax all container isolation or activate paid product routes as a workaround.
 - OpenClaw 2026.4.12 predates native `max` thinking support: its schema rejects `max`, normalization collapses it to `high`, and the Codex bridge does not forward it. Keep this known-good OpenClaw version pinned and let `scripts/apply-openclaw-runtime-patches.sh` apply the version-guarded `gpt-5.6-sol-max-compat` patch; validate with both harness scripts before starting channels.
 - Harness smoke tests must not append synthetic messages to the live Telegram transcript. `scripts/probe-codex-harness-turn.sh` copies config into a temporary `OPENCLAW_HOME`; preserve that isolation in future edits.
 - GPT-6 Astra additionally needs the version-guarded `gpt-6-astra-provider-compat` patch on OpenClaw 2026.4.12. Without it, offline dynamic resolution incorrectly sets `reasoning=false`. The harness contract runs `scripts/validate-codex-model-compat.mjs` to test actual provider behavior and the `max` bridge.

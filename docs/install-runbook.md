@@ -131,8 +131,10 @@ scripts/validate-codex-harness-contract.sh
 scripts/validate-local-setup.sh
 ```
 
+The patch installer also runs `scripts/codex-delivery.test.mjs` against the real pinned runtime. This catches retriable-error poisoning and progress messages suppressing final Telegram replies before channels start. See [codex-telegram-final-delivery.md](codex-telegram-final-delivery.md).
+
 The first script exists specifically to catch fresh/resume Codex CLI argument drift before a Telegram turn fails generically.
-If you changed the primary model or runtime, also run `scripts/probe-codex-harness-turn.sh`; it proves OpenClaw can produce a real `provider=codex` turn, not just a valid-looking config. The probe copies config into a temporary `OPENCLAW_HOME`, so it must not append its synthetic prompt to the live Telegram transcript.
+If you changed the primary model or runtime, also run `scripts/probe-codex-harness-turn.sh`; its default embedded-agent mode checks a real `provider=codex` turn and a successfully projected final transcript record. The probe uses a temporary `OPENCLAW_HOME` and workspace with channels disabled; it must never append synthetic prompts to the live Telegram transcript. Optional `OPENCLAW_CODEX_SMOKE_MODE=infer` tests only model inference, not this full harness path.
 
 ## Live Model Migration Without Context Loss
 

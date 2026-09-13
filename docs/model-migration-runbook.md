@@ -44,7 +44,7 @@ scripts/probe-codex-harness-turn.sh
 bin/openclaw-local channels status --probe --json
 ```
 
-The normal post-switch probe leaves the live allowlist unchanged. Verify its native `turn_context` records the target model and `effort=max` when auditing end-to-end effort forwarding. Check the gateway's startup model, enabled systemd unit, `OOMPolicy=continue`, and no fatal channel startup failure. No server reboot is required for this service-restart test.
+The normal post-switch probe leaves the live allowlist unchanged. Its default `agent` mode validates projected completion in an isolated workspace/home with no channels, using a private temporary copy of the existing file-backed Codex login. Probe history now lives in that temporary `CODEX_HOME`, not in the real user's thread. Inspect its native `turn_context` before cleanup when auditing the actual model and `effort=max`; do not confuse optional model-only `infer` mode with the full harness check. Check the gateway's startup model, enabled systemd unit, `OOMPolicy=continue`, and no fatal channel startup failure. No server reboot is required for this service-restart test.
 
 OpenClaw 2026.4.12 can log a pre-plugin `Unknown model` warmup warning. An optional ACP side-worker probe can also fail independently of the primary `codex` app-server harness. Record such warnings, but do not conflate them with successful primary inference or ignore a fatal Telegram startup failure.
 

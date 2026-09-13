@@ -43,7 +43,8 @@
 - Telegram bot connectivity is configured locally via `channels.telegram.tokenFile`
 - Telegram channel probe is healthy
 - Telegram owner access is now persisted in local runtime config via `allowFrom` plus `dmPolicy=allowlist`
-- Telegram DM replies are now working end to end
+- Telegram transport health is not proof that a final report reached the owner; verify native completion, prepared payloads and send receipts using `docs/codex-telegram-final-delivery.md`
+- The pinned runtime now requires terminal-status, strict current-attempt recovery and distinct-final delivery patches plus executable regression tests
 - Shared host context is now documented in `docs/shared-host-context.md`
 - OpenClaw TUI is the first recommended operator surface; Node-RED remains the preferred automation fabric
 - OpenClaw TUI reaches the gateway but still runs into a local operator-approval barrier before full use

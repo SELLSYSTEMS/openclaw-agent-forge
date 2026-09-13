@@ -16,6 +16,13 @@ if [[ ! -d "${DIST_DIR}" ]]; then
   exit 1
 fi
 
+installed_version="$(node -p 'require(process.argv[1]).version' "${DIST_DIR}/../package.json")"
+if [[ "${installed_version}" != "${LEGACY_MAX_COMPAT_VERSION}" ]]; then
+  echo "Unvalidated OpenClaw runtime ${installed_version}; refusing all legacy patches before any writes." >&2
+  echo "Validate a deliberate runtime migration instead of patching an unknown version." >&2
+  exit 1
+fi
+
 RUNNER_FILE="$(find "${DIST_DIR}" -maxdepth 1 -name 'pi-embedded-runner-*.js' -print -quit)"
 if [[ -z "${RUNNER_FILE}" || ! -f "${RUNNER_FILE}" ]]; then
   echo "Unable to find OpenClaw pi embedded runner in ${DIST_DIR}" >&2
@@ -346,6 +353,8 @@ fi
 
 node --check "${PROVIDER_FILE}" >/dev/null
 node "${ROOT}/scripts/validate-codex-model-compat.mjs"
+node "${ROOT}/scripts/patch-codex-delivery.mjs"
+node --test "${ROOT}/scripts/codex-delivery.test.mjs"
 
 echo "OpenClaw runtime patches present: ${RUNNER_FILE}"
 echo "OpenClaw Telegram durable outbox patch present: ${BOT_FILE}"

@@ -36,6 +36,8 @@ It must also stay free of secrets because the repository is public.
 - [docs/stt-path.md](docs/stt-path.md) - repo-local speech-to-text path and validation
 - [docs/lessons-learned.md](docs/lessons-learned.md) - mistakes and decisions worth preserving
 - [docs/operational-reliability-playbook.md](docs/operational-reliability-playbook.md) - recurring failure classes and required recovery gates
+- [docs/codex-telegram-final-delivery.md](docs/codex-telegram-final-delivery.md) - retry status, missing final replies, and executable delivery regression tests
+- [docs/local-langfuse-host-readiness.md](docs/local-langfuse-host-readiness.md) - distinguish container startup blockers from domain and tracing setup
 - [docs/artifact-delivery-policy.md](docs/artifact-delivery-policy.md) - cross-system artifact delivery preflight rules
 - [docs/shared-host-context.md](docs/shared-host-context.md) - safe map of shared Codex, Node-RED, and host-level context
 - [docs/agent-topology.md](docs/agent-topology.md) - live topology rediscovery and same-tab neighboring-agent control

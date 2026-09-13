@@ -140,3 +140,13 @@
 - Startup caveats: the pinned runtime still has its known pre-plugin model warmup warning; the optional ACP side-worker probe is separate from the validated primary Codex harness. A service restart was tested, not a server reboot.
 - Guardrails: add transcript-only quota diagnosis with privacy-safe output, fixture-based backup tests, candidate-only temporary allowlist handling, and the model-migration runbook. Provider quota still applies; do not promise unlimited execution or automatic quota bypass.
 - Validation: full local setup, Codex harness and CLI fallback contracts passed; all 10 transcript/backup regression tests passed. The service remains enabled with `OOMPolicy=continue`. Public defaults were updated without rewriting dated historical model decisions.
+
+## 2026-09-13
+
+### Repair Completion Semantics And Final Delivery, Not Just Symptoms
+
+- Evidence: a long native Codex task completed after transient model-access/stream retries, while OpenClaw retained a generic error and suppressed its different final report after a message-tool progress send. No gateway OOM/restart or missing memory explained this incident.
+- Decision: respect scoped nested app-server errors, `willRetry`, and authoritative terminal status; restrict old text recovery to verified current-attempt success. Never turn genuine failures into success using partial or previous-turn text.
+- Delivery: preserve distinct Codex/Telegram automatic finals, exact-deduplicate repeated text and sent media, retain silence/streaming controls, and leave other runtimes' policy unchanged. Empty outbox and healthy bot probe are not delivery proof.
+- Prevention: execute regression tests against the actual pinned runtime during patching, validation and CI; fail closed on unknown versions or incomplete patches. Upgrade the isolated smoke from model-only inference to a real embedded agent with verified projected terminal status, no live transcript access and no channels.
+- Host boundary: local Langfuse startup is blocked if a real OCI process cannot mount `/proc` inside an unprivileged LXC guest. A domain does not fix that. Preserve the working product backend and private credentials; obtain outer-host evidence before choosing a remedy.

@@ -35,6 +35,7 @@ require_fixed_string "agents.defaults.embeddedHarness.runtime" "${ROOT}/scripts/
 require_fixed_string "agents.defaults.thinkingDefault" "${ROOT}/scripts/validate-local-setup.sh"
 
 node "${ROOT}/scripts/validate-codex-model-compat.mjs"
+node "${ROOT}/scripts/patch-codex-delivery.mjs" --check
 
 bad_primary_matches="$(
   git -C "${ROOT}" grep -n -E 'primary baseline model: codex-cli/|baseline model: `codex-cli/|primary model to `codex-cli/|MUST use `codex-cli/' -- \

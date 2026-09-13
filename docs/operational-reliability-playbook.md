@@ -15,6 +15,10 @@ When OpenClaw or a connected agent breaks:
 
 Do not close a recurring incident with documentation only when a script can detect it.
 
+For a completed Codex task with a missing final reply, use [codex-telegram-final-delivery.md](codex-telegram-final-delivery.md). A transient `willRetry` notification is not terminal failure, and an earlier same-chat progress send must not suppress a different final. Existing v1/v2 recovery markers alone are insufficient. `node --test scripts/codex-delivery.test.mjs` exercises the real pinned runtime, including genuine failures and Telegram rejection.
+
+For local tracing setup, use [local-langfuse-host-readiness.md](local-langfuse-host-readiness.md). Container startup, tracing ingestion, remote UI/domain access and product activation are separate readiness gates; do not restart OpenClaw to fix an outer LXC mount denial.
+
 ## Failure Classes Already Seen
 
 - `bwrap: Failed to make / slave: Permission denied`: wrong sandbox/runtime. On this host class, OpenClaw embedded Codex must run with `agents.defaults.sandbox.mode=off` and no-sandbox Codex CLI backend args.

@@ -90,6 +90,9 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 
 ## Telegram
 
+- A progress update sent with `message` is not the final report. Produce a concise final summary after checkpointing; the validated `codex-telegram-distinct-final` patch preserves it while deduplicating an identical already-sent final. Never replace a final report with raw tool/JSONL output.
+- Diagnose work completion, reply projection, payload preparation and Telegram delivery separately. A native successful turn, healthy channel probe or empty outbox does not prove the owner received the answer. See `../docs/codex-telegram-final-delivery.md`; use receipts, not guesses.
+- Retriable Codex app-server notifications must not become permanent errors after terminal success. Conversely, partial text or an older answer cannot hide quota, timeout or interruption failures. Preserve memory; require the runtime regression gate before declaring a fix.
 - Telegram is configured via a local token file, not tracked repo secrets
 - Owner access is meant to live in local runtime config, not public docs
 - Transport is working; do not move secrets or owner-specific IDs into Git
@@ -120,6 +123,8 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 - Shared Codex CLI behavior and flags are documented in `docs/codex-cli-tui.md`
 
 ## Public-Safe Memory Rule
+
+Local Langfuse readiness is separate from OpenClaw health. A domain is optional for later protected browser access, not a fix for nested OCI `/proc` mount denial. Inspect the actual project lifecycle helper and host policy first; see `../docs/local-langfuse-host-readiness.md`. Do not activate paid model routes or reload a working backend merely to test observability.
 
 Promote these kinds of facts into tracked memory:
 

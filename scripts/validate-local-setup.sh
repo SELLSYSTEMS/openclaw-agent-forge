@@ -143,6 +143,8 @@ EXPECTED_CODEX_CLI_RESUME_ARGS_COMPACT="$(printf '%s' "${EXPECTED_CODEX_CLI_RESU
 env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" config validate
 "${ROOT}/scripts/validate-codex-harness-contract.sh"
 "${ROOT}/scripts/validate-codex-cli-contract.sh"
+node "${ROOT}/scripts/patch-codex-delivery.mjs" --check
+node --test "${ROOT}/scripts/codex-delivery.test.mjs"
 
 codex_runner_file="$(find "${ROOT}/.openclaw/lib/node_modules/openclaw/dist" -maxdepth 1 -name 'pi-embedded-runner-*.js' -print -quit)"
 if [[ -z "${codex_runner_file}" || ! -f "${codex_runner_file}" ]]; then
