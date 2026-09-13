@@ -92,6 +92,7 @@ cat /opt/claude-vnc-terminal/data/terminal-state.json
 
 - A progress update sent with `message` is not the final report. Produce a concise final summary after checkpointing; the validated `codex-telegram-distinct-final` patch preserves it while deduplicating an identical already-sent final. Never replace a final report with raw tool/JSONL output.
 - Diagnose work completion, reply projection, payload preparation and Telegram delivery separately. A native successful turn, healthy channel probe or empty outbox does not prove the owner received the answer. See `../docs/codex-telegram-final-delivery.md`; use receipts, not guesses.
+- Installation regression tests must start from the pristine pinned package, not only this previously patched host. The historical Telegram outbox requires the tracked base patch and exact-hash validation; never skip a missing prerequisite to make CI green.
 - Retriable Codex app-server notifications must not become permanent errors after terminal success. Conversely, partial text or an older answer cannot hide quota, timeout or interruption failures. Preserve memory; require the runtime regression gate before declaring a fix.
 - Telegram is configured via a local token file, not tracked repo secrets
 - Owner access is meant to live in local runtime config, not public docs

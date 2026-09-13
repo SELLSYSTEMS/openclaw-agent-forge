@@ -145,6 +145,8 @@ env OPENCLAW_HOME="${ROOT}/.openclaw-home" "${ROOT}/.openclaw/bin/openclaw" conf
 "${ROOT}/scripts/validate-codex-cli-contract.sh"
 node "${ROOT}/scripts/patch-codex-delivery.mjs" --check
 node --test "${ROOT}/scripts/codex-delivery.test.mjs"
+node "${ROOT}/scripts/ensure-telegram-outbox-base.mjs" --check
+node --test "${ROOT}/scripts/telegram-outbox.test.mjs"
 
 codex_runner_file="$(find "${ROOT}/.openclaw/lib/node_modules/openclaw/dist" -maxdepth 1 -name 'pi-embedded-runner-*.js' -print -quit)"
 if [[ -z "${codex_runner_file}" || ! -f "${codex_runner_file}" ]]; then

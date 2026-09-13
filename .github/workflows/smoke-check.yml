@@ -83,6 +83,7 @@ jobs:
           bash -n scripts/probe-codex-harness-turn.sh
           bash -n scripts/validate-codex-harness-contract.sh
           node --check scripts/validate-codex-model-compat.mjs
+          node --check scripts/ensure-telegram-outbox-base.mjs
           node --test scripts/inspect-last-turn.test.mjs
           node --test scripts/backup-openclaw-continuity-state.test.mjs
           test -f docs/model-migration-runbook.md
@@ -110,3 +111,4 @@ jobs:
         run: |
           scripts/apply-openclaw-runtime-patches.sh
           node scripts/patch-codex-delivery.mjs --check
+          node scripts/ensure-telegram-outbox-base.mjs --check

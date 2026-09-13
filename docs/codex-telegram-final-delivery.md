@@ -22,12 +22,18 @@ This protocol/status and reply-selection incident is distinct from memory loss, 
 
 All three target shapes and syntax are checked before these changes are written. Reapplication is idempotent; `--check` validates complete replacements, not just markers. The legacy patch installer refuses unvalidated OpenClaw versions before any writes. Never blindly apply these replacements to a newer build.
 
+Clean-package CI also exposed an older prerequisite missing from Git: the Telegram text outbox itself was a local customization, not part of the stock npm package. `scripts/ensure-telegram-outbox-base.mjs` now reproduces the existing customization from a tracked diff with exact before/after hashes, version, hunk and syntax checks. It leaves an already managed live bot file untouched and rejects unknown local changes. See [patch provenance and license](../patches/README.md).
+
+This legacy outbox is bounded text-recovery support, not an exactly-once delivery guarantee or coverage of every exception path. It cannot recover a final suppressed before transport, and its in-process retry timers are not a persistent scheduler. Checkpoints and stage-specific receipts remain required.
+
 ## Mandatory Tests
 
 ```bash
 scripts/apply-openclaw-runtime-patches.sh
 node scripts/patch-codex-delivery.mjs --check
 node --test scripts/codex-delivery.test.mjs
+node scripts/ensure-telegram-outbox-base.mjs --check
+node --test scripts/telegram-outbox.test.mjs
 scripts/validate-codex-harness-contract.sh
 scripts/validate-codex-cli-contract.sh
 scripts/validate-local-setup.sh
@@ -37,6 +43,8 @@ scripts/probe-codex-harness-turn.sh
 The regression suite extracts the installed event projector and reply builder, imports real directive/deduplication functions and the Telegram formatter/delivery module, and substitutes the external Telegram API boundary. It makes no model calls or Telegram sends. Cases cover retries, fatal errors, stale/foreign events, timeout/interruption, prior-turn recovery, distinct/identical finals, quoted progress, media, silence, streaming, recipient/account boundaries and rejected sends.
 
 CI installs the pinned runtime without credentials, applies the patches, runs tests and repeats application. A mocked transport is not a live Telegram receipt. The default harness smoke now runs an isolated embedded agent, checks its projected transcript for `codexTurnStatus=completed` and `stopReason=stop`, and disables channels. `OPENCLAW_CODEX_SMOKE_MODE=infer` remains a narrower optional model-only probe, not a substitute for this regression gate.
+
+The outbox suite verifies the official stock-file hash, exact reconstruction, no-write idempotence, rejection of modified files, generic-failure exclusion, durable text retention on failed/unacknowledged sends, acknowledged removal, bounded backoff and account/chat/due-time isolation. It uses temporary storage and mocked network/timers, never the live queue.
 
 The smoke copies the existing file-backed Codex login/config into a private, temporary `CODEX_HOME` beneath the ignored runtime home; it does not create a new login or use an API key. The directory and copies are removed afterward. This also prevents native workspace-trust writes from polluting the shared Codex config. A keyring-only/custom auth setup needs an explicitly validated isolation strategy, not an automatic auth change.
 

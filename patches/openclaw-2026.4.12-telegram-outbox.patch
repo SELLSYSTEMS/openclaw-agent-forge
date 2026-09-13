@@ -1,0 +1,518 @@
+--- a/bot-BJJHvk3V.js
++++ b/bot-BJJHvk3V.js
+@@ -4319,6 +4319,232 @@
+ const EMPTY_RESPONSE_FALLBACK = "No response generated. Please try again.";
+ /** Minimum chars before sending first streaming message (improves push notification UX) */
+ const DRAFT_MIN_INITIAL_CHARS = 30;
++const TELEGRAM_DURABLE_OUTBOX_RELATIVE_DIR = path.join("telegram", "durable-outbox");
++const TELEGRAM_DURABLE_OUTBOX_VERSION = 1;
++const TELEGRAM_DURABLE_OUTBOX_BASE_DELAY_MS = 15e3;
++const TELEGRAM_DURABLE_OUTBOX_MAX_DELAY_MS = 60 * 60 * 1e3;
++const TELEGRAM_DURABLE_OUTBOX_RECOVERY_PREFIX = "⚠️ Recovered after an earlier Telegram delivery failure.\n\n";
++const TELEGRAM_DURABLE_OUTBOX_GENERIC_FAILURE_TEXTS = new Set([
++	"Something went wrong while processing your request. Please try again.",
++	"⚠️ Something went wrong while processing your request. Please try again, or use /new to start a fresh session."
++]);
++function isTelegramDurableOutboxGenericFailureText(text) {
++	const normalized = typeof text === "string" ? text.trim() : "";
++	if (!normalized) return false;
++	if (TELEGRAM_DURABLE_OUTBOX_GENERIC_FAILURE_TEXTS.has(normalized)) return true;
++	return /^⚠️ Recovered after an earlier Telegram delivery failure\.\s+Something went wrong while processing your request\. Please try again\.?$/s.test(normalized);
++}
++function shouldSkipTelegramDurableOutboxEntry(params) {
++	if (isTelegramDurableOutboxGenericFailureText(params?.text)) return "telegram-durable-outbox-skip-generic-failures";
++	const reason = typeof params?.reason === "string" ? params.reason : "";
++	if (reason === "processor-failure") return "telegram-durable-outbox-skip-generic-failures";
++	if (reason === "fallback-after-dispatch-error") return "telegram-durable-outbox-skip-generic-failures";
++	if (reason === "fallback-after-delivery-failure") return "telegram-durable-outbox-skip-generic-failures";
++	return "";
++}
++const telegramDurableOutboxActiveDrains = /* @__PURE__ */ new Map();
++const telegramDurableOutboxScheduledDrains = /* @__PURE__ */ new Map();
++function resolveTelegramDurableOutboxDir() {
++	return path.join(resolveStateDir(process.env, os.homedir), TELEGRAM_DURABLE_OUTBOX_RELATIVE_DIR);
++}
++function cloneTelegramDurableOutboxThread(thread) {
++	if (!thread || typeof thread !== "object") return;
++	const cloned = {
++		...thread
++	};
++	if (typeof cloned.id !== "number") delete cloned.id;
++	return cloned;
++}
++function buildTelegramDurableOutboxEntryId(params) {
++	return `${Date.now()}-${createHash("sha256").update(JSON.stringify(params)).digest("hex").slice(0, 16)}.json`;
++}
++function computeTelegramDurableOutboxDelayMs(attemptCount) {
++	const safeAttemptCount = Number.isFinite(attemptCount) ? Math.max(0, attemptCount) : 0;
++	return Math.min(TELEGRAM_DURABLE_OUTBOX_MAX_DELAY_MS, TELEGRAM_DURABLE_OUTBOX_BASE_DELAY_MS * 2 ** safeAttemptCount);
++}
++function buildTelegramDurableOutboxRecoveryText(text) {
++	const trimmed = typeof text === "string" ? text.trim() : "";
++	if (!trimmed) return "";
++	if (trimmed.startsWith(TELEGRAM_DURABLE_OUTBOX_RECOVERY_PREFIX.trim())) return trimmed;
++	return `${TELEGRAM_DURABLE_OUTBOX_RECOVERY_PREFIX}${trimmed}`;
++}
++async function writeTelegramDurableOutboxFile(fileName, payload) {
++	const outboxDir = resolveTelegramDurableOutboxDir();
++	await fs.mkdir(outboxDir, { recursive: true });
++	const finalPath = path.join(outboxDir, fileName);
++	const tempPath = path.join(outboxDir, `.${fileName}.${process.pid}.${Date.now()}.tmp`);
++	await fs.writeFile(tempPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
++	await fs.rename(tempPath, finalPath);
++	return finalPath;
++}
++async function enqueueTelegramDurableOutboxEntry(params) {
++	const text = typeof params.text === "string" ? params.text.trim() : "";
++	if (!text) return false;
++	const skipReason = shouldSkipTelegramDurableOutboxEntry({ text, reason: params.reason });
++	if (skipReason) {
++		params.runtime.log?.(`telegram durable outbox skipped non-actionable generic failure chat=${String(params.chatId)} reason=${params.reason ?? "unknown"} marker=${skipReason}`);
++		return false;
++	}
++	const nowIso = (/* @__PURE__ */ new Date()).toISOString();
++	const entry = {
++		version: TELEGRAM_DURABLE_OUTBOX_VERSION,
++		kind: "telegram-final-reply-recovery",
++		accountId: params.accountId,
++		chatId: String(params.chatId),
++		thread: cloneTelegramDurableOutboxThread(params.thread),
++		sessionKey: normalizeOptionalString(params.sessionKey),
++		text,
++		reason: params.reason,
++		attemptCount: 0,
++		createdAt: nowIso,
++		updatedAt: nowIso,
++		nextAttemptAt: nowIso
++	};
++	const fileName = buildTelegramDurableOutboxEntryId({
++		accountId: entry.accountId,
++		chatId: entry.chatId,
++		thread: entry.thread,
++		sessionKey: entry.sessionKey,
++		createdAt: nowIso,
++		text: entry.text
++	});
++	await writeTelegramDurableOutboxFile(fileName, entry);
++	params.runtime.log?.(`telegram durable outbox queued chat=${entry.chatId} file=${fileName} reason=${entry.reason}`);
++	return true;
++}
++async function loadTelegramDurableOutboxEntries(runtime) {
++	const outboxDir = resolveTelegramDurableOutboxDir();
++	const fileNames = await fs.readdir(outboxDir).catch((err) => {
++		if (err?.code === "ENOENT") return [];
++		throw err;
++	});
++	const entries = [];
++	for (const fileName of fileNames.sort()) {
++		if (!fileName.endsWith(".json")) continue;
++		const filePath = path.join(outboxDir, fileName);
++		try {
++			const parsed = JSON.parse(await fs.readFile(filePath, "utf8"));
++			entries.push({
++				fileName,
++				filePath,
++				entry: parsed
++			});
++		} catch (err) {
++			runtime.error?.(danger(`telegram durable outbox read failed for ${fileName}: ${String(err)}`));
++		}
++	}
++	return entries;
++}
++function isTelegramDurableOutboxEntryDue(entry, nowMs) {
++	const nextAttemptAtMs = Date.parse(normalizeOptionalString(entry?.nextAttemptAt) ?? "");
++	if (!Number.isFinite(nextAttemptAtMs)) return true;
++	return nextAttemptAtMs <= nowMs;
++}
++async function removeTelegramDurableOutboxEntry(item) {
++	await fs.rm(item.filePath, { force: true }).catch(() => {});
++}
++async function updateTelegramDurableOutboxEntry(item, nextEntry) {
++	await writeTelegramDurableOutboxFile(item.fileName, nextEntry);
++}
++async function drainTelegramDurableOutbox(params) {
++	const drainKey = params.accountId;
++	const existingDrain = telegramDurableOutboxActiveDrains.get(drainKey);
++	if (existingDrain) {
++		await existingDrain;
++		return;
++	}
++	let runPromise;
++	runPromise = (async () => {
++		const nowMs = Date.now();
++		const dueEntries = (await loadTelegramDurableOutboxEntries(params.runtime)).filter((item) => {
++			if (item.entry?.accountId !== params.accountId) return false;
++			if (params.chatId != null && item.entry?.chatId !== String(params.chatId)) return false;
++			if (!isTelegramDurableOutboxEntryDue(item.entry, nowMs)) return false;
++			return typeof item.entry?.text === "string" && item.entry.text.trim().length > 0;
++		}).sort((left, right) => {
++			const leftMs = Date.parse(normalizeOptionalString(left.entry?.createdAt) ?? "");
++			const rightMs = Date.parse(normalizeOptionalString(right.entry?.createdAt) ?? "");
++			return (Number.isFinite(leftMs) ? leftMs : 0) - (Number.isFinite(rightMs) ? rightMs : 0);
++		}).slice(0, params.maxEntries ?? 3);
++		for (const item of dueEntries) {
++			const staleSkipReason = shouldSkipTelegramDurableOutboxEntry({ text: item.entry.text, reason: item.entry.reason });
++			if (staleSkipReason) {
++				params.runtime.log?.(`telegram durable outbox dropped non-actionable generic failure chat=${item.entry?.chatId ?? "unknown"} file=${item.fileName} reason=${item.entry?.reason ?? "unknown"} marker=${staleSkipReason}`);
++				await removeTelegramDurableOutboxEntry(item);
++				continue;
++			}
++			const recoveryText = buildTelegramDurableOutboxRecoveryText(item.entry.text);
++			if (!recoveryText) {
++				await removeTelegramDurableOutboxEntry(item);
++				continue;
++			}
++			try {
++				const delivered = (await (params.telegramDeps.deliverReplies ?? deliverReplies)({
++					replies: [{ text: recoveryText }],
++					chatId: item.entry.chatId,
++					accountId: item.entry.accountId,
++					sessionKeyForInternalHooks: item.entry.sessionKey,
++					mirrorIsGroup: item.entry.chatId.startsWith("-"),
++					mirrorGroupId: item.entry.chatId.startsWith("-") ? item.entry.chatId : void 0,
++					runtime: params.runtime,
++					bot: params.bot,
++					replyToMode: "off",
++					textLimit: params.textLimit,
++					thread: item.entry.thread,
++					tableMode: params.tableMode,
++					chunkMode: params.chunkMode,
++					linkPreview: params.linkPreview,
++					mediaLoader: params.telegramDeps.loadWebMedia
++				})).delivered;
++				if (!delivered) throw new Error("telegram durable outbox delivery returned delivered=false");
++				await removeTelegramDurableOutboxEntry(item);
++				params.runtime.log?.(`telegram durable outbox delivered chat=${item.entry.chatId} file=${item.fileName}`);
++			} catch (err) {
++				const attemptCount = (Number.isFinite(item.entry?.attemptCount) ? item.entry.attemptCount : 0) + 1;
++				const nextDelayMs = computeTelegramDurableOutboxDelayMs(attemptCount);
++				const nextEntry = {
++					...item.entry,
++					attemptCount,
++					updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
++					nextAttemptAt: new Date(Date.now() + nextDelayMs).toISOString(),
++					lastError: formatErrorMessage(err)
++				};
++				await updateTelegramDurableOutboxEntry(item, nextEntry);
++				params.runtime.error?.(danger(`telegram durable outbox send failed: ${String(err)}`));
++				scheduleTelegramDurableOutboxDrain({
++					...params,
++					delayMs: nextDelayMs
++				});
++			}
++		}
++	})().finally(() => {
++		if (telegramDurableOutboxActiveDrains.get(drainKey) === runPromise) telegramDurableOutboxActiveDrains.delete(drainKey);
++	});
++	telegramDurableOutboxActiveDrains.set(drainKey, runPromise);
++	await runPromise;
++}
++function scheduleTelegramDurableOutboxDrain(params) {
++	const drainKey = params.accountId;
++	const delayMs = Math.max(0, Number.isFinite(params.delayMs) ? params.delayMs : 0);
++	const nextRunAt = Date.now() + delayMs;
++	const existing = telegramDurableOutboxScheduledDrains.get(drainKey);
++	if (existing && existing.nextRunAt <= nextRunAt) return;
++	if (existing) clearTimeout(existing.timer);
++	const timer = setTimeout(() => {
++		telegramDurableOutboxScheduledDrains.delete(drainKey);
++		void drainTelegramDurableOutbox({
++			...params,
++			delayMs: void 0
++		}).catch((err) => {
++			params.runtime.error?.(danger(`telegram durable outbox drain failed: ${String(err)}`));
++		});
++	}, delayMs);
++	timer.unref?.();
++	telegramDurableOutboxScheduledDrains.set(drainKey, {
++		timer,
++		nextRunAt
++	});
++}
+ async function resolveStickerVisionSupport(cfg, agentId) {
+ 	try {
+ 		const catalog = await loadModelCatalog({ config: cfg });
+@@ -4632,6 +4858,7 @@
+ 	});
+ 	let queuedFinal = false;
+ 	let hadErrorReplyFailureOrSkip = false;
++	let pendingDurableFinalText;
+ 	const isDmTopic = !isGroup && threadSpec.scope === "dm" && threadSpec.id != null;
+ 	let isFirstTurnInSession = false;
+ 	if (isDmTopic) try {
+@@ -4673,86 +4900,96 @@
+ 				...replyPipeline,
+ 				deliver: async (payload, info) => {
+ 					if (payload.isError === true) hadErrorReplyFailureOrSkip = true;
+-					if (info.kind === "final") await enqueueDraftLaneEvent(async () => {});
+-					if (shouldSuppressLocalTelegramExecApprovalPrompt({
+-						cfg,
+-						accountId: route.accountId,
+-						payload
+-					})) {
+-						queuedFinal = true;
+-						return;
++					const isFinalReply = info.kind === "final";
++					if (isFinalReply) {
++						await enqueueDraftLaneEvent(async () => {});
++						const recoverableSplit = splitTextIntoLaneSegments(payload.text);
++						const recoverableAnswerText = recoverableSplit.segments.filter((segment) => segment.lane === "answer").map((segment) => segment.text.trim()).filter(Boolean).join("\n\n").trim();
++						const recoverableText = recoverableAnswerText || (typeof payload.text === "string" ? payload.text.trim() : "");
++						if (recoverableText) pendingDurableFinalText = recoverableText;
+ 					}
+-					const previewButtons = (payload.channelData?.telegram)?.buttons;
+-					const split = splitTextIntoLaneSegments(payload.text);
+-					const segments = split.segments;
+-					const reply = resolveSendableOutboundReplyParts(payload);
+-					reply.hasMedia;
+-					const flushBufferedFinalAnswer = async () => {
+-						const buffered = reasoningStepState.takeBufferedFinalAnswer();
+-						if (!buffered) return;
+-						const bufferedButtons = (buffered.payload.channelData?.telegram)?.buttons;
+-						await deliverLaneText({
+-							laneName: "answer",
+-							text: buffered.text,
+-							payload: buffered.payload,
+-							infoKind: "final",
+-							previewButtons: bufferedButtons
+-						});
+-						reasoningStepState.resetForNextStep();
+-					};
+-					for (const segment of segments) {
+-						if (segment.lane === "answer" && info.kind === "final" && reasoningStepState.shouldBufferFinalAnswer()) {
+-							reasoningStepState.bufferFinalAnswer({
++					await (async () => {
++						if (shouldSuppressLocalTelegramExecApprovalPrompt({
++							cfg,
++							accountId: route.accountId,
++							payload
++						})) {
++							queuedFinal = true;
++							return;
++						}
++						const previewButtons = (payload.channelData?.telegram)?.buttons;
++						const split = splitTextIntoLaneSegments(payload.text);
++						const segments = split.segments;
++						const reply = resolveSendableOutboundReplyParts(payload);
++						reply.hasMedia;
++						const flushBufferedFinalAnswer = async () => {
++							const buffered = reasoningStepState.takeBufferedFinalAnswer();
++							if (!buffered) return;
++							const bufferedButtons = (buffered.payload.channelData?.telegram)?.buttons;
++							await deliverLaneText({
++								laneName: "answer",
++								text: buffered.text,
++								payload: buffered.payload,
++								infoKind: "final",
++								previewButtons: bufferedButtons
++							});
++							reasoningStepState.resetForNextStep();
++						};
++						for (const segment of segments) {
++							if (segment.lane === "answer" && info.kind === "final" && reasoningStepState.shouldBufferFinalAnswer()) {
++								reasoningStepState.bufferFinalAnswer({
++									payload,
++									text: segment.text
++								});
++								continue;
++							}
++							if (segment.lane === "reasoning") reasoningStepState.noteReasoningHint();
++							const result = await deliverLaneText({
++								laneName: segment.lane,
++								text: segment.text,
+ 								payload,
+-								text: segment.text
++								infoKind: info.kind,
++								previewButtons,
++								allowPreviewUpdateForNonFinal: segment.lane === "reasoning"
+ 							});
+-							continue;
+-						}
+-						if (segment.lane === "reasoning") reasoningStepState.noteReasoningHint();
+-						const result = await deliverLaneText({
+-							laneName: segment.lane,
+-							text: segment.text,
+-							payload,
+-							infoKind: info.kind,
+-							previewButtons,
+-							allowPreviewUpdateForNonFinal: segment.lane === "reasoning"
+-						});
+-						if (info.kind === "final") emitPreviewFinalizedHook(result);
+-						if (segment.lane === "reasoning") {
+-							if (result.kind !== "skipped") {
+-								reasoningStepState.noteReasoningDelivered();
+-								await flushBufferedFinalAnswer();
++							if (info.kind === "final") emitPreviewFinalizedHook(result);
++							if (segment.lane === "reasoning") {
++								if (result.kind !== "skipped") {
++									reasoningStepState.noteReasoningDelivered();
++									await flushBufferedFinalAnswer();
++								}
++								continue;
++							}
++							if (info.kind === "final") {
++								if (reasoningLane.hasStreamedMessage) {
++									activePreviewLifecycleByLane.reasoning = "complete";
++									retainPreviewOnCleanupByLane.reasoning = true;
++								}
++								reasoningStepState.resetForNextStep();
+ 							}
+-							continue;
++						}
++						if (segments.length > 0) return;
++						if (split.suppressedReasoningOnly) {
++							if (reply.hasMedia) await sendPayload(typeof payload.text === "string" ? {
++								...payload,
++								text: ""
++							} : payload);
++							if (info.kind === "final") await flushBufferedFinalAnswer();
++							return;
+ 						}
+ 						if (info.kind === "final") {
+-							if (reasoningLane.hasStreamedMessage) {
+-								activePreviewLifecycleByLane.reasoning = "complete";
+-								retainPreviewOnCleanupByLane.reasoning = true;
+-							}
++							await answerLane.stream?.stop();
++							await reasoningLane.stream?.stop();
+ 							reasoningStepState.resetForNextStep();
+ 						}
+-					}
+-					if (segments.length > 0) return;
+-					if (split.suppressedReasoningOnly) {
+-						if (reply.hasMedia) await sendPayload(typeof payload.text === "string" ? {
+-							...payload,
+-							text: ""
+-						} : payload);
+-						if (info.kind === "final") await flushBufferedFinalAnswer();
+-						return;
+-					}
+-					if (info.kind === "final") {
+-						await answerLane.stream?.stop();
+-						await reasoningLane.stream?.stop();
+-						reasoningStepState.resetForNextStep();
+-					}
+-					if (!(reply.hasMedia || reply.text.length > 0)) {
++						if (!(reply.hasMedia || reply.text.length > 0)) {
++							if (info.kind === "final") await flushBufferedFinalAnswer();
++							return;
++						}
++						await sendPayload(payload);
+ 						if (info.kind === "final") await flushBufferedFinalAnswer();
+-						return;
+-					}
+-					await sendPayload(payload);
+-					if (info.kind === "final") await flushBufferedFinalAnswer();
++					})();
++					if (isFinalReply) pendingDurableFinalText = void 0;
+ 				},
+ 				onSkip: (payload, info) => {
+ 					if (payload.isError === true) hadErrorReplyFailureOrSkip = true;
+@@ -4872,6 +5109,32 @@
+ 			silent: silentErrorReplies && (dispatchError != null || hadErrorReplyFailureOrSkip),
+ 			mediaLoader: telegramDeps.loadWebMedia
+ 		})).delivered;
++		const shouldQueueDurableRecovery = Boolean(pendingDurableFinalText) || !sentFallback;
++		const durableRecoveryText = pendingDurableFinalText ?? (!sentFallback ? fallbackText : "");
++		if (shouldQueueDurableRecovery && durableRecoveryText.trim()) try {
++			const queued = await enqueueTelegramDurableOutboxEntry({
++				runtime,
++				accountId: route.accountId,
++				chatId: String(chatId),
++				thread: threadSpec,
++				sessionKey: ctxPayload.SessionKey,
++				text: durableRecoveryText,
++				reason: pendingDurableFinalText ? "final-reply" : dispatchError ? "fallback-after-dispatch-error" : "fallback-after-delivery-failure"
++			});
++			if (queued) scheduleTelegramDurableOutboxDrain({
++				accountId: route.accountId,
++				bot,
++				runtime,
++				telegramDeps,
++				textLimit,
++				tableMode,
++				chunkMode,
++				linkPreview: telegramCfg.linkPreview,
++				delayMs: TELEGRAM_DURABLE_OUTBOX_BASE_DELAY_MS
++			});
++		} catch (outboxErr) {
++			runtime.error?.(danger(`telegram durable outbox enqueue failed: ${String(outboxErr)}`));
++		}
+ 	}
+ 	const hasFinalResponse = queuedFinal || sentFallback;
+ 	if (statusReactionController && !hasFinalResponse) statusReactionController.setError().catch((err) => {
+@@ -4969,6 +5232,33 @@
+ 			return;
+ 		}
+ 		if (ingressDebugEnabled && ingressReceivedAtMs && ingressContextStartMs) logVerbose(`telegram ingress: chatId=${context.chatId} contextReadyMs=${Date.now() - ingressReceivedAtMs} preDispatchMs=${Date.now() - ingressContextStartMs}` + (options?.ingressBuffer ? ` buffer=${options.ingressBuffer}` : ""));
++		const durableOutboxContext = {
++			accountId: account.accountId,
++			bot,
++			runtime,
++			telegramDeps,
++			textLimit,
++			tableMode: resolveMarkdownTableMode({
++				cfg,
++				channel: "telegram",
++				accountId: account.accountId
++			}),
++			chunkMode: resolveChunkMode(cfg, "telegram", account.accountId),
++			linkPreview: telegramCfg.linkPreview
++		};
++		try {
++			await drainTelegramDurableOutbox({
++				...durableOutboxContext,
++				chatId: String(context.chatId),
++				maxEntries: 1
++			});
++		} catch (outboxErr) {
++			runtime.error?.(danger(`telegram durable outbox pre-dispatch drain failed: ${String(outboxErr)}`));
++		}
++		scheduleTelegramDurableOutboxDrain({
++			...durableOutboxContext,
++			delayMs: 0
++		});
+ 		try {
+ 			await dispatchTelegramMessage({
+ 				context,
+@@ -4985,9 +5275,39 @@
+ 			if (ingressDebugEnabled && ingressReceivedAtMs) logVerbose(`telegram ingress: chatId=${context.chatId} dispatchCompleteMs=${Date.now() - ingressReceivedAtMs}` + (options?.ingressBuffer ? ` buffer=${options.ingressBuffer}` : ""));
+ 		} catch (err) {
+ 			runtime.error?.(danger(`telegram message processing failed: ${String(err)}`));
++			let sentProcessorFallback = false;
+ 			try {
+ 				await bot.api.sendMessage(context.chatId, "Something went wrong while processing your request. Please try again.", buildTelegramThreadParams(context.threadSpec));
++				sentProcessorFallback = true;
+ 			} catch {}
++			if (!sentProcessorFallback) try {
++				const queued = await enqueueTelegramDurableOutboxEntry({
++					runtime,
++					accountId: account.accountId,
++					chatId: String(context.chatId),
++					thread: context.threadSpec,
++					sessionKey: context.ctxPayload.SessionKey,
++					text: "Something went wrong while processing your request. Please try again.",
++					reason: "processor-failure"
++				});
++				if (queued) scheduleTelegramDurableOutboxDrain({
++					accountId: account.accountId,
++					bot,
++					runtime,
++					telegramDeps,
++					textLimit,
++					tableMode: resolveMarkdownTableMode({
++						cfg,
++						channel: "telegram",
++						accountId: account.accountId
++					}),
++					chunkMode: resolveChunkMode(cfg, "telegram", account.accountId),
++					linkPreview: telegramCfg.linkPreview,
++					delayMs: TELEGRAM_DURABLE_OUTBOX_BASE_DELAY_MS
++				});
++			} catch (queueErr) {
++				runtime.error?.(danger(`telegram durable outbox enqueue failed after processor error: ${String(queueErr)}`));
++			}
+ 		}
+ 	};
+ };

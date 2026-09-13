@@ -112,6 +112,8 @@ NODE
 
 node --check "${RUNNER_FILE}" >/dev/null
 
+node "${ROOT}/scripts/ensure-telegram-outbox-base.mjs"
+
 BOT_FILE="$(grep -l 'TELEGRAM_DURABLE_OUTBOX_RECOVERY_PREFIX' "${DIST_DIR}"/bot-*.js 2>/dev/null | head -n 1 || true)"
 if [[ -z "${BOT_FILE}" || ! -f "${BOT_FILE}" ]]; then
   echo "Unable to find OpenClaw Telegram bot runtime in ${DIST_DIR}" >&2
@@ -355,6 +357,7 @@ node --check "${PROVIDER_FILE}" >/dev/null
 node "${ROOT}/scripts/validate-codex-model-compat.mjs"
 node "${ROOT}/scripts/patch-codex-delivery.mjs"
 node --test "${ROOT}/scripts/codex-delivery.test.mjs"
+node --test "${ROOT}/scripts/telegram-outbox.test.mjs"
 
 echo "OpenClaw runtime patches present: ${RUNNER_FILE}"
 echo "OpenClaw Telegram durable outbox patch present: ${BOT_FILE}"
